@@ -6,6 +6,7 @@ import { CustomerSelectComponent } from 'src/app/popup/customer-select/customer-
 import { SimpleLOVComponent } from 'src/app/popup/simple-lov/simple-lov.component';
 import { SalesInvoiceService } from 'src/app/services/sales-invoice.service';
 import Swal from 'sweetalert2';
+import { v4 as uuid } from 'uuid';
 
 @Component({
   selector: 'app-root',
@@ -36,14 +37,16 @@ export class AppComponent {
   originalRetailInvoices: any[] = [];
   selectedInvoice: any;
   selectedInvoiceProducts: any = [];
-  openProductDetails: boolean = false;
   promoSelectAllFlag: boolean = false;
   openPromotion: boolean = false;
   promosList: any = [];
   receiptMethods: any = [];
   Amounts: any;
-  selectedPayments: any;
+  selectedPayments: any = [];
   addToCart: any = [];
+  data: any;
+  serviceCharge: boolean = false;
+  selectedPaymentsData: any = [];
 
   ngOnInit(): void {
     this.getUserInfo();
@@ -297,12 +300,12 @@ export class AppComponent {
   }
 
   searchRecall(value: string) {
-    console.log(this.originalRetailInvoices);
     this.retailInvoices = this.originalRetailInvoices.filter((item: { ID: string; Code: string; CustDescription: string; }) =>
       item.ID.toString().includes(value) || item.Code.includes(value) || item.CustDescription.includes(value));
   }
 
   invoiceDetails(invoice: any) {
+    this.addToCart = [];
     this.selectedInvoice = invoice;
     this.selectedInvoiceProducts = this.selectedInvoice.Products;
     this.activeInvoiceTab = 'invoice';
@@ -323,7 +326,6 @@ export class AppComponent {
         SoldAmount: 0,
         invoiceDate: invoice.Payments[0].PaymentDate
       });
-      console.log(this.selectedPayments)
     }
 
   }
@@ -343,12 +345,11 @@ export class AppComponent {
     inputElement.style.width = ((inputElement.value.length + 10) * 8) + 'px';
   }
 
-  openDetails() {
-    this.openProductDetails = !this.openProductDetails;
+  openDetails(product: { opened: boolean; }) {
+    product.opened = !product.opened;
   }
 
   onCheckboxChange() {
-    console.log(this.promoSelectAllFlag);
     this.promoSelectAllFlag = !this.promoSelectAllFlag;
   }
 
@@ -401,7 +402,7 @@ export class AppComponent {
 
   }
 
-  collectMethodDetails(methodsType: string, discreption: string) {
+  collectMethodDetails(methodsType: string, discreption: string, methods: any) {
     if (this.selectedInvoice.SalesInvoiceStatusID === 'Printed') {
       Swal.fire({
         icon: "warning",
@@ -410,15 +411,14 @@ export class AppComponent {
       });
       return;
     }
-    console.log(methodsType);
     if (methodsType === 'Cash') {
-      this._getCash(discreption, methodsType);
+      this._getCash(discreption, methodsType, methods);
     } else if (methodsType === 'Card') {
-      this._getCard(discreption, methodsType);
+      this._getCard(discreption, methodsType, methods);
     }
   }
 
-  _getCash(methodsType: string, ReceiptMethodTypeID: string): void {
+  _getCash(methodsType: string, ReceiptMethodTypeID: string, methods: any): void {
     const dialogRef = this.dialog.open(CashComponent, {
       disableClose: true,
       direction: "ltr",
@@ -431,12 +431,12 @@ export class AppComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.addPayment(result, ReceiptMethodTypeID)
+        this.addPayment(result, ReceiptMethodTypeID, methods)
       }
     });
   }
 
-  _getCard(methodsType: string, ReceiptMethodTypeID: string): void {
+  _getCard(methodsType: string, ReceiptMethodTypeID: string, methods: any): void {
 
     const dialogRef = this.dialog.open(CardComponent, {
       disableClose: true,
@@ -451,12 +451,12 @@ export class AppComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.addPayment(result, ReceiptMethodTypeID)
+        this.addPayment(result, ReceiptMethodTypeID, methods)
       }
     });
   }
 
-  addPayment(amount: number, ReceiptMethodTypeID: string) {
+  addPayment(amount: number, ReceiptMethodTypeID: string, methods: any) {
 
     if (!this.selectedPayments) {
       this.selectedPayments = [];
@@ -472,7 +472,7 @@ export class AppComponent {
       invoiceDate: new Date()
     });
 
-    console.log(this.selectedPayments)
+    this.selectedPaymentsData.push(methods)
   }
 
   deleteCash(item: any) {
@@ -486,13 +486,104 @@ export class AppComponent {
   }
 
   newInvoice() {
-    this.openCustomerDialog();
-    this.selectedInvoice = { SalesInvoiceDate: new Date() };
+    const currentDate = new Date();
+
+    const POSCode = `${this.userInfo.SalesDivision.SalesDivisionID}/${this.userInfo.SalesDivision.SalesDivisionPosID}/${currentDate.getFullYear().toString().slice(-2)}/${currentDate.getMonth() + 1}-${Math.floor(Math.random() * 100)}`;
+
+    let table = sessionStorage.getItem('selectedTable');
+    if (table) {
+      var tableID = JSON.parse(table).ID;
+    } else {
+      var tableID = null;
+    }
+
+    this.data = {
+      Code: this.selectedInvoice?.Code ? this.selectedInvoice.Code : null,
+      POSCode: this.selectedInvoice?.POSCode ? this.selectedInvoice.POSCode : POSCode,
+      SalesInvoiceStatusID: this.selectedInvoice?.SalesInvoiceStatusID ? this.selectedInvoice.SalesInvoiceStatusID : 'Created',
+      CustID: this.userInfo.DefaultCustomer.CustID,
+      Description: this.userInfo.DefaultCustomer.CustomerDescription,
+      CustDescription: this.userInfo.DefaultCustomer.CustomerDescription,
+      ManualDiscountAmount: this.selectedInvoice?.ManualDiscountAmount ? this.selectedInvoice.ManualDiscountAmount : 0.0,
+      DiscountPercentage: this.selectedInvoice?.DiscountPercentage ? this.selectedInvoice.DiscountPercentage : 0.0,
+      TipAmount: this.selectedInvoice?.TipAmount ? this.selectedInvoice.TipAmount : 0.0,
+      TableID: tableID,
+      ServiceCharge: this.serviceCharge ? 1 : 0,
+      SalesDivisionPOSID: this.userInfo.RetailUserPOS.SalesDivisionPOSID ? this.userInfo.RetailUserPOS.SalesDivisionPOSID : 0,
+      RetailOrderReferenceCode: this.selectedInvoice?.RetailOrderReferenceCode ? this.selectedInvoice.RetailOrderReferenceCode : null,
+      RetailOrderID: this.selectedInvoice?.RetailOrderID ? this.selectedInvoice.RetailOrderID : null,
+      SalesInvoiceDate: this.selectedInvoice?.SalesInvoiceDate ? this.selectedInvoice.SalesInvoiceDate : new Date(),
+      Products: this.selectedInvoice?.Products ? this.selectedInvoice.Products : this.addToCart,
+      Payments: this.selectedPaymentsData,
+      Notes: this.selectedInvoice?.Notes ? this.selectedInvoice.Notes : null,
+      ReferenceCode: uuid(),
+      CashBookID: this.selectedInvoice?.CashBookID ? this.selectedInvoice.CashBookID : null,
+      CreatedDate: this.selectedInvoice?.CreatedDate ? this.selectedInvoice.CreatedDate : new Date(),
+    }
+    console.log(this.selectedPayments);
+    this.salesInvoiceService.retailInvoice_Create(this.data).subscribe((result: any) => {
+      if (result) {
+        this.selectedInvoice = result;
+        this.selectedInvoiceProducts = result.Products;
+        this.activeInvoiceTab = 'invoice';
+        this.openCustomerDialog();
+      } else {
+        Swal.fire({
+          icon: "question",
+          title: "Warning...",
+          text: "Error in creating invoice.",
+        });
+      }
+    }, (error) => {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: error.error.Message,
+      })
+    });
   }
 
   addItemOrGroup(product: any) {
+
     if (this.selectedInvoice) {
-      this.addToCart.push(product);
+
+      if (this.selectedInvoice.Products.find((item: { ProductID: any; }) => item.ProductID === product.ProductID)) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning...",
+          text: "Product already exists in the invoice.",
+        });
+      } else {
+        this.selectedInvoice.Products.push({
+          "ProductID": product.ProductID,
+          "RetailInvoiceID": this.selectedInvoice.ID,
+          "TaxGroupID": product.TaxGroupID,
+          "UOMID": product.UOMID,
+          "Description": this.getDescription(product, 'DescriptionEn', 'DescriptionAr'),
+          "UOMDescription": this.getDescription(product, 'UOMDescriptionEn', 'UOMDescriptionAr'),
+          "ReturnedQty": 0,
+          "ReturnQty": 0,
+          "Qty": product.Qty,
+          "RemainingQty": 0,
+          "SalesPrice": product.SalesPrice,
+          "Amount": product.SalesPrice * product.Qty,
+          "NetTotalBeforeDiscount": product.SalesPrice * product.Qty,
+          "TotalDiscount": 0,
+          "DiscountPercentage": 0,
+          "DiscountPerUnit": 0,
+          "NetTotalAfterDiscount": product.SalesPrice * product.Qty,
+          "TaxAmount": 0,
+          "TaxPercent": 0,
+          "NetTotalAfterTax": product.SalesPrice * product.Qty,
+          "Additions": [],
+          "Seriales": [],
+          "Batches": [],
+          "CurrencyID": this.userInfo?.CompanyInfo.CurrencyID,
+          "AppReferenceTransCode": uuid(),
+          "RetailOrderReferenceTransCode": "",
+          "Note": product.Note,
+        });
+      }
     }
   }
 

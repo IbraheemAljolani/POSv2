@@ -308,12 +308,10 @@
                                         <div class="tab-pane table-responsive custom-scroll"
                                             [ngClass]="{'active in':activeInvoiceTab === 'invoice'}">
 
-                                            <div
-                                                *ngFor="let product of selectedInvoiceProducts else let addToCartProduct of addToCart">
+                                            <div *ngFor="let product of selectedInvoiceProducts">
                                                 <div class="s-item-list m-t-15" *ngIf="selectedInvoice">
-                                                    <div class="p-5-10" (click)="openDetails()">
-                                                        <strong>{{product.Description ? product.Description :
-                                                            addToCartProduct.DescriptionEn}}</strong>
+                                                    <div class="p-5-10" (click)="openDetails(product)">
+                                                        <strong>{{ product.Description }}</strong>
 
                                                         <div class="s-price-details">
                                                             <span class="s-price-details">
@@ -370,8 +368,7 @@
                                                     </div>
 
 
-                                                    <table class="table-condensed table-striped"
-                                                        *ngIf="openProductDetails">
+                                                    <table class="table-condensed table-striped" *ngIf="product.opened">
                                                         <!-- <tr>
                                                             <td>
                                                                 Additions Amount
@@ -448,6 +445,144 @@
                                                                 {{product.NetTotalAfterDiscount}}
                                                                 &nbsp;
                                                                 {{product.CurrencyID}}
+                                                            </td>
+                                                        </tr>
+
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                            <div *ngFor="let product of addToCart">
+                                                <div class="s-item-list m-t-15" *ngIf="selectedInvoice">
+                                                    <div class="p-5-10" (click)="openDetails(product)">
+                                                        <strong>{{ getDescription(product, 'DescriptionEn',
+                                                            'DescriptionAr') }}</strong>
+
+                                                        <div class="s-price-details">
+                                                            <span class="s-price-details">
+
+                                                                <button class="btn-flat" data-toggle="dropdown"
+                                                                    [disabled]="doesInvoiceStatusDisallow()"
+                                                                    (click)="increaseQty(product)">
+                                                                    <i class="fa fa-plus txt-color-green"></i>
+                                                                </button>
+
+                                                                <button [disabled]="doesInvoiceStatusDisallow()"
+                                                                    class="btn-flat" (click)="decreaseQty(product)">
+
+                                                                    <i class="fa fa-minus txt-color-dangerLight"></i>
+                                                                </button>
+
+                                                                <input
+                                                                    style='font-weight:bold; border-radius: 30px 0 0 30px;'
+                                                                    class="input-left-rounded" [ngModel]="product.Qty"
+                                                                    [disabled]="doesInvoiceStatusDisallow()"
+                                                                    (keypress)="adjustInputWidth($event)"
+                                                                    type="number" />
+
+                                                                <button
+                                                                    class="btn btn-xs width-40 disabled btn-default-gray"
+                                                                    disabled>
+                                                                    {{product.UOMDescription}}
+                                                                </button>
+
+                                                            </span>
+
+                                                            <span class="pull-right bold m-t-5" title="Total Product">
+                                                                {{product.SalesPrice}}
+                                                                &nbsp;
+                                                                {{userInfo.CurrencyID}}
+                                                            </span>
+
+                                                        </div>
+                                                        <div class="item-controls">
+                                                            <a role="button" class="pointer" title="Remove"
+                                                                *ngIf="selectedInvoice.SalesInvoiceStatusID == 'Created'"
+                                                                aria-label="Remove">
+                                                                <i class="fa fa-trash txt-color-dangerLight"
+                                                                    aria-hidden="true"></i>
+                                                            </a>
+
+
+                                                            <a role="button" NgClass="pointer" class="pointer "
+                                                                title="Show more" aria-label="Show more">
+                                                                <i class="fa fa-arrows-alt txt-color-green"
+                                                                    aria-hidden="true"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <table class="table-condensed table-striped" *ngIf="product.opened">
+                                                        <tr>
+                                                            <td>Tax</td>
+                                                            <td>
+                                                                <i class="fa fa-caret-right m-r-5"
+                                                                    aria-hidden="true"></i>
+                                                                Amount: {{product.TaxAmount? product.TaxAmount : 0}}
+                                                            </td>
+                                                            <td>%</td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td>Promo</td>
+                                                            <td>
+                                                                <i class="fa fa-caret-right m-r-5"
+                                                                    aria-hidden="true"></i>
+                                                                ID: ---
+                                                            </td>
+                                                            <td>Discount: ---
+                                                            </td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td>Promo Notes</td>
+                                                            <td colspan="2">
+                                                                <i class="fa fa-caret-right m-r-5"
+                                                                    aria-hidden="true"></i>
+                                                                ---
+                                                            </td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td>
+                                                                Discount/Unit
+                                                            </td>
+                                                            <td>
+                                                                <i class="fa fa-caret-right m-r-5"
+                                                                    aria-hidden="true"></i>
+                                                                <input type="number" class="input-rounded"
+                                                                    [ngModel]="product.DiscountPercentage ? product.DiscountPercentage : 0" />
+                                                                <strong>%</strong>
+                                                            </td>
+                                                            <td>
+                                                                <input type="number" class="input-rounded"
+                                                                    [ngModel]="product.DiscountPerUnit ? product.DiscountPerUnit : 0" />
+                                                                <strong>$</strong>
+                                                            </td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td>Total Discount</td>
+                                                            <td>
+                                                                <i class="fa fa-caret-right m-r-5"
+                                                                    aria-hidden="true"></i>
+                                                                {{product.TotalDiscount ? product.TotalDiscount : 0}}
+                                                            </td>
+                                                            <td></td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td>
+                                                                Total Amount After Discount
+                                                            </td>
+                                                            <td colspan="2">
+                                                                <i class="fa fa-caret-right m-r-5"
+                                                                    aria-hidden="true"></i>
+                                                                {{product.NetTotalAfterDiscount ?
+                                                                product.NetTotalAfterDiscount : 0}}
+                                                                &nbsp;
+                                                                {{userInfo.CurrencyID}}
                                                             </td>
                                                         </tr>
 
@@ -554,7 +689,7 @@
                                                         <tr>
                                                             <td *ngFor="let methods of receiptMethods">
                                                                 <label role="button"
-                                                                    (click)="collectMethodDetails(methods.MethodTypeID, methods.Description)">
+                                                                    (click)="collectMethodDetails(methods.MethodTypeID, methods.Description, methods)">
                                                                     <img alt="MethodType"
                                                                         [src]="'data:image/jpeg;base64,' + methods.Image ? 'data:image/jpeg;base64,' + methods.Image : '../assets/customer.svg'" />
                                                                     <br />
@@ -854,7 +989,8 @@
                                             <div class="row" style="font-size:14px;">
                                                 <div class="col-sm-4">
                                                     <strong>
-                                                        <input type="checkbox" style="margin-top:0" class="m-r-5" />
+                                                        <input type="checkbox" [(ngModel)]="serviceCharge"
+                                                            style="margin-top:0" class="m-r-5" />
                                                         Service Charge
                                                     </strong>
                                                 </div>
