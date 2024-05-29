@@ -41,9 +41,8 @@ export class SimpleLOVComponent {
     constructor(private _http: HttpClient, public dialogRef: MatDialogRef<any>,
         @Inject(MAT_DIALOG_DATA) public data: SimpleLOVComponentData, private salesInvoiceService: SalesInvoiceService) { }
 
-    filterText: any = "";
-
-    openedFilter: boolean = true;
+    searchID: number = 0;
+    searchDescription: string = '';
 
     lookupRows: any[] = [];
 
@@ -63,15 +62,6 @@ export class SimpleLOVComponent {
         if (args && (this.pagination.PageSize != args.recordPerPage || this.pagination.SelectedPageNumber != args.pageNumber)) {
             this.pagination.PageSize = args.recordPerPage;
             this.pagination.SelectedPageNumber = args.pageNumber;
-            this._loadTargetData();
-        }
-    }
-
-    goFilterData(filter: any) {
-        if (filter) {
-            this.pagination.SelectedPageNumber = 1;
-            this.filterText = filter.filterQuery;
-            this.inprocessing = true;
             this._loadTargetData();
         }
     }
@@ -97,11 +87,25 @@ export class SimpleLOVComponent {
         this.dialogRef.close(this.selectedItems);
     }
 
-    _loadCustomers() {
+    _loadCustomers(id: number) {
         this.salesInvoiceService.getCustomers().subscribe((result: any) => {
             this.lookupRowFields = ['ID', 'DescriptionEn', 'Code', 'Tel'];
+
+            let matchedSalesMen = [];
             for (let i = 0; i < result.length; i++) {
-                this.lookupRows.push([result[i].CustID, result[i].DescriptionEn, result[i].Code, result[i].Tel]);
+                if (result[i].CustID == id) {
+                    matchedSalesMen.push(result[i]);
+                }
+            }
+
+            var results = matchedSalesMen;
+
+            if (results.length == 0) {
+                results = result;
+            }
+            
+            for (let i = 0; i < result.length; i++) {
+                this.lookupRows.push([results[i].CustID, results[i].DescriptionEn, results[i].Code, results[i].Tel]);
             }
         }, (error) => {
             Swal.fire({
@@ -112,10 +116,23 @@ export class SimpleLOVComponent {
         });
     }
 
-    _loadSalesMen() {
+    _loadSalesMen(id: number) {
         this.salesInvoiceService.getLookups().subscribe((result: any) => {
             this.lookupRowFields = ['ID', 'Description', 'Sales Division'];
             let salesMen = result.SalesMans;
+            let matchedSalesMen = [];
+            for (let i = 0; i < salesMen.length; i++) {
+                if (salesMen[i].ID == id) {
+                    matchedSalesMen.push(salesMen[i]);
+                }
+            }
+
+            salesMen = matchedSalesMen;
+
+            if (salesMen.length == 0) {
+                salesMen = result.SalesMans;
+            }
+
             for (let i = 0; i < salesMen.length; i++) {
                 this.lookupRows.push([salesMen[i].ID, salesMen[i].Description, salesMen[i].SalesDivisionID]);
             }
@@ -168,12 +185,20 @@ export class SimpleLOVComponent {
         });
     }
 
+    onSearchChange(value: any) {
+        this.lookupRows = [];
+        if (this.data.dataType === 'salesMen')
+            this._loadSalesMen(value);
+        else if (this.data.dataType === 'customers')
+            this._loadCustomers(value);
+    }
+
 
     _loadTargetData() {
         if (this.data.dataType === 'customers')
-            this._loadCustomers();
+            this._loadCustomers(this.searchID);
         else if (this.data.dataType === 'salesMen')
-            this._loadSalesMen();
+            this._loadSalesMen(this.searchID);
         else if (this.data.dataType === 'POS')
             this._loadPOS();
         else if (this.data.dataType === "drillDown")

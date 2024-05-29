@@ -712,7 +712,6 @@ export class AppComponent {
   }
 
   postCash() {
-    debugger;
     if (this.totalAmount >= this.selectedInvoice.NetTotalAfterTax) {
       this.newInvoice(this.addToCart);
       this.selectedInvoice = null;
@@ -726,6 +725,7 @@ export class AppComponent {
       sessionStorage.removeItem('selectedTable');
       this.salesManID = 0;
       this.salesManName = '';
+      this.selectedTable = '---';
       this.userInfo.DefaultCustomer.CustID = this.userInfo.DefaultCustomer.CustID;
       this.userInfo.DefaultCustomer.CustomerDescription = this.userInfo.DefaultCustomer.CustomerDescription;
     } else {

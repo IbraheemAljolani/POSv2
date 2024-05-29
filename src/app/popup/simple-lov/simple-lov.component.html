@@ -5,7 +5,11 @@
         <h4 class="modal-title">{{data.title}}</h4>
     </div>
     <div class="modal-body">
-
+        <div *ngIf="data.title != 'POS'">
+            <label for="searchID" style="margin-left: 5px;">ID</label>
+            <input style="width: 25%; margin-bottom: 10px; margin-left: 5px;" type="number" class="form-control"
+                placeholder="SearchID" [(ngModel)]="searchID" (ngModelChange)="onSearchChange($event)" />
+        </div>
         <div>
             <div class="row mx-height-470">
                 <div style="padding: 0 20px;">
@@ -16,13 +20,13 @@
                                 <thead>
                                     <tr>
                                         <th *ngIf="data.dataType != 'drillDown'"></th>
-                                        <th *ngFor="let col of lookupRowFields">
+                                        <th *ngFor="let col of lookupRowFields ">
                                             {{col}}
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <ng-container *ngFor="let row of lookupRows ">
+                                    <ng-container *ngFor="let row of lookupRows">
                                         <tr class="pointer">
                                             <td *ngIf="data.dataType != 'drillDown'">
                                                 <button class="btn btn-default btn-xs" aria-label="Select"

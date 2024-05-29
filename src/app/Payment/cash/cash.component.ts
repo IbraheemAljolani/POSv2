@@ -36,7 +36,6 @@ export class CashComponent {
   }
 
   clearDisplay() {
-    console.log('clearDisplay');
     this.displayValue = '';
   }
 
