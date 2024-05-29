@@ -5,6 +5,7 @@
         <h4 class="modal-title">{{data.title}}</h4>
     </div>
     <div class="modal-body">
+
         <div>
             <div class="row mx-height-470">
                 <div style="padding: 0 20px;">
@@ -23,8 +24,7 @@
                                 <tbody>
                                     <ng-container *ngFor="let row of lookupRows ">
                                         <tr class="pointer">
-                                            <td>
-
+                                            <td *ngIf="data.dataType != 'drillDown'">
                                                 <button class="btn btn-default btn-xs" aria-label="Select"
                                                     title="Select" (click)="selectCustomer(row)">
                                                     <i class="fa fa-check "

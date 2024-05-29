@@ -56,17 +56,20 @@
             </div>
 
             <!-- salesmen dropdown-menu-->
-            <div class="parameter-context m-l-20 m-t-5">
+            <div class="parameter-context m-l-20 m-t-5" (click)="selectSalesMan()">
 
                 <div>Sales Man</div>
-                <div class="btn-trans" title="6 - ibraheem">
+                <div class="btn-trans" [title]="salesManName ? salesManID + ' - ' + salesManName : ''">
+                    <ng-container *ngIf="salesManName; else noSalesMan">
+                        <img src="../assets/anonymous.png" />
+                        <div>{{salesManID}} - {{salesManName}}</div>
+                    </ng-container>
 
-                    <img src="../assets/anonymous.png" />
-                    <div>6- ibraheem</div>
-
-                    <img src="../assets/salesman32.png" />
-                    <div>...</div>
-                    <i class="fa fa-search border-left"></i>
+                    <ng-template #noSalesMan>
+                        <img src="../assets/salesman32.png" />
+                        <div>...</div>
+                        <i class="fa fa-search border-left"></i>
+                    </ng-template>
                 </div>
 
             </div>
@@ -250,18 +253,20 @@
 
                                 </h3>
 
-                                <div class="trio-window-ctrls">
+                                <div class="trio-window-ctrls" *ngIf="selectedInvoice">
                                     <!-- <a class="button-icon pointer" title="Save (Ctrl + s)" aria-label="Save">
                                         <i class="fa fa-save invoice-icon" aria-hidden="true"></i>
                                     </a> -->
-                                    <a class="button-icon pointer" title="Print" aria-label="Print">
+                                    <a class="button-icon pointer" title="Print" aria-label="Print"
+                                        (click)="printPage()">
                                         <i class="fa fa-print invoice-icon" aria-hidden="true"></i>
                                     </a>
-                                    <a class="button-icon pointer" title="Void (Shift + v)" aria-label="Void">
+                                    <a class="button-icon pointer" (click)="RetailInvoice_Void()"
+                                        title="Void (Shift + v)" aria-label="Void">
                                         <i class="fa fa-window-close-o txt-color-dangerLight invoice-icon"
                                             aria-hidden="true"></i>
                                     </a>
-                                    <a (click)="newInvoice()" class="button-icon pointer" title="New (Ctrl + i)"
+                                    <a class="button-icon pointer" title="New (Ctrl + i)" (click)="addNewInvoice()"
                                         aria-label="New">
                                         <i class="fa fa-plus invoice-icon" aria-hidden="true"></i>
                                     </a>
@@ -317,13 +322,11 @@
                                                             <span class="s-price-details">
 
                                                                 <button class="btn-flat" data-toggle="dropdown"
-                                                                    [disabled]="doesInvoiceStatusDisallow()"
                                                                     (click)="increaseQty(product)">
                                                                     <i class="fa fa-plus txt-color-green"></i>
                                                                 </button>
 
-                                                                <button [disabled]="doesInvoiceStatusDisallow()"
-                                                                    class="btn-flat" (click)="decreaseQty(product)">
+                                                                <button class="btn-flat" (click)="decreaseQty(product)">
 
                                                                     <i class="fa fa-minus txt-color-dangerLight"></i>
                                                                 </button>
@@ -331,8 +334,7 @@
                                                                 <input
                                                                     style='font-weight:bold; border-radius: 30px 0 0 30px;'
                                                                     class="input-left-rounded" [ngModel]="product.Qty"
-                                                                    [disabled]="doesInvoiceStatusDisallow()"
-                                                                    (keypress)="adjustInputWidth($event)"
+                                                                    (keyup)="adjustInputWidth($event, product)"
                                                                     type="number" />
 
                                                                 <button
@@ -354,8 +356,10 @@
                                                             <a role="button" class="pointer" title="Remove"
                                                                 *ngIf="selectedInvoice.SalesInvoiceStatusID == 'Created'"
                                                                 aria-label="Remove">
-                                                                <i class="fa fa-trash txt-color-dangerLight"
-                                                                    aria-hidden="true"></i>
+                                                                <i (click)="deleteItem(product)"
+                                                                    class="fa fa-trash txt-color-dangerLight"
+                                                                    aria-hidden="true">
+                                                                </i>
                                                             </a>
 
 
@@ -366,7 +370,6 @@
                                                             </a>
                                                         </div>
                                                     </div>
-
 
                                                     <table class="table-condensed table-striped" *ngIf="product.opened">
                                                         <!-- <tr>
@@ -445,144 +448,6 @@
                                                                 {{product.NetTotalAfterDiscount}}
                                                                 &nbsp;
                                                                 {{product.CurrencyID}}
-                                                            </td>
-                                                        </tr>
-
-                                                    </table>
-                                                </div>
-                                            </div>
-
-                                            <div *ngFor="let product of addToCart">
-                                                <div class="s-item-list m-t-15" *ngIf="selectedInvoice">
-                                                    <div class="p-5-10" (click)="openDetails(product)">
-                                                        <strong>{{ getDescription(product, 'DescriptionEn',
-                                                            'DescriptionAr') }}</strong>
-
-                                                        <div class="s-price-details">
-                                                            <span class="s-price-details">
-
-                                                                <button class="btn-flat" data-toggle="dropdown"
-                                                                    [disabled]="doesInvoiceStatusDisallow()"
-                                                                    (click)="increaseQty(product)">
-                                                                    <i class="fa fa-plus txt-color-green"></i>
-                                                                </button>
-
-                                                                <button [disabled]="doesInvoiceStatusDisallow()"
-                                                                    class="btn-flat" (click)="decreaseQty(product)">
-
-                                                                    <i class="fa fa-minus txt-color-dangerLight"></i>
-                                                                </button>
-
-                                                                <input
-                                                                    style='font-weight:bold; border-radius: 30px 0 0 30px;'
-                                                                    class="input-left-rounded" [ngModel]="product.Qty"
-                                                                    [disabled]="doesInvoiceStatusDisallow()"
-                                                                    (keypress)="adjustInputWidth($event)"
-                                                                    type="number" />
-
-                                                                <button
-                                                                    class="btn btn-xs width-40 disabled btn-default-gray"
-                                                                    disabled>
-                                                                    {{product.UOMDescription}}
-                                                                </button>
-
-                                                            </span>
-
-                                                            <span class="pull-right bold m-t-5" title="Total Product">
-                                                                {{product.SalesPrice}}
-                                                                &nbsp;
-                                                                {{userInfo.CurrencyID}}
-                                                            </span>
-
-                                                        </div>
-                                                        <div class="item-controls">
-                                                            <a role="button" class="pointer" title="Remove"
-                                                                *ngIf="selectedInvoice.SalesInvoiceStatusID == 'Created'"
-                                                                aria-label="Remove">
-                                                                <i class="fa fa-trash txt-color-dangerLight"
-                                                                    aria-hidden="true"></i>
-                                                            </a>
-
-
-                                                            <a role="button" NgClass="pointer" class="pointer "
-                                                                title="Show more" aria-label="Show more">
-                                                                <i class="fa fa-arrows-alt txt-color-green"
-                                                                    aria-hidden="true"></i>
-                                                            </a>
-                                                        </div>
-                                                    </div>
-
-
-                                                    <table class="table-condensed table-striped" *ngIf="product.opened">
-                                                        <tr>
-                                                            <td>Tax</td>
-                                                            <td>
-                                                                <i class="fa fa-caret-right m-r-5"
-                                                                    aria-hidden="true"></i>
-                                                                Amount: {{product.TaxAmount? product.TaxAmount : 0}}
-                                                            </td>
-                                                            <td>%</td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <td>Promo</td>
-                                                            <td>
-                                                                <i class="fa fa-caret-right m-r-5"
-                                                                    aria-hidden="true"></i>
-                                                                ID: ---
-                                                            </td>
-                                                            <td>Discount: ---
-                                                            </td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <td>Promo Notes</td>
-                                                            <td colspan="2">
-                                                                <i class="fa fa-caret-right m-r-5"
-                                                                    aria-hidden="true"></i>
-                                                                ---
-                                                            </td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <td>
-                                                                Discount/Unit
-                                                            </td>
-                                                            <td>
-                                                                <i class="fa fa-caret-right m-r-5"
-                                                                    aria-hidden="true"></i>
-                                                                <input type="number" class="input-rounded"
-                                                                    [ngModel]="product.DiscountPercentage ? product.DiscountPercentage : 0" />
-                                                                <strong>%</strong>
-                                                            </td>
-                                                            <td>
-                                                                <input type="number" class="input-rounded"
-                                                                    [ngModel]="product.DiscountPerUnit ? product.DiscountPerUnit : 0" />
-                                                                <strong>$</strong>
-                                                            </td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <td>Total Discount</td>
-                                                            <td>
-                                                                <i class="fa fa-caret-right m-r-5"
-                                                                    aria-hidden="true"></i>
-                                                                {{product.TotalDiscount ? product.TotalDiscount : 0}}
-                                                            </td>
-                                                            <td></td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <td>
-                                                                Total Amount After Discount
-                                                            </td>
-                                                            <td colspan="2">
-                                                                <i class="fa fa-caret-right m-r-5"
-                                                                    aria-hidden="true"></i>
-                                                                {{product.NetTotalAfterDiscount ?
-                                                                product.NetTotalAfterDiscount : 0}}
-                                                                &nbsp;
-                                                                {{userInfo.CurrencyID}}
                                                             </td>
                                                         </tr>
 
@@ -743,9 +608,10 @@
                                                             </div>
                                                         </div>
                                                         <div class="item-controls">
-                                                            <a role="button" class="pointer m-r-15" title="Delete"
-                                                                (click)="deleteCash(item)" aria-label="Delete"
-                                                                *ngIf="!doesInvoiceStatusDisallow()">
+                                                            <a role="button"
+                                                                *ngIf="selectedInvoice.SalesInvoiceStatusID != 'Printed'"
+                                                                class="pointer m-r-15" title="Delete"
+                                                                (click)="deleteCash(item)" aria-label="Delete">
                                                                 <i class="fa fa-trash txt-color-dangerLight"></i>
                                                             </a>
                                                             <a role="button" class="pointer" title="Show more"
@@ -864,16 +730,10 @@
                                                             <div class="p-5-10">
                                                                 <i class="fa fa-stop fa-stop-style"
                                                                     [ngStyle]="{'color': getColor(invoices.SalesInvoiceStatusID)}"
-                                                                    aria-hidden="true"></i>
+                                                                    aria-hidden="true">
+                                                                </i>
                                                                 <strong>{{invoices.ID}}</strong> -
                                                                 {{invoices.CustDescription}}
-
-                                                                <!-- <span title="Delivery Date" style="color: #96c7e7;">
-                                                                <span>
-                                                                    Delivery Date
-                                                                </span>
-                                                                05/09/2024
-                                                            </span> -->
                                                                 <div class="s-price-details">
                                                                     <small class="text-muted">
                                                                         <span class="input-rounded"
@@ -912,8 +772,7 @@
                                         <!--this tab will be shown  when no invoice-->
                                         <div *ngIf="!selectedInvoice && activeInvoiceTab !== 'recall'">
                                             <div class="text-center" style="position: relative; bottom: 300px;">
-                                                <a role="button" class="btn btn-lg m-t-50" title="Ctrl + i"
-                                                    (click)="newInvoice()">
+                                                <a role="button" class="btn btn-lg m-t-50" title="Ctrl + i">
                                                     <i class="fa fa-plus m-r-5"></i>
                                                     New Invoice
                                                 </a>
@@ -925,9 +784,10 @@
                                         style="margin-bottom:-13px">
                                         <div class="row">
                                             <div class="col-sm-3" style="z-index:2">
-                                                <button type="button" *ngIf="activeInvoiceTab === 'invoice'"
-                                                    class="btn btn-success m-t-10 m-l-5 pull-left" title="Ctrl + s"><i
-                                                        class="fa fa-chevron-left m-r-5" aria-hidden="true"></i>
+                                                <button type="button" (click)="goTab('cash')"
+                                                    *ngIf="activeInvoiceTab === 'invoice' && selectedInvoice.SalesInvoiceStatusID != 'Printed'"
+                                                    class="btn btn-success m-t-10 m-l-5 pull-left" title="Ctrl + s">
+                                                    <i class="fa fa-chevron-left m-r-5" aria-hidden="true"></i>
                                                     Check Out
                                                 </button>
 
@@ -943,7 +803,8 @@
                                                     Clear
                                                 </button>
 
-                                                <button type="button" *ngIf="activeInvoiceTab === 'cash'"
+                                                <button (click)="postCash()" type="button"
+                                                    *ngIf="activeInvoiceTab === 'cash'"
                                                     class="btn btn-success m-t-10 m-l-5 pull-left" title="Ctrl + s">
                                                     <i class="fa fa-money m-r-5" aria-hidden="true"></i>
                                                     Done
@@ -965,7 +826,7 @@
                                                             Total Payment
                                                             <span class="txt-color-purple">
                                                                 <i class="fa fa-check"></i>
-                                                                &nbsp;0.000
+                                                                &nbsp;{{totalAmount}}
                                                             </span>
                                                         </h5>
 
@@ -975,8 +836,7 @@
                                                             Remaining Total Amount
                                                             <span class="txt-color-greenDark">
                                                                 <i class="fa fa-minus"></i>
-                                                                &nbsp;{{selectedInvoice.NetTotalAfterTax ?
-                                                                selectedInvoice.NetTotalAfterTax : 0.000}}
+                                                                &nbsp;{{paidAmount.toFixed(3)}}
                                                             </span>
                                                         </h5>
 
@@ -990,7 +850,9 @@
                                                 <div class="col-sm-4">
                                                     <strong>
                                                         <input type="checkbox" [(ngModel)]="serviceCharge"
-                                                            style="margin-top:0" class="m-r-5" />
+                                                            style="margin-top:0" class="m-r-5"
+                                                            [disabled]="selectedInvoice.SalesInvoiceStatusID === 'Printed' || selectedInvoice.SalesInvoiceStatusID === 'Rejected'"
+                                                            [ngStyle]="{'cursor': (selectedInvoice.SalesInvoiceStatusID === 'Printed' || selectedInvoice.SalesInvoiceStatusID === 'Rejected') ? 'no-drop' : 'auto'}" />
                                                         Service Charge
                                                     </strong>
                                                 </div>
@@ -1047,23 +909,24 @@
 
                                 <div class="row overflow-class" *ngIf="!message">
                                     <div class="col-lg-6 " style="width: fit-content;"
-                                        *ngFor="let product of (newProducts.length > 0 ? newProducts : products)"
-                                        (click)="addItemOrGroup(product)">
+                                        *ngFor="let product of (newProducts.length > 0 ? newProducts : products)">
                                         <div class="">
                                             <div class="list-item">
                                                 <span class="prod-price">{{product.SalesPrice}} /
                                                     {{product.UOMDescription}}</span>
-                                                <div class="prod-image">
+                                                <div (click)="addItemOrGroup(product)" class="prod-image">
                                                     <img [src]="product.Image" style="object-fit: cover;" alt="product"
                                                         width="100%" height="100%" />
                                                 </div>
                                                 <div style="display: flex;align-items: center;justify-content: center;">
-                                                    <div class="prod-desc prod-desc-class"
+                                                    <div (click)="addItemOrGroup(product)"
+                                                        class="prod-desc prod-desc-class"
                                                         title="{{product.DescriptionEn}}" aria-label="Details">
                                                         {{ getDescription(product, 'DescriptionEn', 'DescriptionAr') }}
                                                     </div>
-                                                    <i class="fa fa-caret-down txt-color-dangerLight" title="Details"
-                                                        aria-hidden="true"></i>
+                                                    <i class="fa fa-caret-down txt-color-dangerLight"
+                                                        style="padding: 10px;" (click)="openMenuDrilldown(product)"
+                                                        title="Details" aria-hidden="true"></i>
                                                 </div>
 
                                             </div>
@@ -1074,8 +937,6 @@
                                 <div class="row overflow-class product-search-empty" *ngIf="message">
                                     <div class="col-lg-6 " style="width: fit-content;">
                                         <h1 style="color: red;">{{message}}</h1>
-
-
                                     </div>
                                 </div>
                             </div>
@@ -1084,7 +945,13 @@
                 </div>
             </div>
             <!-- END #MAIN CONTENT -->
-
+            <div style="display: none;" id="agrrement-section" class="trio-window trio-window-color-blueLight">
+                <header>
+                    <h1>
+                        set agreement here ...
+                    </h1>
+                </header>
+            </div>
         </div>
         <!-- END #MAIN PANEL -->
     </div>

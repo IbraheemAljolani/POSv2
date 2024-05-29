@@ -12,6 +12,8 @@ export class SimpleLOVComponentData {
     idName: string = "ID";
     drillDownDetails!: DrillDownDetails;
     selectedPOSID: number = 0;
+    productItem: any;
+    SalesDivisionPOSID: number = 0;
 }
 
 export enum DataType {
@@ -76,13 +78,11 @@ export class SimpleLOVComponent {
 
 
     selectCustomer(item: any) {
-        sessionStorage.setItem('selectCustomer', JSON.stringify(item));
         this.dialogRef.close(item);
     }
 
 
     removeItem(item: any) {
-
         const existedItem = this.selectedItems.find(i => i["ID"] === item["ID"]);
         if (existedItem)
             this.selectedItems.splice(this.selectedItems.indexOf(existedItem), 1);
@@ -97,46 +97,6 @@ export class SimpleLOVComponent {
         this.dialogRef.close(this.selectedItems);
     }
 
-
-    // private _getObjectKeys(obj: any) {
-    //     const objKeys = Object.keys(obj);
-
-    //     //this.lookupRowFields = Object.keys(obj);
-    //     this.lookupRowFields = [];
-
-    //     for (let i = 0; i < objKeys.length; i++) {
-    //         const item = { FieldName: objKeys[i], FieldCaption: objKeys[i], FieldType: 'string' };
-    //         this.lookupRowFields.push(item);
-    //     }
-    // }
-
-    // _drawData(result: any) {
-
-    //     if (result) {
-    //         if (result.errorCode)
-    //             this.loadingStatus = result.errorMsg;
-    //         else {
-    //             this.lookupRows = result.Contents;
-    //             console.log('lookupRows', this.lookupRows)
-    //             this.RecordsCount = result.Count[0].RecordsCount;
-    //             if (result.Fields && result.Fields.length > 0) {
-    //                 this.lookupRowFields = result.Fields;
-    //             } else {
-    //                 if (this.lookupRows && this.lookupRows.length > 0) {
-    //                     this._getObjectKeys(this.lookupRows[0]);
-    //                 }
-    //             }
-
-    //             if (this.lookupRows && this.lookupRows.length > 0) {
-    //                 this.loadingStatus = "";
-    //             } else {
-    //                 this.loadingStatus = 'No data found';
-    //             }
-    //         }
-    //     } else
-    //         this.loadingStatus = 'No data found';
-    // }
-
     _loadCustomers() {
         this.salesInvoiceService.getCustomers().subscribe((result: any) => {
             this.lookupRowFields = ['ID', 'DescriptionEn', 'Code', 'Tel'];
@@ -144,7 +104,6 @@ export class SimpleLOVComponent {
                 this.lookupRows.push([result[i].CustID, result[i].DescriptionEn, result[i].Code, result[i].Tel]);
             }
         }, (error) => {
-            console.log('error', error)
             Swal.fire({
                 icon: "error",
                 title: "Oops...",
@@ -154,13 +113,19 @@ export class SimpleLOVComponent {
     }
 
     _loadSalesMen() {
-        const params = { CompanyID: 1, "PageSize": this.pagination.PageSize, "SelectedPageNumber": this.pagination.SelectedPageNumber, SearchFilterQuery: this.filterText };
-        this._http.post(this._baseUrl + `api/POS/FetchSalesMen`, params).subscribe((result: any) => {
-            this.inprocessing = false;
-
-            // this._drawData(result);
-
-        }, error => { this.inprocessing = false; this.loadingStatus = (error) ? error.Message || error : "Error"; console.error(error) });
+        this.salesInvoiceService.getLookups().subscribe((result: any) => {
+            this.lookupRowFields = ['ID', 'Description', 'Sales Division'];
+            let salesMen = result.SalesMans;
+            for (let i = 0; i < salesMen.length; i++) {
+                this.lookupRows.push([salesMen[i].ID, salesMen[i].Description, salesMen[i].SalesDivisionID]);
+            }
+        }, (error) => {
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: error.error.Message,
+            });
+        });
     }
 
     _loadPOS() {
@@ -170,7 +135,6 @@ export class SimpleLOVComponent {
                 this.lookupRows.push([result[i].PosID, result[i].POSDescription, result[i].ID]);
             }
         }, (error) => {
-            console.log('error', error)
             Swal.fire({
                 icon: "error",
                 title: "Oops...",
@@ -179,31 +143,29 @@ export class SimpleLOVComponent {
         });
     }
 
-    _loadProducts() {
-        const params = { CompanyID: 1, "PageSize": this.pagination.PageSize, "SelectedPageNumber": this.pagination.SelectedPageNumber, SearchFilterQuery: this.filterText };
-        this._http.post(this._baseUrl + `api/POS/FetchProudcts`, params).subscribe((result: any) => {
-            this.inprocessing = false;
+    // _loadProducts() {
+    //     const params = { CompanyID: 1, "PageSize": this.pagination.PageSize, "SelectedPageNumber": this.pagination.SelectedPageNumber, SearchFilterQuery: this.filterText };
+    //     this._http.post(this._baseUrl + `api/POS/FetchProudcts`, params).subscribe((result: any) => {
+    //         this.inprocessing = false;
 
-            // this._drawData(result);
+    //         // this._drawData(result);
 
-        }, error => { this.inprocessing = false; this.loadingStatus = (error) ? error.Message || error : "Error"; console.error(error) });
-    }
+    //     }, error => { this.inprocessing = false; this.loadingStatus = (error) ? error.Message || error : "Error"; console.error(error) });
+    // }
 
     _loadDrillDownData() {
-        if (!this.data.drillDownDetails) return;
-
-        const params = {
-            MenuDrillDownID: this.data.drillDownDetails.drillDownId,
-            RecordID: this.data.drillDownDetails.recordId,
-            Code: this.data.drillDownDetails.code,
-            lOVParameters: { CompanyID: 1, "PageSize": this.pagination.PageSize, "SelectedPageNumber": this.pagination.SelectedPageNumber, SearchFilterQuery: this.filterText }
-        };
-        this._http.post(this._baseUrl + `api/POS/FetchProudctsDrillDownDetails`, params).subscribe((result: any) => {
-            this.inprocessing = false;
-
-            // this._drawData(result);
-
-        }, error => { this.inprocessing = false; this.loadingStatus = (error) ? error.Message || error : "Error"; console.error(error) });
+        this.salesInvoiceService.getProductsStock(this.data.SalesDivisionPOSID, this.data.productItem.ProductID).subscribe((result: any) => {
+            this.lookupRowFields = ['Code', 'Unit Of Measurement', 'Available Qty'];
+            for (let i = 0; i < result.length; i++) {
+                this.lookupRows.push([result[i].Code, result[i].UOMDescription, result[i].DeviceAvailableQty]);
+            }
+        }, (error) => {
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: error.error.Message,
+            });
+        });
     }
 
 
@@ -216,8 +178,8 @@ export class SimpleLOVComponent {
             this._loadPOS();
         else if (this.data.dataType === "drillDown")
             this._loadDrillDownData();
-        else
-            this._loadProducts();
+        // else
+        //     this._loadProducts();
     }
 
     ngOnInit() {

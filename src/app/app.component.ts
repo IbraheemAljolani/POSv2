@@ -31,22 +31,25 @@ export class AppComponent {
   newProducts: any = [];
   languageID = this.salesInvoiceService.userInfo.languageID;
   message: string = '';
-  datepicker = new Date();
+  datepicker = new Date().toISOString().slice(0, 10);
   filterRecallSearch: string[] = ['date'];
   retailInvoices: any = [];
-  originalRetailInvoices: any[] = [];
   selectedInvoice: any;
   selectedInvoiceProducts: any = [];
   promoSelectAllFlag: boolean = false;
   openPromotion: boolean = false;
   promosList: any = [];
   receiptMethods: any = [];
-  Amounts: any;
+  Amounts: number = 0.000;
   selectedPayments: any = [];
   addToCart: any = [];
   data: any;
   serviceCharge: boolean = false;
   selectedPaymentsData: any = [];
+  totalAmount: number = 0.000;
+  paidAmount: number = 0.000;
+  salesManName: string = '';
+  salesManID: number = 0;
 
   ngOnInit(): void {
     this.getUserInfo();
@@ -112,7 +115,7 @@ export class AppComponent {
     this.activeInvoiceTab = tab;
 
     if (tab === 'recall') {
-      this.getRetailInvoices(this.filterRecallSearch);
+      this.getRetailInvoices();
     }
 
     if (tab === 'promo') {
@@ -160,6 +163,16 @@ export class AppComponent {
   }
 
   openCustomerDialog() {
+
+    if (!this.selectedInvoice) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning...",
+        text: "Please create a new invoice or select an existing invoice.",
+      });
+      return;
+    }
+
     const dialogRef = this.dialog.open(CustomerSelectComponent, {
       disableClose: true,
       data: { title: "Set Customer", DefaultCustomer: this.userInfo.DefaultCustomer },
@@ -167,12 +180,44 @@ export class AppComponent {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      let results = sessionStorage.getItem('selectCustomer');
-      if (results) {
-        let parsedResult = JSON.parse(results);
-        this.userInfo.DefaultCustomer.CustID = parsedResult[0];
-        this.userInfo.DefaultCustomer.CustomerDescription = parsedResult[1];
-      }
+      if (!result) return;
+
+      sessionStorage.setItem('selectCustomer', JSON.stringify(result.selectedCustomer));
+      this.userInfo.DefaultCustomer.CustID = result.selectedCustomer[0];
+      this.userInfo.DefaultCustomer.CustomerDescription = result.selectedCustomer[1];
+    });
+  }
+
+  openMenuDrilldown(productItem: any): void {
+    const dialogRef = this.dialog.open(SimpleLOVComponent, {
+      disableClose: true,
+      maxHeight: '98%',
+      width: "80%",
+      minWidth: '300px',
+      direction: "ltr",
+      data: { dataType: "drillDown", isMultiCheck: false, productItem: productItem, title: productItem.DescriptionEn + ' Qty', SalesDivisionPOSID: this.userInfo?.RetailUserPOS?.SalesDivisionPOSID },
+    });
+
+    dialogRef.afterClosed().subscribe((selectedResult) => {
+
+    });
+  }
+
+  selectSalesMan(): void {
+    const dialogRef = this.dialog.open(SimpleLOVComponent, {
+      disableClose: true,
+      maxHeight: '98%',
+      width: "70%",
+      minWidth: '300px',
+      direction: "ltr",
+      data: { dataType: "salesMen", isMultiCheck: false, title: "SalesMen" },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) return;
+
+      this.salesManID = result[0];
+      this.salesManName = result[1];
     });
   }
 
@@ -258,7 +303,7 @@ export class AppComponent {
     { label: 'Created', value: 'created', color: '#47bb47', checked: false },
     { label: 'Printed', value: 'printed', color: '#F1DA91', checked: false },
     { label: 'Under Delivery', value: 'underDelivery', color: '#96c7e7', checked: false },
-    { label: 'Void', value: 'void', color: '#f25022', checked: false },
+    { label: 'Void', value: 'rejected', color: '#f25022', checked: false },
   ];
 
   toggleFilter(filter: { checked: boolean; value: any; }): void {
@@ -268,15 +313,33 @@ export class AppComponent {
     } else {
       this.filterRecallSearch = this.filterRecallSearch.filter(item => item !== filter.value);
     }
-    this.getRetailInvoices(this.filterRecallSearch);
+    this.getRetailInvoices();
   }
 
-  getRetailInvoices(filterRecallSearch: string[]) {
-    this.salesInvoiceService.getRetailInvoices().subscribe((result: any) => {
-      if (result) {
-        this.retailInvoices = result.filter((item: { SalesInvoiceStatusID: string; }) => filterRecallSearch.includes(item.SalesInvoiceStatusID.toLowerCase()));
+  changeDate(date: any) {
+    date.setDate(date.getDate() + 1);
+    this.datepicker = date.toISOString().slice(0, 10);
+    this.getRetailInvoices();
+  }
 
-        this.originalRetailInvoices = (this.retailInvoices && this.retailInvoices.length > 0) ? this.retailInvoices : result;
+  searchRecall(value: string) {
+    if (value) {
+      this.retailInvoices = this.retailInvoices.filter((item: { Code: string; ID: number; CustDescription: string }) => item.Code.includes(value) || item.ID.toString().includes(value) || item.CustDescription.includes(value));
+    } else {
+      this.getRetailInvoices();
+    }
+  }
+
+  getRetailInvoices() {
+    this.salesInvoiceService.getRetailInvoices(this.userInfo?.RetailUserPOS?.SalesDivisionPOSID).subscribe((result: any) => {
+      if (result) {
+
+        if (this.filterRecallSearch.includes('date')) {
+          this.retailInvoices = this.filterByDate(result);
+        } else {
+          this.retailInvoices = this.filterByStatus(result);
+        }
+
       } else {
         Swal.fire({
           icon: "question",
@@ -293,27 +356,42 @@ export class AppComponent {
     });
   }
 
-  changeDate(date: any) {
-    date.setDate(date.getDate() + 1);
-    this.datepicker = date.toISOString().slice(0, 10);
-    this.getRetailInvoices(this.filterRecallSearch);
+  filterByDate(result: any[]) {
+    const filterFunc = (item: { CreatedDate: string; SalesInvoiceStatusID?: string }) => {
+      const isDateMatch = item.CreatedDate.slice(0, 10) === this.datepicker;
+      const isStatusMatch = this.filterRecallSearch.length > 1 ? (item.SalesInvoiceStatusID && this.filterRecallSearch.includes(item.SalesInvoiceStatusID.toLowerCase())) : true;
+      return isDateMatch && isStatusMatch;
+    };
+    return result.filter(filterFunc);
   }
 
-  searchRecall(value: string) {
-    this.retailInvoices = this.originalRetailInvoices.filter((item: { ID: string; Code: string; CustDescription: string; }) =>
-      item.ID.toString().includes(value) || item.Code.includes(value) || item.CustDescription.includes(value));
+  filterByStatus(result: any[]) {
+    if (this.filterRecallSearch.length === 1) {
+      return result.filter((item: { SalesInvoiceStatusID: string }) =>
+        this.filterRecallSearch.includes(item.SalesInvoiceStatusID.toLowerCase())
+      );
+    }
+    return result;
   }
 
   invoiceDetails(invoice: any) {
     this.addToCart = [];
     this.selectedInvoice = invoice;
     this.selectedInvoiceProducts = this.selectedInvoice.Products;
+    this.addToCart.push(...this.selectedInvoiceProducts);
     this.activeInvoiceTab = 'invoice';
+    this.paidAmount = this.selectedInvoice.NetTotalAfterTax;
 
     if (invoice.SalesInvoiceStatusID === "Printed") {
       if (!this.selectedPayments) {
         this.selectedPayments = [];
       }
+
+      this.totalAmount = this.selectedInvoice.Payments[0].CashReceiptAmount;
+
+      this.paidAmount = this.selectedInvoice.Payments[0].CashReturnedAmount;
+
+      this.serviceCharge = this.selectedInvoice.ServiceCharge;
 
       this.selectedPayments = [];
 
@@ -327,22 +405,40 @@ export class AppComponent {
         invoiceDate: invoice.Payments[0].PaymentDate
       });
     }
-
   }
 
   increaseQty(product: any) {
     product.Qty++;
+    this.addToCart.forEach((item: any) => {
+      if (item.ProductID === product.ProductID) {
+        item.Qty = product.Qty;
+      }
+    });
+    this.newInvoice(this.addToCart);
+
   }
 
   decreaseQty(product: any) {
-    if (product.Qty > 0) {
+    if (product.Qty > 1) {
       product.Qty--;
+      this.addToCart.forEach((item: any) => {
+        if (item.ProductID === product.ProductID) {
+          item.Qty = product.Qty;
+        }
+      });
+      this.newInvoice(this.addToCart);
     }
   }
 
-  adjustInputWidth(event: KeyboardEvent) {
+  adjustInputWidth(event: KeyboardEvent, product: any) {
     const inputElement = event.target as HTMLInputElement;
     inputElement.style.width = ((inputElement.value.length + 10) * 8) + 'px';
+    this.addToCart.forEach((item: any) => {
+      if (item.ProductID === product.ProductID) {
+        item.Qty = inputElement.value;
+      }
+    });
+    this.newInvoice(this.addToCart);
   }
 
   openDetails(product: { opened: boolean; }) {
@@ -461,31 +557,48 @@ export class AppComponent {
     if (!this.selectedPayments) {
       this.selectedPayments = [];
     }
-    this.selectedPayments = [];
 
-    this.selectedPayments.unshift({
-      // ReceiptMethodID: methodID,
-      ReceiptMethodTypeID: ReceiptMethodTypeID,
-      Description: "",//paymentName + " payment for invoice " + this.invoiceData.invoiceID,
-      Amount: amount,
-      SoldAmount: 0,
-      invoiceDate: new Date()
-    });
+    if (this.selectedPayments.some((item: { ReceiptMethodTypeID: string; }) => item.ReceiptMethodTypeID === ReceiptMethodTypeID)) {
+      this.selectedPayments.forEach((item: { ReceiptMethodTypeID: string; Amount: number; }) => {
+        if (item.ReceiptMethodTypeID === ReceiptMethodTypeID) {
+          item.Amount = amount;
+        }
+      });
+    } else {
+      this.selectedPayments.unshift({
+        ReceiptMethodID: methods.ID,
+        ReceiptMethodTypeID: ReceiptMethodTypeID,
+        Description: "",
+        Amount: amount,
+        SoldAmount: 0,
+        invoiceDate: new Date()
+      });
+    }
+
+    this.totalAmount = this.selectedPayments.reduce((sum: any, item: { Amount: any; }) => sum + item.Amount, 0.000);
+
+    this.paidAmount = this.selectedInvoice.NetTotalAfterTax - this.totalAmount;
 
     this.selectedPaymentsData.push(methods)
   }
 
   deleteCash(item: any) {
-    if (this.doesInvoiceStatusDisallow()) return;
-
     this.selectedPayments.splice(this.selectedPayments.indexOf(item), 1);
+    this.totalAmount = this.selectedPayments.reduce((sum: any, item: { Amount: any; }) => item.Amount - sum, 0);
   }
 
-  doesInvoiceStatusDisallow(): boolean {
-    return (this.retailInvoices.SalesInvoiceStatusID !== "Created");
+  deleteItem(item: any) {
+    for (let i = 0; i < this.addToCart.length; i++) {
+      if (this.addToCart[i].ProductID === item.ProductID) {
+        this.addToCart.splice(i, 1);
+        break;
+      }
+    }
+
+    this.newInvoice(this.addToCart);
   }
 
-  newInvoice() {
+  newInvoice(cart: any) {
     const currentDate = new Date();
 
     const POSCode = `${this.userInfo.SalesDivision.SalesDivisionID}/${this.userInfo.SalesDivision.SalesDivisionPosID}/${currentDate.getFullYear().toString().slice(-2)}/${currentDate.getMonth() + 1}-${Math.floor(Math.random() * 100)}`;
@@ -497,13 +610,16 @@ export class AppComponent {
       var tableID = null;
     }
 
+    var customer = sessionStorage.getItem('selectCustomer');
+    customer = customer ? JSON.parse(customer) : null;
+
     this.data = {
       Code: this.selectedInvoice?.Code ? this.selectedInvoice.Code : null,
       POSCode: this.selectedInvoice?.POSCode ? this.selectedInvoice.POSCode : POSCode,
       SalesInvoiceStatusID: this.selectedInvoice?.SalesInvoiceStatusID ? this.selectedInvoice.SalesInvoiceStatusID : 'Created',
       CustID: this.userInfo.DefaultCustomer.CustID,
-      Description: this.userInfo.DefaultCustomer.CustomerDescription,
-      CustDescription: this.userInfo.DefaultCustomer.CustomerDescription,
+      Description: customer ? customer[1] : null,
+      CustDescription: customer ? customer[1] : null,
       ManualDiscountAmount: this.selectedInvoice?.ManualDiscountAmount ? this.selectedInvoice.ManualDiscountAmount : 0.0,
       DiscountPercentage: this.selectedInvoice?.DiscountPercentage ? this.selectedInvoice.DiscountPercentage : 0.0,
       TipAmount: this.selectedInvoice?.TipAmount ? this.selectedInvoice.TipAmount : 0.0,
@@ -513,20 +629,20 @@ export class AppComponent {
       RetailOrderReferenceCode: this.selectedInvoice?.RetailOrderReferenceCode ? this.selectedInvoice.RetailOrderReferenceCode : null,
       RetailOrderID: this.selectedInvoice?.RetailOrderID ? this.selectedInvoice.RetailOrderID : null,
       SalesInvoiceDate: this.selectedInvoice?.SalesInvoiceDate ? this.selectedInvoice.SalesInvoiceDate : new Date(),
-      Products: this.selectedInvoice?.Products ? this.selectedInvoice.Products : this.addToCart,
-      Payments: this.selectedPaymentsData,
+      Products: cart,
+      Payments: this.selectedPayments,
       Notes: this.selectedInvoice?.Notes ? this.selectedInvoice.Notes : null,
-      ReferenceCode: uuid(),
+      ReferenceCode: this.selectedInvoice?.ReferenceCode ? this.selectedInvoice.ReferenceCode : uuid(),
       CashBookID: this.selectedInvoice?.CashBookID ? this.selectedInvoice.CashBookID : null,
       CreatedDate: this.selectedInvoice?.CreatedDate ? this.selectedInvoice.CreatedDate : new Date(),
+      Amounts: this.selectedInvoice?.NetTotalAfterTax ?? 0,
     }
-    console.log(this.selectedPayments);
+
     this.salesInvoiceService.retailInvoice_Create(this.data).subscribe((result: any) => {
       if (result) {
         this.selectedInvoice = result;
         this.selectedInvoiceProducts = result.Products;
-        this.activeInvoiceTab = 'invoice';
-        this.openCustomerDialog();
+        this.userInfo.DefaultCustomer.CustomerDescription = result.CustDescription;
       } else {
         Swal.fire({
           icon: "question",
@@ -545,46 +661,188 @@ export class AppComponent {
 
   addItemOrGroup(product: any) {
 
-    if (this.selectedInvoice) {
+    if (['Printed', 'Rejected'].includes(this.selectedInvoice?.SalesInvoiceStatusID)) return;
 
-      if (this.selectedInvoice.Products.find((item: { ProductID: any; }) => item.ProductID === product.ProductID)) {
+
+    let item = this.addToCart.find((item: { ProductID: any; }) => item.ProductID === product.ProductID);
+
+    this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, product.ProductID).subscribe((result: any) => {
+      if (result[0] && result[0].DeviceAvailableQty > 0) {
+        if (item) {
+          item.Qty++;
+        } else {
+          this.addToCart.push({
+            "ProductID": product.ProductID,
+            "TaxGroupID": product.TaxGroupID,
+            "UOMID": product.UOMID,
+            "Description": this.getDescription(product, 'DescriptionEn', 'DescriptionAr'),
+            "UOMDescription": this.getDescription(product, 'UOMDescriptionEn', 'UOMDescriptionAr'),
+            "ReturnedQty": 0,
+            "ReturnQty": 0,
+            "Qty": 1,
+            "RemainingQty": 1,
+            "SalesPrice": product.SalesPrice,
+            "Amount": product.SalesPrice * 1,
+            "NetTotalBeforeDiscount": product.SalesPrice * 1,
+            "TotalDiscount": 0,
+            "DiscountPercentage": 0,
+            "DiscountPerUnit": 0,
+            "NetTotalAfterDiscount": product.SalesPrice * 1,
+            "TaxAmount": 0,
+            "TaxPercent": 0,
+            "NetTotalAfterTax": product.SalesPrice * 1,
+            "Additions": [],
+            "Seriales": [],
+            "Batches": [],
+            "CurrencyID": this.userInfo?.CompanyInfo.CurrencyID,
+            "AppReferenceTransCode": uuid(),
+            "RetailOrderReferenceTransCode": "",
+            "Note": product.Note,
+          });
+        }
+        this.newInvoice(this.addToCart);
+      } else {
         Swal.fire({
           icon: "warning",
           title: "Warning...",
-          text: "Product already exists in the invoice.",
-        });
-      } else {
-        this.selectedInvoice.Products.push({
-          "ProductID": product.ProductID,
-          "RetailInvoiceID": this.selectedInvoice.ID,
-          "TaxGroupID": product.TaxGroupID,
-          "UOMID": product.UOMID,
-          "Description": this.getDescription(product, 'DescriptionEn', 'DescriptionAr'),
-          "UOMDescription": this.getDescription(product, 'UOMDescriptionEn', 'UOMDescriptionAr'),
-          "ReturnedQty": 0,
-          "ReturnQty": 0,
-          "Qty": product.Qty,
-          "RemainingQty": 0,
-          "SalesPrice": product.SalesPrice,
-          "Amount": product.SalesPrice * product.Qty,
-          "NetTotalBeforeDiscount": product.SalesPrice * product.Qty,
-          "TotalDiscount": 0,
-          "DiscountPercentage": 0,
-          "DiscountPerUnit": 0,
-          "NetTotalAfterDiscount": product.SalesPrice * product.Qty,
-          "TaxAmount": 0,
-          "TaxPercent": 0,
-          "NetTotalAfterTax": product.SalesPrice * product.Qty,
-          "Additions": [],
-          "Seriales": [],
-          "Batches": [],
-          "CurrencyID": this.userInfo?.CompanyInfo.CurrencyID,
-          "AppReferenceTransCode": uuid(),
-          "RetailOrderReferenceTransCode": "",
-          "Note": product.Note,
+          text: "No stock available.",
         });
       }
+    })
+  }
+
+  postCash() {
+    debugger;
+    if (this.totalAmount >= this.selectedInvoice.NetTotalAfterTax) {
+      this.newInvoice(this.addToCart);
+      this.selectedInvoice = null;
+      this.selectedInvoiceProducts = [];
+      this.addToCart = [];
+      this.selectedPayments = [];
+      this.totalAmount = 0;
+      this.paidAmount = 0.000;
+      this.activeInvoiceTab = 'invoice';
+      sessionStorage.removeItem('selectCustomer');
+      sessionStorage.removeItem('selectedTable');
+      this.salesManID = 0;
+      this.salesManName = '';
+      this.userInfo.DefaultCustomer.CustID = this.userInfo.DefaultCustomer.CustID;
+      this.userInfo.DefaultCustomer.CustomerDescription = this.userInfo.DefaultCustomer.CustomerDescription;
+    } else {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning...",
+        text: "Paid amount is less than the total amount.",
+      });
     }
+  }
+
+  addNewInvoice() {
+    if (this.selectedInvoice) {
+      this.selectedInvoice = null;
+      this.selectedInvoiceProducts = [];
+      this.addToCart = [];
+      this.selectedPayments = [];
+      this.totalAmount = 0;
+      this.paidAmount = 0.000;
+      this.activeInvoiceTab = 'invoice';
+    }
+  }
+
+  RetailInvoice_Void() {
+    if (this.selectedInvoice && this.selectedInvoice.SalesInvoiceStatusID === 'Created') {
+
+      Swal.fire({
+        title: "Do you want to void the invoice?",
+        showCancelButton: true,
+        confirmButtonText: "Ok",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.salesInvoiceService.RetailInvoice_Void(this.selectedInvoice.ID).subscribe((result: any) => {
+            if (result) {
+              this.selectedInvoice.SalesInvoiceStatusID = 'Void';
+              Swal.fire({
+                icon: "success",
+                title: "Success...",
+                text: "Invoice has been voided successfully.",
+              });
+            } else {
+              Swal.fire({
+                icon: "question",
+                title: "Warning...",
+                text: "Error in voiding invoice.",
+              });
+            }
+          });
+        }
+      });
+    }
+  }
+
+  printPage() {
+    let printContents, popupWin;
+    const agreementSection = document.getElementById('agrrement-section');
+    printContents = agreementSection ? agreementSection.innerHTML : '';
+    popupWin = window.open('', '_blank', 'top=0,left=0,height=100%,width=auto');
+    if (popupWin) {
+      popupWin.document.open();
+      popupWin.document.write(`
+				<html>
+					<head>
+						<title>Trio365</title>
+						<style type="text/css">
+              p {
+                font-family: "Times New Roman";
+              }
+
+              .padding-main-divcls{
+                padding: 5px;
+              }
+
+              .text-center{
+                text-align: center
+              }
+              .width-full{
+                width: 100%;
+              }
+
+              .box{
+                  border-style: solid;
+                  border-width: 1px;
+                  width: 65px;
+                  height: 100px;
+                  float: right;
+                  margin-right: 50px;
+                  font-size: 10px;
+                  padding: 5px;
+              }
+              .box-divcls{
+                width: 100%;
+                display: inline-block;
+              }
+
+              .TermsConditionTable, tr , td {
+								padding: 4px !important;
+							}
+							tr, td {
+								page-break-inside: avoid !important;
+							}
+            
+
+							.break-after{
+								page-break-after: always;
+							}
+              .top-border-cls{
+                border-top: solid black 1.0pt;
+              }
+            </style>
+            <body onload="window.print();window.close()">${printContents}</body>
+          </head>
+        </html>
+      `)
+      popupWin.document.close();
+    }
+
   }
 
   ngOnDestroy() {

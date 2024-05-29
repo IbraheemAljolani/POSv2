@@ -271,7 +271,7 @@ export class SalesInvoiceComponent {
     }
 
     getRetailInvoices(filterRecallSearch: string[]) {
-        this.salesInvoiceService.getRetailInvoices().subscribe((result: any) => {
+        this.salesInvoiceService.getRetailInvoices(this.userInfo.RetailUserPOS.SalesDivisionPOSID).subscribe((result: any) => {
             if (result) {
                 this.retailInvoices = result.filter((item: { SalesInvoiceStatusID: string; }) => filterRecallSearch.includes(item.SalesInvoiceStatusID.toLowerCase()));
 
@@ -299,7 +299,6 @@ export class SalesInvoiceComponent {
     }
 
     searchRecall(value: string) {
-        console.log(this.originalRetailInvoices);
         this.retailInvoices = this.originalRetailInvoices.filter((item: { ID: string; Code: string; CustDescription: string; }) =>
             item.ID.toString().includes(value) || item.Code.includes(value) || item.CustDescription.includes(value));
     }
@@ -325,7 +324,6 @@ export class SalesInvoiceComponent {
                 SoldAmount: 0,
                 invoiceDate: invoice.Payments[0].PaymentDate
             });
-            console.log(this.selectedPayments)
         }
 
     }
@@ -350,7 +348,6 @@ export class SalesInvoiceComponent {
     }
 
     onCheckboxChange() {
-        console.log(this.promoSelectAllFlag);
         this.promoSelectAllFlag = !this.promoSelectAllFlag;
     }
 
@@ -412,7 +409,6 @@ export class SalesInvoiceComponent {
             });
             return;
         }
-        console.log(methodsType);
         if (methodsType === 'Cash') {
             this._getCash(discreption, methodsType);
         } else if (methodsType === 'Card') {
@@ -474,7 +470,6 @@ export class SalesInvoiceComponent {
             invoiceDate: new Date()
         });
 
-        console.log(this.selectedPayments)
     }
 
     deleteCash(item: any) {

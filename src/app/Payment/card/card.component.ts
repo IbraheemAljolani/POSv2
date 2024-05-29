@@ -29,7 +29,6 @@ export class CardComponent {
       return false;
     }
     return true;
-
   }
 
   addNumber(n: string) {

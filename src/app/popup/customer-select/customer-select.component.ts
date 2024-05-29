@@ -22,6 +22,8 @@ export class CustomerSelectComponent {
     loyaltyValue: number = 0;
     customerDescription: string = '---';
     result = sessionStorage.getItem('selectCustomer');
+    selectedCustomer: any;
+
     ngOnInit(): void {
 
         if (this.result) {
@@ -44,6 +46,7 @@ export class CustomerSelectComponent {
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
+                this.selectedCustomer = result;
                 this.customerID = result[0];
                 this.customerDescription = result[1];
             }
@@ -52,5 +55,9 @@ export class CustomerSelectComponent {
 
     onCancel(): void {
         this.dialogRef.close();
+    }
+
+    onConfirmMultiChecked() {
+        this.dialogRef.close({ selectedCustomer: this.selectedCustomer });
     }
 }
