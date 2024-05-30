@@ -6494,11 +6494,11 @@ aside {
     -webkit-user-select: none;
     background-color: #f8f8f8;
     background-image: -webkit-gradient(linear, left top, left bottom, from(#f8f8f8), to(#f1f1f1));
-    background-image: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
+    /* background-image: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
     background-image: -moz-linear-gradient(top, #f8f8f8, #f1f1f1);
     background-image: -ms-linear-gradient(top, #f8f8f8, #f1f1f1);
     background-image: -o-linear-gradient(top, #f8f8f8, #f1f1f1);
-    background-image: linear-gradient(top, #f8f8f8, #f1f1f1);
+    background-image: linear-gradient(top, #f8f8f8, #f1f1f1); */
     border: 1px solid #bfbfbf;
     color: #c4bab6;
     font-size: 19px;
@@ -7298,7 +7298,7 @@ img.online {
     background-image: -moz-linear-gradient(top, #f8f8f8, #f1f1f1);
     background-image: -ms-linear-gradient(top, #f8f8f8, #f1f1f1);
     background-image: -o-linear-gradient(top, #f8f8f8, #f1f1f1);
-    background-image: linear-gradient(top, #f8f8f8, #f1f1f1);
+    /* background-image: linear-gradient(top, #f8f8f8, #f1f1f1); */
     border: 1px solid #bfbfbf;
     color: #6D6A69;
     font-size: 17px;

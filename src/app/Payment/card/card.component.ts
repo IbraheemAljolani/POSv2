@@ -43,6 +43,20 @@ export class CardComponent {
     }
   }
 
+  formatCardNumber(event: any) {
+    let input = event.target.value.replace(/\D/g, '').substring(0, 16);
+    let formattedInput = '';
+
+    for (let i = 0; i < input.length; i++) {
+      if (i !== 0 && i % 4 === 0) {
+        formattedInput += ' ';
+      }
+      formattedInput += input[i];
+    }
+
+    this.cardNumber = formattedInput;
+  }
+
   clearDisplay() {
     if (this.focusedElement == this.amountNumberElement) {
       this.amountCashnumber = '';

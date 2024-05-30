@@ -4,8 +4,9 @@
             <span aria-hidden="true">&times;</span>
         </button>
         <h4 class="modal-title">
-            <img [title]="data.title" class="payment-method-logo m-r-5" src="/Content/img/invoice/cash.png"
-                [alt]="data.title" />
+            <img [title]="data.title" class="payment-method-logo m-r-5"
+                [src]="'data:image/jpeg;base64,' + data.image ? 'data:image/jpeg;base64,' + data.image : 'assets/customer.svg'"
+                (error)="data.image = 'assets/default.webp'" [alt]="data.title" />
             {{data.title}}
         </h4>
     </div>

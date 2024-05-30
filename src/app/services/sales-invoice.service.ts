@@ -26,7 +26,7 @@ export class SalesInvoiceService {
     // Test data for userInfo object
     public userInfo: { baseUrl: string; token: string; userID: number; languageID: number, companyID: number } = {
         baseUrl: "https://proxypos.trio365.com",
-        token: "_y0H3EbRnVEw_jMAUm1xMFkwNz7QRi4l_m3X5YnPCUSwQHB7Qmw0Hql_gQD9tGJhTrAObaS_RMDAXuHlQxTh23EmhrTGls8SK7Z-lUI_X_9w8TP_AJ0iFU-nhO1Y1pqSBVzfOp0wuY57EX7p_J9IZ9N30ryihLz57XOWwLAQDrqLojPTrpwP8YxHFRiFyxvw3SZXo_Kj28hh2dN61YYXoVCAlQIfVV6WsWJxZYJWbOXMzuB26C2zGcJ3Je879NI3rpA4MlTUVUoVNxs3EsjiXplWAlDvJgB6Oo56cJ_Z-z1DD9jhEUDPOq-PSmxfxCNiE02mAPXyXGSNHvQu92g5Xg",
+        token: "yJzcmD3XUwwIkZeuixrehSfe1AeCYmynT4vBx6ukEEvGo9zKA6PbzeRhf9ORLMHm-svVAU3oHeUyp56Fl-_G0bZqiXV1cxA_R-fdFRcZxXRe3hgbI89aQNnhV--jTOhiIn5akM0SC1Pb2OHawgmuddnFuREUScTzt4ahfyqui4ZtQOUuNa2zo73UFfJkONCRwpnlJNUxygGKxjJKAloGkQGO4spM8xsW-iBDx2Yk4JpN3LnjvTwDOaCZdl_6wlsZG4we5VRd2AN2MgaKObALuksqLkr5p3OTJYACbdciErfKoLAc-yq3HfBv_cwvOBWK",
         userID: 87,
         languageID: 1,
         companyID: 1,

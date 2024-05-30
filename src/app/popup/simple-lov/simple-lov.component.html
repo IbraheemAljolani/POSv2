@@ -5,8 +5,8 @@
         <h4 class="modal-title">{{data.title}}</h4>
     </div>
     <div class="modal-body">
-        <div *ngIf="data.title != 'POS'">
-            <label for="searchID" style="margin-left: 5px;">ID</label>
+        <div *ngIf="data.title != 'POS' && !data.title.includes('Qty')">
+            <label for=" searchID" style="margin-left: 5px;">ID</label>
             <input style="width: 25%; margin-bottom: 10px; margin-left: 5px;" type="number" class="form-control"
                 placeholder="SearchID" [(ngModel)]="searchID" (ngModelChange)="onSearchChange($event)" />
         </div>
@@ -14,7 +14,7 @@
             <div class="row mx-height-470">
                 <div style="padding: 0 20px;">
                     <div class="row">
-                        <div class="col-xs-12" style="overflow: scroll; height: 470px">
+                        <div class="col-xs-12" style="overflow-y: scroll; height: 470px">
                             <!--Grid View-->
                             <table class="table table-bordered table-condensed table-striped table-hover">
                                 <thead>
@@ -65,7 +65,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-sm-12 m-t-15 text-right">
+                        <div class="col-sm-12 m-t-15 m-b-15 text-right">
                             <button class="btn btn-primary width-80" *ngIf="data.isMultiCheck">
                                 Ok
                             </button>

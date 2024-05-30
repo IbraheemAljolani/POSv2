@@ -5,11 +5,11 @@
         <div class="col-sm-11" style="margin-top:-2px;">
 
             <!-- POS dropdown-menu-->
-            <div class="parameter-context m-t-5">
+            <div class="parameter-context ">
 
                 <div>POS</div>
                 <div class="btn-trans" (click)="openPOSDialog()">
-                    <img src="../assets/2084-512.webp" />
+                    <img src="assets/2084-512.webp" />
                     <div>
                         {{ userInfo?.SalesDivision?.DivisionPOSDescription ?
                         userInfo.SalesDivision.DivisionPOSDescription : '---' }}
@@ -19,13 +19,13 @@
             </div>
 
             <!-- Customers dropdown-menu-->
-            <div class="parameter-context m-l-20 m-t-5">
+            <div class="parameter-context m-l-20">
 
                 <div>Customer</div>
                 <div class="btn-trans" title="{{ userInfo?.DefaultCustomer?.CustID ? userInfo?.DefaultCustomer?.CustID : '---' }} - {{
                         userInfo?.DefaultCustomer?.CustomerDescription ? userInfo?.DefaultCustomer?.CustomerDescription :
                         '---'}}" (click)="openCustomerDialog()">
-                    <img src="../assets/customer.svg" />
+                    <img src="assets/customer.svg" />
                     <div>
                         {{ userInfo?.DefaultCustomer?.CustID ? userInfo.DefaultCustomer.CustID : '---' }} - {{
                         userInfo?.DefaultCustomer?.CustomerDescription ? userInfo.DefaultCustomer.CustomerDescription :
@@ -36,11 +36,11 @@
             </div>
 
             <!-- tables dropdown-menu-->
-            <div class="parameter-context m-t-5 m-l-20" clickOutside (clickOutside)="clickedOutsideTable()">
+            <div class="parameter-context m-l-20" clickOutside (clickOutside)="clickedOutsideTable()">
                 <div class="dropdown" style="position:relative">
                     <div>Table</div>
                     <div class="dropdown-toggle btn-trans" (click)="toggleDropdownVisible()" title="{{selectedTable}}">
-                        <img src="../assets/branchtable32.png" />
+                        <img src="assets/branchtable32.png" />
                         <div>{{selectedTable}}</div>
                         <i class="fa fa-caret-down"></i>
                     </div>
@@ -56,17 +56,17 @@
             </div>
 
             <!-- salesmen dropdown-menu-->
-            <div class="parameter-context m-l-20 m-t-5" (click)="selectSalesMan()">
+            <div class="parameter-context m-l-20" (click)="selectSalesMan()">
 
                 <div>Sales Man</div>
                 <div class="btn-trans" [title]="salesManName ? salesManID + ' - ' + salesManName : ''">
                     <ng-container *ngIf="salesManName; else noSalesMan">
-                        <img src="../assets/anonymous.png" />
+                        <img src="assets/anonymous.png" />
                         <div>{{salesManID}} - {{salesManName}}</div>
                     </ng-container>
 
                     <ng-template #noSalesMan>
-                        <img src="../assets/salesman32.png" />
+                        <img src="assets/salesman32.png" />
                         <div>...</div>
                         <i class="fa fa-search border-left"></i>
                     </ng-template>
@@ -75,7 +75,7 @@
             </div>
 
             <!-- deliveryDate datepicker-->
-            <div class="parameter-context m-l-20">
+            <div class="parameter-context m-l-20 ">
 
                 <div>Delivery Date</div>
                 <div class="btn-trans" (click)="deliveryDateDatepicker.open()">
@@ -139,7 +139,8 @@
             <!-- fullscreen button -->
             <span id="fullscreen" class="btn-header transparent">
                 <span>
-                    <a href="javascript:void(0);" data-action="launchFullscreen" title="Full Screen">
+                    <a href="javascript:void(0);" data-action="launchFullscreen" (click)="toggleFullscreen()"
+                        title="Full Screen">
                         <i class="fa fa-arrows-alt"></i>
                     </a>
                 </span>
@@ -148,7 +149,8 @@
             <span class="header-profile hidden-xs">
                 <a href="javascript:void(0);" id="show-shortcut" class="dropdown-toggle" data-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
-                    <img src="../assets/anonymous.png" alt="me" />
+                    <img [src]="userInfo.Employee?.Image ? 'data:image/jpeg;base64,' + userInfo.Employee.Image : 'assets/anonymous.png'"
+                        (error)="userInfo.Employee.Image = 'assets/anonymous.png'" alt="me" />
                 </a>
             </span>
 
@@ -315,7 +317,7 @@
 
                                             <div *ngFor="let product of selectedInvoiceProducts">
                                                 <div class="s-item-list m-t-15" *ngIf="selectedInvoice">
-                                                    <div class="p-5-10" (click)="openDetails(product)">
+                                                    <div class="p-5-10">
                                                         <strong>{{ product.Description }}</strong>
 
                                                         <div class="s-price-details">
@@ -363,8 +365,9 @@
                                                             </a>
 
 
-                                                            <a role="button" NgClass="pointer" class="pointer "
-                                                                title="Show more" aria-label="Show more">
+                                                            <a role="button" NgClass="pointer" class="pointer"
+                                                                (click)="openDetails(product)" title="Show more"
+                                                                aria-label="Show more">
                                                                 <i class="fa fa-arrows-alt txt-color-green"
                                                                     aria-hidden="true"></i>
                                                             </a>
@@ -479,7 +482,7 @@
                                                 </div>
                                                 <div class="table-responsive custom-scroll full-flex">
                                                     <div class="s-item-list" *ngFor="let item of promosList">
-                                                        <div class="p-5-10" (click)="expandArea(item)">
+                                                        <div class="p-5-10">
                                                             <label>
                                                                 <input type="checkbox" class="checkbox style-0"
                                                                     [(ngModel)]="item.SelectFlag">
@@ -499,7 +502,7 @@
 
                                                             <div class="item-controls">
                                                                 <a role="button" class="pointer" title="Show more"
-                                                                    aria-label="Show more">
+                                                                    (click)="expandArea(item)" aria-label="Show more">
                                                                     <i class="fa fa-arrows-alt txt-color-green"></i>
                                                                 </a>
                                                             </div>
@@ -556,7 +559,8 @@
                                                                 <label role="button"
                                                                     (click)="collectMethodDetails(methods.MethodTypeID, methods.Description, methods)">
                                                                     <img alt="MethodType"
-                                                                        [src]="'data:image/jpeg;base64,' + methods.Image ? 'data:image/jpeg;base64,' + methods.Image : '../assets/customer.svg'" />
+                                                                        [src]="'data:image/jpeg;base64,' + methods.Image ? 'data:image/jpeg;base64,' + methods.Image : 'assets/customer.svg'"
+                                                                        (error)="methods.Image = 'assets/default.webp'" />
                                                                     <br />
                                                                     {{methods.Description}}
                                                                 </label>
@@ -681,8 +685,6 @@
                                                         <div class="col-sm-6 m-t-5"
                                                             *ngIf="filterRecallSearch.includes('date')">
                                                             <div class="input-group input-group-sm">
-                                                                <span class="input-group-addon">
-                                                                </span>
                                                                 <input type="text" style="cursor: not-allowed;" readonly
                                                                     [matDatepicker]="myDatepicker"
                                                                     placeholder="Search by Date"
@@ -899,8 +901,9 @@
                                         <button class="btn m-7 prod-desc-class"
                                             [ngClass]="{'btn-danger-light': categorie.CategoryID == selectedCategory}"
                                             (click)="getProducts(categorie.CategoryID)" style="width: 100%;">
-                                            <img class="img-size" [alt]="categorie.Description"
-                                                [src]="'data:image/jpeg;base64,' + categorie.Image" />
+                                            <img class="img-size" [alt]="categorie?.Description"
+                                                [src]="categorie?.Image ? 'data:image/jpeg;base64,' + categorie.Image : 'assets/default.webp'"
+                                                (error)="categorie.Image = 'assets/default.webp'" />
                                             {{ getDescription(categorie, 'DescriptionEn', 'DescriptionAr') }}
 
                                         </button>
@@ -915,8 +918,9 @@
                                                 <span class="prod-price">{{product.SalesPrice}} /
                                                     {{product.UOMDescription}}</span>
                                                 <div (click)="addItemOrGroup(product)" class="prod-image">
-                                                    <img [src]="product.Image" style="object-fit: cover;" alt="product"
-                                                        width="100%" height="100%" />
+                                                    <img [src]="product.Image" style=" object-fit: cover;" alt="product"
+                                                        width="100%" height="100%"
+                                                        (error)="product.Image = 'assets/default.webp'" />
                                                 </div>
                                                 <div style="display: flex;align-items: center;justify-content: center;">
                                                     <div (click)="addItemOrGroup(product)"
