@@ -12,12 +12,11 @@ export class SalesInvoiceService {
         // Comment for testing purpose only
         // const recordDetailsJSON = (window as any).recordDetails;
         // if (recordDetailsJSON) {
-        //     const recordDetails = JSON.parse(recordDetailsJSON);
         //     this.userInfo = {
-        //         baseUrl: recordDetails.baseUrl,
-        //         token: recordDetails.c,
-        //         languageID: recordDetails.languageId,
-        //         companyID: recordDetails.companyId,
+        //         baseUrl: recordDetailsJSON.baseUrl,
+        //         token: recordDetailsJSON.c,
+        //         languageID: recordDetailsJSON.languageId,
+        //         companyID: recordDetailsJSON.companyId,
         //         userID: 0
         //     };
         // }
@@ -26,7 +25,7 @@ export class SalesInvoiceService {
     // Test data for userInfo object
     public userInfo: { baseUrl: string; token: string; userID: number; languageID: number, companyID: number } = {
         baseUrl: "https://proxypos.trio365.com",
-        token: "yJzcmD3XUwwIkZeuixrehSfe1AeCYmynT4vBx6ukEEvGo9zKA6PbzeRhf9ORLMHm-svVAU3oHeUyp56Fl-_G0bZqiXV1cxA_R-fdFRcZxXRe3hgbI89aQNnhV--jTOhiIn5akM0SC1Pb2OHawgmuddnFuREUScTzt4ahfyqui4ZtQOUuNa2zo73UFfJkONCRwpnlJNUxygGKxjJKAloGkQGO4spM8xsW-iBDx2Yk4JpN3LnjvTwDOaCZdl_6wlsZG4we5VRd2AN2MgaKObALuksqLkr5p3OTJYACbdciErfKoLAc-yq3HfBv_cwvOBWK",
+        token: "1g9PAQq6llqGYSXTtMQmyi9Yr_T-RRaGpXL76iqqH8-nsEp0Chid_jW6h0Rk14jhSKTxkVTCiJDOV-rGwjbXGA0okOxqHhSj2yJ9HODvuRajeSQKhdEWjUTU1TM-n9Vbqrurikkqnj8rKzNqHivRL__pp4s5CiCZL0bQAPSuroQsjK8TCUt-VL3jRtnIrdYL8o9WmYmhakw11bGLnqWPu6ab43XU-1xJOsQgOzsSYN_E6Bn1GJF3HdKntb84ShjImP8uJ-PnvzgrnH62X4v--vL3rVFJ0VSFkS1v_NWwES502jbDf56IWKloU9ROHnz18A0u5c1tvPBwUWTkLjrSNA",
         userID: 87,
         languageID: 1,
         companyID: 1,
@@ -76,7 +75,7 @@ export class SalesInvoiceService {
             .set('Paging', '')
             .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_GetUserPOS`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_GetUserPOS`;
 
         return this.http.post(url, dataUserPOS);
     }
@@ -98,7 +97,7 @@ export class SalesInvoiceService {
             .set('Paging', '')
             .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_GetCustomers`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_GetCustomers`;
 
         return this.http.post(url, dataCustomers);
     }
@@ -119,7 +118,7 @@ export class SalesInvoiceService {
             .set('Paging', '')
             .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_GetBranchTables`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_GetBranchTables`;
 
         return this.http.post(url, dataBranchTables);
     }
@@ -138,7 +137,7 @@ export class SalesInvoiceService {
             .set('Paging', '')
             .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_GetCategories`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_GetCategories`;
 
         return this.http.post(url, dataCategories);
     }
@@ -157,7 +156,7 @@ export class SalesInvoiceService {
             .set('Paging', '')
             .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_GetProducts`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_GetProducts`;
 
         return this.http.post(url, dataProducts);
     }
@@ -179,7 +178,7 @@ export class SalesInvoiceService {
             .set('Paging', '')
             .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_GetRetailInvoices`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_GetRetailInvoices`;
 
         return this.http.post(url, dataRetailInvoices);
     }
@@ -198,7 +197,7 @@ export class SalesInvoiceService {
             .set('Paging', '')
             .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_GetPromotions`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_GetPromotions`;
 
         return this.http.post(url, dataPromotions);
     }
@@ -213,7 +212,7 @@ export class SalesInvoiceService {
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
             .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_GetReceiptMethods`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_GetReceiptMethods`;
 
         return this.http.post(url, dataReceiptMethods);
     }
@@ -228,7 +227,7 @@ export class SalesInvoiceService {
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
             .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_GetLookups`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_GetLookups`;
 
         return this.http.post(url, dataLookups);
     }
@@ -250,7 +249,7 @@ export class SalesInvoiceService {
             .set('Paging', '')
             .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_GetProductsStock`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_GetProductsStock`;
 
         return this.http.post(url, dataProductsStock);
     }
@@ -331,14 +330,14 @@ export class SalesInvoiceService {
             CashBookID: data.CashBookID,
             CreatedDate: data.CreatedDate,
         };
-        
+
         const dataRetailInvoice_Create = new HttpParams()
             .set('CompanyID', this.userInfo.companyID?.toString() || '')
             .set('UserID', this.userInfo.userID?.toString() || '')
             .set('DataString', JSON.stringify(dataString))
             .set('LanguageID', this.userInfo.languageID?.toString() || '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_RetailInvoice_Create`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_RetailInvoice_Create`;
 
         return this.http.post(url, dataRetailInvoice_Create);
     }
@@ -354,7 +353,7 @@ export class SalesInvoiceService {
             .set('RetailInvoiceID', retailInvoiceID?.toString() || '')
             .set('LanguageID', this.userInfo.languageID?.toString() || '');
 
-        const url = `${this.userInfo.baseUrl}/api/ext/POS_RetailInvoice_Void`;
+        const url = `${this.userInfo.baseUrl}/api/sec/POS_RetailInvoice_Void`;
 
         return this.http.post(url, dataRetailInvoice_Create);
     }

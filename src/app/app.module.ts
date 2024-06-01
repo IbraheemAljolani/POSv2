@@ -16,33 +16,35 @@ import { FormsModule } from '@angular/forms';
 import { ClickOutsideDirective } from './directive/click-outside.directive';
 import { CashComponent } from './Payment/cash/cash.component';
 import { CardComponent } from './Payment/card/card.component';
+import { QRCodeModule } from 'angularx-qrcode';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    CustomerSelectComponent,
-    SalesInvoiceComponent,
-    SimpleLOVComponent,
-    ClickOutsideDirective,
-    CashComponent,
-    CardComponent,
-  ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    NgxMaterialTimepickerModule,
-    MatAutocompleteModule,
-    MatDialogModule,
-    HttpClientModule,
-    FormsModule
-  ],
-  providers: [
-    {
-      provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true
-    },
-  ],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        CustomerSelectComponent,
+        SalesInvoiceComponent,
+        SimpleLOVComponent,
+        ClickOutsideDirective,
+        CashComponent,
+        CardComponent,
+    ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        NgxMaterialTimepickerModule,
+        MatAutocompleteModule,
+        MatDialogModule,
+        HttpClientModule,
+        FormsModule,
+        QRCodeModule
+    ],
+    providers: [
+        {
+            provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true
+        },
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }

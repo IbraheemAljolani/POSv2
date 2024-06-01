@@ -158,6 +158,7 @@
         <!-- end pulled right: nav area -->
 
     </header>
+
     <!-- END HEADER -->
     <!-- #NAVIGATION -->
     <!-- END NAVIGATION -->
@@ -256,7 +257,7 @@
                                 </h3>
 
                                 <div class="trio-window-ctrls" *ngIf="selectedInvoice">
-                                    <!-- <a class="button-icon pointer" title="Save (Ctrl + s)" aria-label="Save">
+                                    <!-- <a class="button-icon pointer" aria-label="Save">
                                         <i class="fa fa-save invoice-icon" aria-hidden="true"></i>
                                     </a> -->
                                     <a class="button-icon pointer" title="Print" aria-label="Print"
@@ -268,8 +269,7 @@
                                         <i class="fa fa-window-close-o txt-color-dangerLight invoice-icon"
                                             aria-hidden="true"></i>
                                     </a>
-                                    <a class="button-icon pointer" title="New (Ctrl + i)" (click)="addNewInvoice()"
-                                        aria-label="New">
+                                    <a class="button-icon pointer" (click)="addNewInvoice()" aria-label="New">
                                         <i class="fa fa-plus invoice-icon" aria-hidden="true"></i>
                                     </a>
                                     <!-- <a class="button-icon pointer" title="Refresh" aria-label="Refresh">
@@ -323,27 +323,31 @@
                                                         <div class="s-price-details">
                                                             <span class="s-price-details">
 
-                                                                <button class="btn-flat" data-toggle="dropdown"
+                                                                <div class="btn-flat" data-toggle="dropdown"
+                                                                    [style.pointer-events]="selectedInvoice.SalesInvoiceStatusID === 'Printed' ? 'none' : 'auto' && selectedInvoice.SalesInvoiceStatusID === 'Rejected' ? 'none' : 'auto'"
                                                                     (click)="increaseQty(product)">
                                                                     <i class="fa fa-plus txt-color-green"></i>
-                                                                </button>
+                                                                </div>
 
-                                                                <button class="btn-flat" (click)="decreaseQty(product)">
+                                                                <div class="btn-flat"
+                                                                    [style.pointer-events]="selectedInvoice.SalesInvoiceStatusID === 'Printed' ? 'none' : 'auto' && selectedInvoice.SalesInvoiceStatusID === 'Rejected' ? 'none' : 'auto'"
+                                                                    (click)="decreaseQty(product)">
 
                                                                     <i class="fa fa-minus txt-color-dangerLight"></i>
-                                                                </button>
+                                                                </div>
 
                                                                 <input
                                                                     style='font-weight:bold; border-radius: 30px 0 0 30px;'
+                                                                    [style.pointer-events]="selectedInvoice.SalesInvoiceStatusID === 'Printed' ? 'none' : 'auto' && selectedInvoice.SalesInvoiceStatusID === 'Rejected' ? 'none' : 'auto'"
                                                                     class="input-left-rounded" [ngModel]="product.Qty"
                                                                     (keyup)="adjustInputWidth($event, product)"
                                                                     type="number" />
 
-                                                                <button
-                                                                    class="btn btn-xs width-40 disabled btn-default-gray"
-                                                                    disabled>
+                                                                <div class="btn btn-xs width-40 disabled btn-default-gray"
+                                                                    [style.pointer-events]="isDisabled ? 'none' : 'auto'"
+                                                                    style="color: #000;">
                                                                     {{product.UOMDescription}}
-                                                                </button>
+                                                                </div>
 
                                                             </span>
 
@@ -774,9 +778,8 @@
                                         <!--this tab will be shown  when no invoice-->
                                         <div *ngIf="!selectedInvoice && activeInvoiceTab !== 'recall'">
                                             <div class="text-center" style="position: relative; bottom: 300px;">
-                                                <a role="button" class="btn btn-lg m-t-50" title="Ctrl + i">
-                                                    <i class="fa fa-plus m-r-5"></i>
-                                                    New Invoice
+                                                <a class="btn-lg m-t-50" style="text-decoration: none; ">
+                                                    Select Your First Product to Invoice
                                                 </a>
                                             </div>
                                         </div>
@@ -788,7 +791,7 @@
                                             <div class="col-sm-3" style="z-index:2">
                                                 <button type="button" (click)="goTab('cash')"
                                                     *ngIf="activeInvoiceTab === 'invoice' && selectedInvoice.SalesInvoiceStatusID != 'Printed'"
-                                                    class="btn btn-success m-t-10 m-l-5 pull-left" title="Ctrl + s">
+                                                    class="btn btn-success m-t-10 m-l-5 pull-left">
                                                     <i class="fa fa-chevron-left m-r-5" aria-hidden="true"></i>
                                                     Check Out
                                                 </button>
@@ -807,7 +810,7 @@
 
                                                 <button (click)="postCash()" type="button"
                                                     *ngIf="activeInvoiceTab === 'cash'"
-                                                    class="btn btn-success m-t-10 m-l-5 pull-left" title="Ctrl + s">
+                                                    class="btn btn-success m-t-10 m-l-5 pull-left">
                                                     <i class="fa fa-money m-r-5" aria-hidden="true"></i>
                                                     Done
                                                 </button>
@@ -890,7 +893,7 @@
                                             *ngIf="!searchProduct"></i>
 
                                         <input type="text" placeholder="Search" [(ngModel)]="searchProduct"
-                                            (keyup.enter)="searchProducts(searchProduct)" title="To focus: (Ctrl + f)">
+                                            (keyup.enter)="searchProducts(searchProduct)">
                                     </label>
                                 </div>
                             </header>
@@ -898,15 +901,15 @@
                             <div class="column-flex full-flex" style="max-height: calc(100% - 30px)">
                                 <div class="row widget-body-toolbar p-t-10">
                                     <div class="col-lg-3 row-category-list" *ngFor="let categorie of categories">
-                                        <button class="btn m-7 prod-desc-class"
-                                            [ngClass]="{'btn-danger-light': categorie.CategoryID == selectedCategory}"
+                                        <div class="btn m-7 prod-desc-class"
+                                            [ngClass]="{'btn-danger-light': categorie.CategoryID == selectedCategory, 'background-color': categorie.CategoryID != selectedCategory}"
                                             (click)="getProducts(categorie.CategoryID)" style="width: 100%;">
-                                            <img class="img-size" [alt]="categorie?.Description"
+                                            <img class="img-size" [alt]="categorie?.Description" width="25px"
+                                                height="25px"
                                                 [src]="categorie?.Image ? 'data:image/jpeg;base64,' + categorie.Image : 'assets/default.webp'"
                                                 (error)="categorie.Image = 'assets/default.webp'" />
                                             {{ getDescription(categorie, 'DescriptionEn', 'DescriptionAr') }}
-
-                                        </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -951,9 +954,96 @@
             <!-- END #MAIN CONTENT -->
             <div style="display: none;" id="agrrement-section" class="trio-window trio-window-color-blueLight">
                 <header>
-                    <h1>
-                        set agreement here ...
-                    </h1>
+                    <h1>{{userInfo.CompanyInfo?.CompanyDescription}}</h1>
+                    <div>
+                        <div class="center-text">{{userInfo.SalesDivision?.DivisionDescription}},
+                            {{userInfo.SalesDivision?.SiteDescription}}</div>
+                        <div class="center-text">{{userInfo.SalesDivision?.StoreDescription}}</div>
+                        <table class="info-table">
+                            <tr>
+                                <td><strong>Phone:</strong></td>
+                                <td>{{selectedInvoice?.Mobile}}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Invoice #:</strong></td>
+                                <td>{{selectedInvoice?.ID}}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Date:</strong></td>
+                                <td>{{selectedInvoice?.CreatedDate | date:'shortDate'}}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Customer Name:</strong></td>
+                                <td>{{selectedInvoice?.CustDescription}}</td>
+                            </tr>
+                        </table>
+                        <div class="cashier-info">
+                            <p><strong>Cashier:</strong> {{selectedInvoice?.CashierDescription}}</p>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Amount</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let Products of selectedInvoiceProducts">
+                                    <td>{{Products.ID}}</td>
+                                    <td>{{Products.Description}}</td>
+                                    <td>{{Products.Qty}}</td>
+                                    <td>{{Products.SalesPrice}}</td>
+                                    <td>{{Products.NetTotalAfterTax}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5">
+                                        <hr>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Total Amount</td>
+                                    <td>{{selectedInvoice?.TotalAmount}}</td>
+                                    <td>{{selectedInvoice?.CurrencyID}}</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Discount</td>
+                                    <td>{{selectedInvoice?.DiscountTotal}}</td>
+                                    <td>{{selectedInvoice?.CurrencyID}}</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Vat</td>
+                                    <td>{{selectedInvoice?.TotalTax}}</td>
+                                    <td>{{selectedInvoice?.CurrencyID}}</td>
+                                </tr>
+                                <tr style="font-weight: bold;">
+                                    <td></td>
+                                    <td></td>
+                                    <td>Net Total</td>
+                                    <td>{{selectedInvoice?.NetTotalAfterTax}}</td>
+                                    <td>{{selectedInvoice?.CurrencyID}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="qrcodeImage">
+                            <qrcode [qrdata]="'https://github.com/Cordobo/angularx-qrcode'" [allowEmptyString]="true"
+                                [ariaLabel]="'QR Code image with the following content...'" [cssClass]="'center'"
+                                [colorDark]="'#000000ff'" [colorLight]="'#ffffffff'" [elementType]="'canvas'"
+                                [errorCorrectionLevel]="'M'" [imageSrc]="'./assets/angular-logo.png'" [imageHeight]="75"
+                                [imageWidth]="75" [margin]="4" [scale]="1" [title]="'A custom title attribute'"
+                                [width]="100"></qrcode>
+                        </div>
+                        <div class="center-text m-t-60">Thanks for your visit</div>
+                    </div>
                 </header>
             </div>
         </div>

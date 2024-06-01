@@ -56,3 +56,37 @@
 .m-l-20 {
     margin-left: 20px;
 }
+
+.background-color {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+}
+
+.btn-flat {
+    border: 1px solid #ddd;
+    margin: auto 5px;
+    cursor: pointer;
+    width: 23px;
+    height: 23px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.s-price-details {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.qrcodeImage {
+    display: flex;
+    flex: 1;
+}
+
+.center {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+}

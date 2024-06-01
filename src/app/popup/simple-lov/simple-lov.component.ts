@@ -87,7 +87,7 @@ export class SimpleLOVComponent {
         this.dialogRef.close(this.selectedItems);
     }
 
-    _loadCustomers(id: number) {
+    _loadCustomers(id: number, text?: string) {
         this.salesInvoiceService.getCustomers().subscribe((result: any) => {
             this.lookupRowFields = ['ID', 'DescriptionEn', 'Code', 'Tel'];
 
@@ -103,7 +103,9 @@ export class SimpleLOVComponent {
             if (results.length == 0) {
                 results = result;
             }
-            
+
+            results = results.filter((item: any) => item.DescriptionEn.toLowerCase().includes((text ?? '').toLowerCase()));
+
             for (let i = 0; i < result.length; i++) {
                 this.lookupRows.push([results[i].CustID, results[i].DescriptionEn, results[i].Code, results[i].Tel]);
             }
@@ -116,7 +118,7 @@ export class SimpleLOVComponent {
         });
     }
 
-    _loadSalesMen(id: number) {
+    _loadSalesMen(id?: number, text?: string) {
         this.salesInvoiceService.getLookups().subscribe((result: any) => {
             this.lookupRowFields = ['ID', 'Description', 'Sales Division'];
             let salesMen = result.SalesMans;
@@ -133,9 +135,12 @@ export class SimpleLOVComponent {
                 salesMen = result.SalesMans;
             }
 
+            salesMen = salesMen.filter((item: any) => item.Description.toLowerCase().includes((text ?? '').toLowerCase()));
+
             for (let i = 0; i < salesMen.length; i++) {
                 this.lookupRows.push([salesMen[i].ID, salesMen[i].Description, salesMen[i].SalesDivisionID]);
             }
+
         }, (error) => {
             Swal.fire({
                 icon: "error",
@@ -185,12 +190,12 @@ export class SimpleLOVComponent {
         });
     }
 
-    onSearchChange(value: any) {
+    onSearchChange(id: number, text: string) {
         this.lookupRows = [];
         if (this.data.dataType === 'salesMen')
-            this._loadSalesMen(value);
+            this._loadSalesMen(id, text);
         else if (this.data.dataType === 'customers')
-            this._loadCustomers(value);
+            this._loadCustomers(id, text);
     }
 
 
