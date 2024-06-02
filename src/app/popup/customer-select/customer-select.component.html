@@ -3,7 +3,8 @@
         <button type="button" class="close" aria-label="Close" (click)="onCancel()">
             <span aria-hidden="true">&times;</span>
         </button>
-        <h4 class="modal-title">{{data.title? data.title: '---'}}</h4>
+        <h4 class="modal-title">{{(sysLabels['Set Customer']) ? sysLabels['Set Customer'].Caption : 'Set Customer'}}
+        </h4>
     </div>
     <div class="modal-body">
         <div class="row">
@@ -48,7 +49,8 @@
                 <fieldset style="border:1px dashed #eee; padding: 10px;">
 
                     <legend class="legend1">
-                        Selected Customer ID: {{ customerID }}
+                        {{(sysLabels['Selected Customer ID']) ? sysLabels['Selected Customer ID'].Caption : 'Selected
+                        Customer ID'}} {{ customerID }}
                         <!-- <a href="javascript:void(0)" title="Open record DescriptionEn value"
                             aria-label="Open record DescriptionEn value">
                             <i class="fa fa-share" aria-hidden="true"></i>
@@ -62,7 +64,8 @@
                             </td>
                             <td>
                                 <strong class="m-r-5">
-                                    Loyalty Card
+                                    {{(sysLabels['Loyalty Card']) ? sysLabels['Loyalty Card'].Caption :
+                                    'Loyalty Card'}}
                                 </strong>
                             </td>
                             <td>
@@ -76,7 +79,8 @@
                             <td></td>
                             <td>
                                 <strong class="m-r-5">
-                                    Total Points
+                                    {{(sysLabels['Total Points']) ? sysLabels['Total Points'].Caption :
+                                    'Total Points'}}
                                 </strong>
                             </td>
                             <td>
@@ -88,7 +92,8 @@
 
                             <td>
                                 <strong class="m-l-20 m-r-5">
-                                    Used Points
+                                    {{(sysLabels['Used Points']) ? sysLabels['Used Points'].Caption :
+                                    'Used Points'}}
                                 </strong>
                             </td>
                             <td>
@@ -102,7 +107,8 @@
                             <td></td>
                             <td>
                                 <strong class="m-r-5">
-                                    Loyalty Point
+                                    {{(sysLabels['Loyalty Point']) ? sysLabels['Loyalty Point'].Caption : 'Loyalty
+                                    Point'}}
                                 </strong>
                             </td>
                             <td>
@@ -114,7 +120,8 @@
 
                             <td>
                                 <strong class="m-l-20 m-r-5">
-                                    Loyalty Value
+                                    {{(sysLabels['Loyalty Value']) ? sysLabels['Loyalty Value'].Caption
+                                    : 'Loyalty Value'}}
                                 </strong>
                             </td>
                             <td>
@@ -128,23 +135,28 @@
                     </table>
 
 
-                    <strong>DescriptionEn</strong>
+                    <strong>{{(sysLabels['DescriptionEn']) ? sysLabels['DescriptionEn'].Caption :
+                        'DescriptionEn'}}</strong>
                     <input type="text" class="form-control m-b-10" [(ngModel)]="customerDescription"
-                        aria-label="DescriptionEn" />
+                        attr.aria-label="{{(sysLabels['DescriptionEn']) ? sysLabels['DescriptionEn'].Caption : 'DescriptionEn'}}" />
 
-                    <strong>DescriptionAr</strong>
+                    <strong>{{(sysLabels['DescriptionAr']) ? sysLabels['DescriptionAr'].Caption :
+                        'DescriptionAr'}}</strong>
                     <input type="text" class="form-control m-b-10" [(ngModel)]="customerDescription"
-                        aria-label="DescriptionAr" />
+                        attr.aria-label="{{(sysLabels['DescriptionAr']) ? sysLabels['DescriptionAr'].Caption : 'DescriptionAr'}}" />
 
                     <table class="table m-b-10">
                         <tr>
                             <td class="p-r-10">
-                                <strong>Tel</strong>
-                                <input type="text" class="form-control" aria-label="Tel" />
+                                <strong>{{(sysLabels['Tel']) ? sysLabels['Tel'].Caption :
+                                    'Tel'}}</strong>
+                                <input type="text" class="form-control"
+                                    attr.aria-label="{{(sysLabels['Tel']) ? sysLabels['Tel'].Caption : 'Tel'}}" />
                             </td>
                             <td>
-                                <strong>Email</strong>
-                                <input type="text" class="form-control" aria-label="Email" />
+                                <strong>{{(sysLabels['Email']) ? sysLabels['Email'].Caption : 'Email'}}</strong>
+                                <input type="text" class="form-control"
+                                    attr.aria-label="{{(sysLabels['Email']) ? sysLabels['Email'].Caption : 'Email'}}" />
                             </td>
                         </tr>
                     </table>
@@ -154,7 +166,8 @@
                             <td>
                                 <!-- deliveryDate datepicker-->
                                 <div>
-                                    Delivery Date
+                                    {{(sysLabels['Delivery Date'])?sysLabels['Delivery
+                                    Date'].Caption:'Delivery Date'}}
                                 </div>
                                 <div class="btn-trans" (click)="deliveryDateDatepicker.open()">
                                     <i class="fa fa-calendar-plus-o"></i>
@@ -166,7 +179,8 @@
                             <td>
                                 <!-- deliveryDate Timeepicker-->
                                 <div>
-                                    Delivery Time
+                                    {{(sysLabels['Delivery Time'])?sysLabels['Delivery
+                                    Time'].Caption:'Delivery Time'}}
                                 </div>
                                 <div class="btn-trans">
                                     <i class="fa fa-clock-o"></i>
@@ -178,7 +192,8 @@
                             <td>
                                 <!--Cash on delivery-->
                                 <div>
-                                    Cash On Delivery
+                                    {{(sysLabels['Cash On Delivery'])?sysLabels['Cash On
+                                    Delivery'].Caption:'Cash On Delivery'}}
                                 </div>
                                 <div>
                                     <input type="checkbox" />
@@ -188,8 +203,12 @@
                     </table>
 
                     <div class="m-t-15 text-right">
-                        <button class="btn btn-default-gray width-80" (click)="onCancel()">Cancel</button>
-                        <button class="btn btn-primary width-80 m-l-15" (click)="onConfirmMultiChecked()">Ok</button>
+                        <button class="btn btn-default-gray width-80" (click)="onCancel()">{{(sysLabels['Cancel']) ?
+                            sysLabels['Cancel'].Caption :
+                            'Cancel'}}</button>
+                        <button class="btn btn-primary width-80 m-l-15"
+                            (click)="onConfirmMultiChecked()">{{(sysLabels['Ok']) ?
+                            sysLabels['Ok'].Caption : 'Ok'}}</button>
                     </div>
                 </fieldset>
             </div>

@@ -2,7 +2,8 @@
     <div class="modal-header" style="background-color:#fafafa">
         <button type="button" class="close" (click)="onCancel()" aria-label="Close"><span
                 aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">{{data.title}}</h4>
+        <h4 class="modal-title">{{(data.title)?(sysLabels[data.title]) ? sysLabels[data.title].Caption :
+            data.title: (sysLabels['Products']) ? sysLabels['Products'].Caption : 'Products'}}</h4>
     </div>
     <div class="modal-body">
         <div class="row" *ngIf="data.title != 'POS' && !data.title.includes('Qty')">
@@ -56,16 +57,19 @@
                     <div class="row" *ngIf="data.isMultiCheck">
                         <div class="col-xs-12 table-responsive m-t-15" style="max-height:170px;">
                             <div class="t365-fieldset">
-                                <span class="legand">Selected:</span>
+                                <span class="legand">{{(sysLabels['Selected']) ?
+                                    sysLabels['Selected'].Caption : 'Selected'}}:</span>
                                 <span class="t365-tag">
-                                    DescriptionEn
+                                    {{(sysLabels['Description']) ? sysLabels['Description'].Caption :
+                                    'Description'}}
                                     <a class="pointer" title="Remove" aria-label="Remove">
                                         <i class="fa fa-times-circle txt-color-dangerLight  m-l-5"
                                             aria-hidden="true"></i>
                                     </a>
                                 </span>
                                 <div class="no-data" style="margin:0">
-                                    No Selected Items
+                                    {{(sysLabels['No Selected Items']) ? sysLabels['No Selected
+                                    Items'].Caption : 'No Selected Items'}}
                                 </div>
                             </div>
                         </div>
@@ -74,10 +78,12 @@
                     <div class="row">
                         <div class="col-sm-12 m-t-15 m-b-15 text-right">
                             <button class="btn btn-primary width-80" *ngIf="data.isMultiCheck">
-                                Ok
+                                {{(sysLabels['Ok']) ?
+                                sysLabels['Ok'].Caption : 'Ok'}}
                             </button>
                             <button class="btn btn-default width-80 m-l-15" (click)="onCancel()">
-                                Cancel
+                                {{(sysLabels['Cancel']) ?
+                                sysLabels['Cancel'].Caption : 'Cancel'}}
                             </button>
                         </div>
                     </div>

@@ -1,6 +1,5 @@
 import { Component, Input, OnInit, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SalesInvoiceService } from 'src/app/services/sales-invoice.service';
 import Swal from 'sweetalert2';
 
@@ -38,7 +37,7 @@ export interface DrillDownDetails {
 })
 
 export class SimpleLOVComponent {
-    constructor(private _http: HttpClient, public dialogRef: MatDialogRef<any>,
+    constructor(public dialogRef: MatDialogRef<any>,
         @Inject(MAT_DIALOG_DATA) public data: SimpleLOVComponentData, private salesInvoiceService: SalesInvoiceService) { }
 
     searchID: number = 0;
@@ -52,11 +51,23 @@ export class SimpleLOVComponent {
 
     _baseUrl: string = this.salesInvoiceService.userInfo.baseUrl;
 
+    sysLabels: any = {};
+
+    currentLanguage = this.salesInvoiceService.userInfo.languageID;
+
     loadingStatus: string = 'Loading...';
     inprocessing: boolean = false;
 
     RecordsCount = 0;
     pagination = { PageSize: 1000, SelectedPageNumber: 1 };
+
+    Sys_Labels() {
+        this.salesInvoiceService.Sys_Labels(this.currentLanguage).subscribe((result: any) => {
+            for (let i = 0; i < result.length; i++) {
+                this.sysLabels[String(result[i].LabelID).trim()] = result[i];
+            }
+        });
+    }
 
     changePagination(args: any) {
         if (args && (this.pagination.PageSize != args.recordPerPage || this.pagination.SelectedPageNumber != args.pageNumber)) {
@@ -89,8 +100,12 @@ export class SimpleLOVComponent {
 
     _loadCustomers(id: number, text?: string) {
         this.salesInvoiceService.getCustomers().subscribe((result: any) => {
-            this.lookupRowFields = ['ID', 'DescriptionEn', 'Code', 'Tel'];
-
+            this.lookupRowFields = [
+                this.currentLanguage === 1 ? 'ID' : 'الرقم',
+                this.currentLanguage === 1 ? 'Description' : 'الاسم',
+                this.currentLanguage === 1 ? 'Code' : 'الكود',
+                this.currentLanguage === 1 ? 'Tel' : 'التليفون'
+            ];
             let matchedSalesMen = [];
             for (let i = 0; i < result.length; i++) {
                 if (result[i].CustID == id) {
@@ -120,7 +135,11 @@ export class SimpleLOVComponent {
 
     _loadSalesMen(id?: number, text?: string) {
         this.salesInvoiceService.getLookups().subscribe((result: any) => {
-            this.lookupRowFields = ['ID', 'Description', 'Sales Division'];
+            this.lookupRowFields = [
+                this.currentLanguage === 1 ? 'ID' : 'الرقم',
+                this.currentLanguage === 1 ? 'Description' : 'الاسم',
+                this.currentLanguage === 1 ? 'SalesDivisionID' : 'القسم'
+            ];
             let salesMen = result.SalesMans;
             let matchedSalesMen = [];
             for (let i = 0; i < salesMen.length; i++) {
@@ -152,9 +171,13 @@ export class SimpleLOVComponent {
 
     _loadPOS() {
         this.salesInvoiceService.getUserPOS().subscribe((result: any) => {
-            this.lookupRowFields = ['POSID', 'DescriptionEn', 'ID'];
+            this.lookupRowFields = [
+                this.currentLanguage === 1 ? 'ID' : 'الرقم',
+                this.currentLanguage === 1 ? 'Description' : 'الاسم',
+                this.currentLanguage === 1 ? 'POSID' : 'الموقع'
+            ];
             for (let i = 0; i < result.length; i++) {
-                this.lookupRows.push([result[i].PosID, result[i].POSDescription, result[i].ID]);
+                this.lookupRows.push([result[i].ID, result[i].POSDescription, result[i].PosID]);
             }
         }, (error) => {
             Swal.fire({
@@ -177,7 +200,11 @@ export class SimpleLOVComponent {
 
     _loadDrillDownData() {
         this.salesInvoiceService.getProductsStock(this.data.SalesDivisionPOSID, this.data.productItem.ProductID).subscribe((result: any) => {
-            this.lookupRowFields = ['Code', 'Unit Of Measurement', 'Available Qty'];
+            this.lookupRowFields = [
+                this.currentLanguage === 1 ? 'Code' : 'الكود',
+                this.currentLanguage === 1 ? 'UOM Description' : 'الوحدة',
+                this.currentLanguage === 1 ? 'Available Qty' : 'الكمية'
+            ];
             for (let i = 0; i < result.length; i++) {
                 this.lookupRows.push([result[i].Code, result[i].UOMDescription, result[i].DeviceAvailableQty]);
             }
@@ -213,6 +240,8 @@ export class SimpleLOVComponent {
     }
 
     ngOnInit() {
+        this.Sys_Labels();
+        console.log(this.currentLanguage);
         if (!this.data.idName)
             this.data.idName = "ID";
 

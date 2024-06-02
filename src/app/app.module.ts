@@ -7,7 +7,6 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { CustomerSelectComponent } from './popup/customer-select/customer-select.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { SalesInvoiceComponent } from './POS/sales-invoice/sales-invoice.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { SimpleLOVComponent } from './popup/simple-lov/simple-lov.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
@@ -22,7 +21,6 @@ import { QRCodeModule } from 'angularx-qrcode';
     declarations: [
         AppComponent,
         CustomerSelectComponent,
-        SalesInvoiceComponent,
         SimpleLOVComponent,
         ClickOutsideDirective,
         CashComponent,

@@ -25,9 +25,9 @@ export class SalesInvoiceService {
     // Test data for userInfo object
     public userInfo: { baseUrl: string; token: string; userID: number; languageID: number, companyID: number } = {
         baseUrl: "https://proxypos.trio365.com",
-        token: "1g9PAQq6llqGYSXTtMQmyi9Yr_T-RRaGpXL76iqqH8-nsEp0Chid_jW6h0Rk14jhSKTxkVTCiJDOV-rGwjbXGA0okOxqHhSj2yJ9HODvuRajeSQKhdEWjUTU1TM-n9Vbqrurikkqnj8rKzNqHivRL__pp4s5CiCZL0bQAPSuroQsjK8TCUt-VL3jRtnIrdYL8o9WmYmhakw11bGLnqWPu6ab43XU-1xJOsQgOzsSYN_E6Bn1GJF3HdKntb84ShjImP8uJ-PnvzgrnH62X4v--vL3rVFJ0VSFkS1v_NWwES502jbDf56IWKloU9ROHnz18A0u5c1tvPBwUWTkLjrSNA",
+        token: "UgSZMY1gUZQ40VnIs82Sa85yLjRkZaelRCR53IrRoKhCYbnQ3UqtwxxZAvo4vxWyAl5OSnl78JSWYLuz0E51xvviG1O3JBn5KVsjmX_Av9bvgfNz3MSVaqFtvudlsNf56wXls3tr6aBw4CxyCDGO0f6PsP-rQ8F6Ne3unPSxu0tj9ekt0NXx7GDymX8YswWsAii1N8U9kQZ6vdoyorb5xA51u9X4scvGnuil3jtSX6DzC290uZnIpdaMPguBb4kOcBs2iinb9j9iXJr6425CiHckA4-V33quazVWvNBDstqg865bubCAhF4n-xL-xplpDk1VE8kgnSeSfLStyyGa8Q",
         userID: 87,
-        languageID: 1,
+        languageID: 2,
         companyID: 1,
     }
 
@@ -40,6 +40,19 @@ export class SalesInvoiceService {
     //     userID: 0
     // };
 
+    Sys_Labels(currentLanguage: number): Observable<any> {
+        if (!this.userInfo) {
+            throw new Error('User info is not defined');
+        }
+
+        const dataUserInfo = new HttpParams()
+            .set('LanguageID', currentLanguage.toString() ?? '1');
+
+        const url = `${this.userInfo.baseUrl}/api/sec/Gen_Sys_Labels`;
+
+        return this.http.post(url, dataUserInfo);
+    }
+
     getUserInfo(): Observable<any> {
         if (!this.userInfo) {
             throw new Error('User info is not defined');
@@ -49,14 +62,9 @@ export class SalesInvoiceService {
             .set('UserID', this.userInfo.userID != null ? this.userInfo.userID.toString() : '')
             .set('LanguageID', this.userInfo.languageID != null ? this.userInfo.languageID.toString() : '');
 
-        const headers = new HttpHeaders({
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': this.userInfo.token,
-        });
-
         const url = `${this.userInfo.baseUrl}/api/sec/POS_UserInfo`;
 
-        return this.http.post(url, dataUserInfo, { headers });
+        return this.http.post(url, dataUserInfo);
     }
 
     getUserPOS(): Observable<any> {

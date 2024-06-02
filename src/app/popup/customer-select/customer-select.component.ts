@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SimpleLOVComponent } from '../simple-lov/simple-lov.component';
+import { SalesInvoiceService } from 'src/app/services/sales-invoice.service';
 
 @Component({
     selector: 'app-customer-select',
@@ -10,7 +11,7 @@ import { SimpleLOVComponent } from '../simple-lov/simple-lov.component';
 export class CustomerSelectComponent {
 
     constructor(public dialogRef: MatDialogRef<CustomerSelectComponent>, public dialog: MatDialog,
-        @Inject(MAT_DIALOG_DATA) public data: any
+        @Inject(MAT_DIALOG_DATA) public data: any, private salesInvoiceService: SalesInvoiceService
     ) { }
 
     parsedResult: any;
@@ -24,8 +25,12 @@ export class CustomerSelectComponent {
     result = sessionStorage.getItem('selectCustomer');
     selectedCustomer: any;
 
-    ngOnInit(): void {
+    sysLabels: any = {};
 
+    currentLanguage = this.salesInvoiceService.userInfo.languageID;
+
+    ngOnInit(): void {
+        this.Sys_Labels();
         if (this.result) {
             this.parsedResult = JSON.parse(this.result);
             this.customerID = this.parsedResult[0];
@@ -34,6 +39,14 @@ export class CustomerSelectComponent {
             this.customerID = this.data.DefaultCustomer.CustID ? this.data.DefaultCustomer.CustID : '---'
             this.customerDescription = this.data.DefaultCustomer.CustID ? this.data.DefaultCustomer.CustomerDescription : '---'
         }
+    }
+
+    Sys_Labels() {
+        this.salesInvoiceService.Sys_Labels(this.currentLanguage).subscribe((result: any) => {
+            for (let i = 0; i < result.length; i++) {
+                this.sysLabels[String(result[i].LabelID).trim()] = result[i];
+            }
+        });
     }
 
     openSearchDialog(): void {

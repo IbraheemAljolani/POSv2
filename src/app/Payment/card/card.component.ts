@@ -1,5 +1,6 @@
 import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { SalesInvoiceService } from 'src/app/services/sales-invoice.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -9,7 +10,7 @@ import Swal from 'sweetalert2';
 })
 export class CardComponent {
 
-  constructor(public dialogRef: MatDialogRef<any>, @Inject(MAT_DIALOG_DATA) public data: any) { }
+  constructor(public dialogRef: MatDialogRef<any>, @Inject(MAT_DIALOG_DATA) public data: any, private salesInvoiceService: SalesInvoiceService) { }
 
   amountCashnumber: string = '';
   cardNumber: string = '';
@@ -20,7 +21,21 @@ export class CardComponent {
 
   focusedElement: ElementRef | undefined;
 
+  sysLabels: any = {};
 
+  currentLanguage = this.salesInvoiceService.userInfo.languageID;
+
+  ngOnInit(): void {
+    this.Sys_Labels();
+  }
+
+  Sys_Labels() {
+    this.salesInvoiceService.Sys_Labels(this.currentLanguage).subscribe((result: any) => {
+      for (let i = 0; i < result.length; i++) {
+        this.sysLabels[String(result[i].LabelID).trim()] = result[i];
+      }
+    });
+  }
 
   numberOnly(event: { which: any; keyCode: any; }): boolean {
     const charCode = (event.which) ? event.which : event.keyCode;

@@ -54,9 +54,12 @@ export class AppComponent {
     elem: any;
     isFullscreen = false;
     isDisabled = true;
+    sysLabels: any = {};
+    currentLanguage = this.salesInvoiceService.userInfo.languageID;
 
     ngOnInit(): void {
         this.getUserInfo();
+        this.Sys_Labels();
 
         this.elem = document.documentElement;
 
@@ -86,8 +89,24 @@ export class AppComponent {
         }
     }
 
-    getDescription(item: any, enProp: string, arProp: string) {
-        return this.languageID === 1 ? item[enProp] : item[arProp];
+    Sys_Labels() {
+        this.salesInvoiceService.Sys_Labels(this.currentLanguage).subscribe((result: any) => {
+            for (let i = 0; i < result.length; i++) {
+                this.sysLabels[String(result[i].LabelID).trim()] = result[i];
+            }
+        });
+    }
+
+    changeLanguage() {
+        this.languageID = this.languageID === 1 ? 2 : 1;
+        this.salesInvoiceService.userInfo.languageID = this.languageID;
+        this.currentLanguage = this.languageID;
+        this.Sys_Labels();
+        this.getUserInfo();
+        this.getCategories();
+        this.getRetailInvoices();
+        this.getPromotions();
+        this.getReceiptMethods();
     }
 
     toggleDropdownVisible() {
@@ -181,7 +200,7 @@ export class AppComponent {
 
         const dialogRef = this.dialog.open(CustomerSelectComponent, {
             disableClose: true,
-            data: { title: "Set Customer", DefaultCustomer: this.userInfo.DefaultCustomer },
+            data: { title: "Customer", DefaultCustomer: this.userInfo.DefaultCustomer },
             direction: "ltr",
         });
 
@@ -216,7 +235,7 @@ export class AppComponent {
             width: "70%",
             minWidth: '300px',
             direction: "ltr",
-            data: { dataType: "salesMen", isMultiCheck: false, title: "SalesMen" },
+            data: { dataType: "salesMen", isMultiCheck: false, title: "Sales Man" },
         });
 
         dialogRef.afterClosed().subscribe((result) => {
@@ -683,8 +702,8 @@ export class AppComponent {
                         "ProductID": product.ProductID,
                         "TaxGroupID": product.TaxGroupID,
                         "UOMID": product.UOMID,
-                        "Description": this.getDescription(product, 'DescriptionEn', 'DescriptionAr'),
-                        "UOMDescription": this.getDescription(product, 'UOMDescriptionEn', 'UOMDescriptionAr'),
+                        "Description": this.currentLanguage === 1 ? product.DescriptionEn : product.DescriptionAr,
+                        "UOMDescription": this.currentLanguage === 1 ? product.DescriptionEn : product.DescriptionAr,
                         "ReturnedQty": 0,
                         "ReturnQty": 0,
                         "Qty": 1,

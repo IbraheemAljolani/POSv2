@@ -7,11 +7,11 @@
             <img [title]="data.title" class="payment-method-logo m-r-5"
                 [src]="'data:image/jpeg;base64,' + data.image ? 'data:image/jpeg;base64,' + data.image : 'assets/customer.svg'"
                 (error)="data.image = 'assets/default.webp'" [alt]="data.title" />
-            {{data.title}}
+            {{data.title? sysLabels[data.title]? sysLabels[data.title].Caption: data.title: 'Cash'}}
         </h4>
     </div>
     <div id="calcuatore">
-        <label for="display">Amount</label>
+        <label for="display">{{sysLabels["Amount"]? sysLabels["Amount"].Caption: "Amount"}}</label>
         <input [(ngModel)]="displayValue" #cardNumber (keypress)="numberOnly($event)" class="form-control" type="text"
             pattern="[0-9]+([\.,][0-9]+)?" (keyup.enter)="onConfirm()" />
 
@@ -34,10 +34,10 @@
     <div>
         <div class=" m-t-20 text-center">
             <button class="btn btn-primary width-80" (click)="onConfirm()">
-                Done
+                {{sysLabels["Done"]? sysLabels["Done"].Caption: "Done"}}
             </button>
             <button class="btn btn-default width-80 m-l-15" (click)="onCancel()">
-                Cancel
+                {{sysLabels["Cancel"]? sysLabels["Cancel"].Caption: "Cancel"}}
             </button>
         </div>
     </div>

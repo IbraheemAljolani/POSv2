@@ -7,7 +7,7 @@
             <!-- POS dropdown-menu-->
             <div class="parameter-context ">
 
-                <div>POS</div>
+                <div>{{(sysLabels['POS']) ? sysLabels['POS'].Caption : 'POS'}}</div>
                 <div class="btn-trans" (click)="openPOSDialog()">
                     <img src="assets/2084-512.webp" />
                     <div>
@@ -21,7 +21,7 @@
             <!-- Customers dropdown-menu-->
             <div class="parameter-context m-l-20">
 
-                <div>Customer</div>
+                <div>{{(sysLabels['Customer']) ? sysLabels['Customer'].Caption : 'Customer'}}</div>
                 <div class="btn-trans" title="{{ userInfo?.DefaultCustomer?.CustID ? userInfo?.DefaultCustomer?.CustID : '---' }} - {{
                         userInfo?.DefaultCustomer?.CustomerDescription ? userInfo?.DefaultCustomer?.CustomerDescription :
                         '---'}}" (click)="openCustomerDialog()">
@@ -38,7 +38,7 @@
             <!-- tables dropdown-menu-->
             <div class="parameter-context m-l-20" clickOutside (clickOutside)="clickedOutsideTable()">
                 <div class="dropdown" style="position:relative">
-                    <div>Table</div>
+                    <div>{{(sysLabels['Table'])?sysLabels['Table'].Caption:'Table'}}</div>
                     <div class="dropdown-toggle btn-trans" (click)="toggleDropdownVisible()" title="{{selectedTable}}">
                         <img src="assets/branchtable32.png" />
                         <div>{{selectedTable}}</div>
@@ -58,7 +58,7 @@
             <!-- salesmen dropdown-menu-->
             <div class="parameter-context m-l-20" (click)="selectSalesMan()">
 
-                <div>Sales Man</div>
+                <div>{{(sysLabels['Sales Man'])?sysLabels['Sales Man'].Caption:'Sales Man'}}</div>
                 <div class="btn-trans" [title]="salesManName ? salesManID + ' - ' + salesManName : ''">
                     <ng-container *ngIf="salesManName; else noSalesMan">
                         <img src="assets/anonymous.png" />
@@ -77,7 +77,8 @@
             <!-- deliveryDate datepicker-->
             <div class="parameter-context m-l-20 ">
 
-                <div>Delivery Date</div>
+                <div>{{(sysLabels['Delivery Date'])?sysLabels['Delivery Date'].Caption:'Delivery Date'}}
+                </div>
                 <div class="btn-trans" (click)="deliveryDateDatepicker.open()">
                     <i class="fa fa-calendar-plus-o"></i>
                     <mat-datepicker #deliveryDateDatepicker></mat-datepicker>
@@ -89,7 +90,8 @@
 
             <!-- deliveryDate Timeepicker-->
             <div class="parameter-context m-l-20">
-                <div>Delivery Time</div>
+                <div>{{(sysLabels['Delivery Time'])?sysLabels['Delivery Time'].Caption:'Delivery Time'}}
+                </div>
                 <div class="btn-trans">
                     <i class="fa fa-clock-o"></i>
                     <input style="border: 0; background: transparent; cursor: pointer;width:100%"
@@ -102,8 +104,9 @@
             <!-- cash on delivery -->
             <div class="parameter-context m-t-5 m-l-20">
 
-                <div title="Cash On Delivery">
-                    COD
+                <div
+                    title="{{(sysLabels['Cash On Delivery'])?sysLabels['Cash On Delivery'].Caption:'Cash On Delivery'}}">
+                    {{(sysLabels['COD']) ? sysLabels['COD'].Caption : 'COD'}}
                 </div>
                 <div>
                     <input type="checkbox" />
@@ -113,8 +116,8 @@
             <!-- Direct print (without showing print pop window) -->
             <div class="parameter-context m-t-5 m-l-20">
 
-                <div title="Direct Print">
-                    DP
+                <div title="{{(sysLabels['Direct Print'])?sysLabels['Direct Print'].Caption:'Direct Print'}}">
+                    {{(sysLabels['DP']) ? sysLabels['DP'].Caption : 'DP'}}
                 </div>
                 <div>
                     <input type="checkbox" />
@@ -136,6 +139,16 @@
                 </span>
             </div>
             <!-- end logout button -->
+
+            <span id="fullscreen" class="btn-header" style="margin-right: 10px; cursor: pointer;"
+                (click)="changeLanguage()">
+                <span>
+                    <a href="javascript:void(0);" data-action="launchLanguage" title="Language">
+                        {{currentLanguage == 1 ? 'EN' : 'AR'}}
+                    </a>
+                </span>
+            </span>
+
             <!-- fullscreen button -->
             <span id="fullscreen" class="btn-header transparent">
                 <span>
@@ -171,7 +184,7 @@
                         <i class="fa fa-file"></i>
                         <br />
                         <span class="hidden-sm hidden-xs">
-                            Invoice
+                            {{(sysLabels['Invoice']) ? sysLabels['Invoice'].Caption : 'Invoice'}}
                         </span>
                     </a>
                 </li>
@@ -180,7 +193,7 @@
                         <i class="fa fa-snowflake-o"></i>
                         <br />
                         <span class="hidden-sm hidden-xs">
-                            Promo
+                            {{(sysLabels['Promo']) ? sysLabels['Promo'].Caption : 'Promo'}}
                         </span>
                     </a>
                 </li>
@@ -189,7 +202,7 @@
                         <i class="fa fa-money"></i>
                         <br />
                         <span class="hidden-sm hidden-xs">
-                            Billing
+                            {{(sysLabels['Billing']) ? sysLabels['Billing'].Caption : 'Billing'}}
                         </span>
                     </a>
                 </li>
@@ -198,7 +211,7 @@
                         <i class="fa fa-share"></i>
                         <br />
                         <span class="hidden-sm hidden-xs">
-                            Recall
+                            {{(sysLabels['Recall']) ? sysLabels['Recall'].Caption : 'Recall'}}
                         </span>
                     </a>
                 </li>
@@ -212,25 +225,25 @@
 
                     <span>
                         <strong>
-                            Division:
+                            {{(sysLabels['Division'])?sysLabels['Division'].Caption:'Division'}}:
                         </strong>
                         <span>Amman Division</span>
                     </span>
                     <span>
                         <strong>
-                            Site:
+                            {{(sysLabels['Site'])?sysLabels['Site'].Caption:'Site'}}:
                         </strong>
                         <span>Riyadh</span>
                     </span>
                     <span>
                         <strong>
-                            Store:
+                            {{(sysLabels['Store'])?sysLabels['Store'].Caption:'Store'}}:
                         </strong>
                         <span>NakhelMall</span>
                     </span>
                     <span>
                         <strong>
-                            Cashier:
+                            {{(sysLabels['Cashier'])?sysLabels['Cashier'].Caption:'Cashier'}}:
                         </strong>
                         <span>Talal Younes Cashier</span>
                     </span>
@@ -247,12 +260,18 @@
 
                                 <h3>
                                     <span style="white-space:nowrap" *ngIf="selectedInvoice">
-                                        <span class="hidden-sm hidden-xs">Invoice</span>
+                                        <span class="hidden-sm hidden-xs">
+                                            {{(sysLabels['Invoice']) ? sysLabels['Invoice'].Caption :
+                                            'Invoice'}}
+                                        </span>
                                         {{selectedInvoice.ID}}
                                         <!-- <strong>(orderNumber number)</strong> -->
                                     </span>
 
-                                    <span *ngIf="!selectedInvoice" style="color:#ddd">No Invoice</span>
+                                    <span *ngIf="!selectedInvoice" style="color:#ddd">
+                                        {{(sysLabels['No Invoice']) ? sysLabels['No Invoice'].Caption :
+                                        'No Invoice'}}
+                                    </span>
 
                                 </h3>
 
@@ -296,7 +315,8 @@
                                 <div class="widget-body-toolbar"
                                     *ngIf="activeInvoiceTab !== 'recall' && selectedInvoice">
                                     <div class="text-muted">
-                                        <small>Code: {{selectedInvoice.Code}}</small>
+                                        <small>{{(sysLabels['Code'])?sysLabels['Code'].Caption:'Code'}}:
+                                            {{selectedInvoice.Code}}</small>
 
                                         <!-- <button class="btn btn-primary btn-xs m-l-10" style="margin-top: -2px"> Actions
                                             <span class="caret" aria-readonly="true">
@@ -388,28 +408,37 @@
                                                                 100 pice</td>
                                                         </tr> -->
                                                         <tr>
-                                                            <td>Tax</td>
+                                                            <td>{{(sysLabels['Tax'])?sysLabels['Tax'].Caption:'Tax'}}
+                                                            </td>
                                                             <td>
                                                                 <i class="fa fa-caret-right m-r-5"
                                                                     aria-hidden="true"></i>
-                                                                Amount: {{product.TaxAmount}}
+                                                                {{(sysLabels['Amount'])?sysLabels['Amount'].Caption:'Amount'}}:
+                                                                {{product.TaxAmount}}
                                                             </td>
                                                             <td>%</td>
                                                         </tr>
 
                                                         <tr>
-                                                            <td>Promo</td>
+                                                            <td>{{(sysLabels['Promo'])?sysLabels['Promo'].Caption:'Promo'}}
+                                                            </td>
                                                             <td>
                                                                 <i class="fa fa-caret-right m-r-5"
                                                                     aria-hidden="true"></i>
-                                                                ID: ---
+                                                                {{(sysLabels['ID'])?sysLabels['ID'].Caption:'ID'}}:
+                                                                ---
                                                             </td>
-                                                            <td>Discount: ---
+                                                            <td>{{(sysLabels['Discount'])?sysLabels['Discount'].Caption:'Discount'}}:
+                                                                ---
                                                             </td>
                                                         </tr>
 
                                                         <tr>
-                                                            <td>Promo Notes</td>
+                                                            <td>
+                                                                {{(sysLabels['Promo
+                                                                Notes'])?sysLabels['Promo Notes'].Caption:'Promo
+                                                                Notes'}}
+                                                            </td>
                                                             <td colspan="2">
                                                                 <i class="fa fa-caret-right m-r-5"
                                                                     aria-hidden="true"></i>
@@ -419,7 +448,7 @@
 
                                                         <tr>
                                                             <td>
-                                                                Discount/Unit
+                                                                {{(sysLabels['Discount'])?sysLabels['Discount'].Caption:'Discount'}}/{{(sysLabels['Unit'])?sysLabels['Unit'].Caption:'Unit'}}
                                                             </td>
                                                             <td>
                                                                 <i class="fa fa-caret-right m-r-5"
@@ -436,7 +465,9 @@
                                                         </tr>
 
                                                         <tr>
-                                                            <td>Total Discount</td>
+                                                            <td>{{(sysLabels['Total
+                                                                Discount'])?sysLabels['Total
+                                                                Discount'].Caption:'Total Discount'}}</td>
                                                             <td>
                                                                 <i class="fa fa-caret-right m-r-5"
                                                                     aria-hidden="true"></i>
@@ -447,7 +478,7 @@
 
                                                         <tr>
                                                             <td>
-                                                                Total Amount After Discount
+                                                                {{(sysLabels['TotalAmountAfterDiscount'])?sysLabels['TotalAmountAfterDiscount'].Caption:'TotalAmountAfterDiscount'}}
                                                             </td>
                                                             <td colspan="2">
                                                                 <i class="fa fa-caret-right m-r-5"
@@ -475,10 +506,14 @@
                                                             <span>
                                                                 <ng-container
                                                                     *ngIf="promoSelectAllFlag; else noSelectAll">
-                                                                    Deselect All Promotions
+                                                                    {{(sysLabels['Deselect All
+                                                                    Promotions'])?sysLabels['Deselect All
+                                                                    Promotions'].Caption:'Deselect All Promotions'}}
                                                                 </ng-container>
                                                                 <ng-template #noSelectAll>
-                                                                    Select All Promotions
+                                                                    {{(sysLabels['Select All
+                                                                    Promotions'])?sysLabels['Select All
+                                                                    Promotions'].Caption:'Select All Promotions'}}
                                                                 </ng-template>
                                                             </span>
                                                         </label>
@@ -495,11 +530,12 @@
 
                                                             <div class="m-t-5 m-b-5">
                                                                 <small class="text-muted">
-                                                                    <strong>Type: </strong> {{item.ReferenceType}}
+                                                                    <strong>{{(sysLabels['Type'])?sysLabels['Type'].Caption:'Type'}}:
+                                                                    </strong> {{item.ReferenceType}}
                                                                 </small>
 
                                                                 <span class="pull-right">
-                                                                    Discount:
+                                                                    {{(sysLabels['Discount'])?sysLabels['Discount'].Caption:'Discount'}}:
                                                                     <strong> ---</strong>
                                                                 </span>
                                                             </div>
@@ -516,29 +552,32 @@
                                                             *ngIf="item.opened">
                                                             <tr>
                                                                 <td>
-                                                                    SalesInvoice
+                                                                    {{(sysLabels['SalesInvoice'])?sysLabels['SalesInvoice'].Caption:'SalesInvoice'}}
                                                                 </td>
                                                                 <td>{{ selectedInvoice.ID ? selectedInvoice.ID :
                                                                     '---'
                                                                     }}</td>
                                                                 <td>
-                                                                    <strong>PromotionID</strong>
+                                                                    <strong>{{(sysLabels['PromotionID'])?sysLabels['PromotionID'].Caption:'PromotionID'}}</strong>
                                                                 </td>
                                                                 <td>{{item.ID}}</td>
                                                             </tr>
 
                                                             <tr>
                                                                 <td>
-                                                                    BenefitQty
+                                                                    {{(sysLabels['BenefitQty'])?sysLabels['BenefitQty'].Caption:'BenefitQty'}}
                                                                 </td>
                                                                 <td> ---</td>
                                                                 <td>
-                                                                    <strong>Minimum Qty</strong>
+                                                                    <strong>{{(sysLabels['Minimum
+                                                                        Qty'])?sysLabels['Minimum
+                                                                        Qty'].Caption:'Minimum Qty'}}</strong>
                                                                 </td>
                                                                 <td> ---</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Note</td>
+                                                                <td>{{(sysLabels['Note'])?sysLabels['Note'].Caption:'Note'}}
+                                                                </td>
                                                                 <td colspan="3"> ---</td>
                                                             </tr>
 
@@ -606,7 +645,10 @@
                                                             <div class="m-t-10 m-b-5 m-l-5">
                                                                 <small class="text-muted">
                                                                     <span>
-                                                                        <strong>{{item.ReceiptMethodTypeID}}</strong>
+                                                                        <strong>{{(sysLabels[item.ReceiptMethodTypeID])
+                                                                            ?
+                                                                            sysLabels[item.ReceiptMethodTypeID].Caption
+                                                                            : item.ReceiptMethodTypeID}}</strong>
                                                                     </span>
                                                                     -
                                                                     <span>{{item.invoiceDate |
@@ -656,7 +698,7 @@
                                                             style="background-color:#fafafa">
                                                             <tr>
                                                                 <td>
-                                                                    Description
+                                                                    {{(sysLabels['Description'])?sysLabels['Description'].Caption:'Description'}}
                                                                 </td>
                                                                 <td colspan="2">
                                                                     <i class="fa fa-caret-right m-r-5"
@@ -668,9 +710,10 @@
                                                             <tr>
                                                                 <td colspan="3">
                                                                     <textarea class="inline-select"
-                                                                        [(ngModel)]="item.Note" placeholder="Notes"
+                                                                        [(ngModel)]="item.Note"
+                                                                        placeholder="{{(sysLabels['Notes']) ? sysLabels['Notes'].Caption : 'Notes'}}"
                                                                         style="height:50px;font-weight:normal">
-                                                                                                            </textarea>
+                                                                    </textarea>
                                                                 </td>
                                                             </tr>
                                                         </table>
@@ -691,7 +734,7 @@
                                                             <div class="input-group input-group-sm">
                                                                 <input type="text" style="cursor: not-allowed;" readonly
                                                                     [matDatepicker]="myDatepicker"
-                                                                    placeholder="Search by Date"
+                                                                    placeholder="{{(sysLabels['Search by Date']) ? sysLabels['Search by Date'].Caption : 'Search by Date'}}"
                                                                     [(ngModel)]="datepicker"
                                                                     (ngModelChange)="changeDate($event)"
                                                                     class="form-control">
@@ -708,11 +751,12 @@
                                                         <div class="col-sm-6 m-t-5">
                                                             <div class="input-group input-group-sm">
                                                                 <input #searchInput type="text"
-                                                                    placeholder="Search by ID/Text" class="form-control"
+                                                                    placeholder="{{(sysLabels['Search by ID Text'])?sysLabels['Search by ID Text'].Caption:'Search by ID/Text'}}"
+                                                                    class="form-control"
                                                                     (keyup.enter)="searchRecall(searchInput.value)">
                                                                 <span class="input-group-btn">
                                                                     <button class="btn btn-success" type="button"
-                                                                        (click)="searchRecall(searchInput.value)">Search!</button>
+                                                                        (click)="searchRecall(searchInput.value)">{{(sysLabels['Search'])?sysLabels['Search'].Caption:'Search'}}!</button>
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -723,7 +767,10 @@
                                                                 <input type="checkbox" class="checkbox style-0"
                                                                     [checked]="filter.checked"
                                                                     (change)="toggleFilter(filter)">
-                                                                <span>{{ filter.label }}</span>
+                                                                <span>{{(sysLabels[filter.label])
+                                                                    ?
+                                                                    sysLabels[filter.label].Caption
+                                                                    : filter.label}}</span>
                                                             </label>
                                                         </div>
 
@@ -779,7 +826,8 @@
                                         <div *ngIf="!selectedInvoice && activeInvoiceTab !== 'recall'">
                                             <div class="text-center" style="position: relative; bottom: 300px;">
                                                 <a class="btn-lg m-t-50" style="text-decoration: none; ">
-                                                    Select Your First Product to Invoice
+                                                    {{currentLanguage == 1 ? 'Select Your First Product to Invoice' :
+                                                    'حدد منتجك الأول لفاتورة'}}
                                                 </a>
                                             </div>
                                         </div>
@@ -793,33 +841,37 @@
                                                     *ngIf="activeInvoiceTab === 'invoice' && selectedInvoice.SalesInvoiceStatusID != 'Printed'"
                                                     class="btn btn-success m-t-10 m-l-5 pull-left">
                                                     <i class="fa fa-chevron-left m-r-5" aria-hidden="true"></i>
-                                                    Check Out
+                                                    {{(sysLabels['Check Out
+                                                    Invoice'])?sysLabels['Check Out Invoice'].Caption:'Check
+                                                    Out Invoice'}}
                                                 </button>
 
                                                 <button type="button" *ngIf="activeInvoiceTab === 'promo'"
                                                     class="btn btn-success m-t-10 m-l-5 pull-left">
                                                     <i class="fa fa-chevron-left m-r-5" aria-hidden="true"></i>
-                                                    Apply
+                                                    {{(sysLabels['Apply'])?sysLabels['Apply'].Caption:'Apply'}}
                                                 </button>
 
                                                 <button type="button" *ngIf="activeInvoiceTab === 'promo'"
                                                     class="btn btn-danger m-t-10 m-l-5 pull-left">
                                                     <i class="fa fa-eraser m-r-5" aria-hidden="true"></i>
-                                                    Clear
+                                                    {{(sysLabels['Clear'])?sysLabels['Clear'].Caption:'Clear'}}
                                                 </button>
 
                                                 <button (click)="postCash()" type="button"
                                                     *ngIf="activeInvoiceTab === 'cash'"
                                                     class="btn btn-success m-t-10 m-l-5 pull-left">
                                                     <i class="fa fa-money m-r-5" aria-hidden="true"></i>
-                                                    Done
+                                                    {{(sysLabels['Done'])?sysLabels['Done'].Caption:'Done'}}
                                                 </button>
                                             </div>
 
                                             <div class="col-sm-9">
                                                 <ul class="" id="sparks">
                                                     <li class="sparks-info">
-                                                        <h5 style="margin:0;"> Net Total
+                                                        <h5 style="margin:0;"> {{(sysLabels['Net
+                                                            Total'])?sysLabels['Net Total'].Caption:'Net
+                                                            Total'}}
                                                             <span class="txt-color-blue">
                                                                 <i class="fa fa-money"></i>
                                                                 &nbsp; {{selectedInvoice.NetTotalAfterTax}}
@@ -828,7 +880,7 @@
                                                     </li>
                                                     <li class="sparks-info">
                                                         <h5 style="margin:0;">
-                                                            Total Payment
+                                                            {{(sysLabels['TotalPayment'])?sysLabels['TotalPayment'].Caption:'TotalPayment'}}
                                                             <span class="txt-color-purple">
                                                                 <i class="fa fa-check"></i>
                                                                 &nbsp;{{totalAmount}}
@@ -838,7 +890,7 @@
                                                     </li>
                                                     <li class="sparks-info">
                                                         <h5 style="margin:0;">
-                                                            Remaining Total Amount
+                                                            {{(sysLabels['RemainingTotalAmount'])?sysLabels['RemainingTotalAmount'].Caption:'RemainingTotalAmount'}}
                                                             <span class="txt-color-greenDark">
                                                                 <i class="fa fa-minus"></i>
                                                                 &nbsp;{{paidAmount.toFixed(3)}}
@@ -858,15 +910,20 @@
                                                             style="margin-top:0" class="m-r-5"
                                                             [disabled]="selectedInvoice.SalesInvoiceStatusID === 'Printed' || selectedInvoice.SalesInvoiceStatusID === 'Rejected'"
                                                             [ngStyle]="{'cursor': (selectedInvoice.SalesInvoiceStatusID === 'Printed' || selectedInvoice.SalesInvoiceStatusID === 'Rejected') ? 'no-drop' : 'auto'}" />
-                                                        Service Charge
+                                                        {{(sysLabels['Service
+                                                        Charge'])?sysLabels['Service Charge'].Caption:'Service
+                                                        Charge'}}
                                                     </strong>
                                                 </div>
                                                 <div class="col-sm-4 text-center">
-                                                    <strong>Discount:</strong> {{selectedInvoice.DiscountTotal ?
+                                                    <strong>{{(sysLabels['Discount'])?sysLabels['Discount'].Caption:'Discount'}}:</strong>
+                                                    {{selectedInvoice.DiscountTotal ?
                                                     selectedInvoice.DiscountTotal : 0.000}} $
                                                 </div>
                                                 <div class="col-sm-4 text-right">
-                                                    <strong>TotalTax:</strong> {{selectedInvoice.TotalTax ?
+                                                    <strong>{{(sysLabels['Total
+                                                        Tax'])?sysLabels['Total Tax'].Caption:'Total
+                                                        Tax'}}:</strong> {{selectedInvoice.TotalTax ?
                                                     selectedInvoice.TotalTax : 0.000}} $
                                                 </div>
                                             </div>
@@ -882,7 +939,7 @@
                         <div class="trio-window trio-window-color-blue">
 
                             <header>
-                                <h3>Products
+                                <h3>{{(sysLabels['Products']) ? sysLabels['Products'].Caption :'Products'}}
                                     <i class="fa fa-refresh m-l-5 fa-spin" aria-hidden="true" *ngIf="loading"></i>
                                 </h3>
                                 <div class="widget-toolbar smart-form" role="menu">
@@ -892,8 +949,9 @@
                                         <i class="icon-append fa fa-search border-left pointer" style="color:#000"
                                             *ngIf="!searchProduct"></i>
 
-                                        <input type="text" placeholder="Search" [(ngModel)]="searchProduct"
-                                            (keyup.enter)="searchProducts(searchProduct)">
+                                        <input type="text"
+                                            placeholder="{{(sysLabels['Search']) ? sysLabels['Search'].Caption : 'Search'}}"
+                                            [(ngModel)]="searchProduct" (keyup.enter)="searchProducts(searchProduct)">
                                     </label>
                                 </div>
                             </header>
@@ -908,7 +966,8 @@
                                                 height="25px"
                                                 [src]="categorie?.Image ? 'data:image/jpeg;base64,' + categorie.Image : 'assets/default.webp'"
                                                 (error)="categorie.Image = 'assets/default.webp'" />
-                                            {{ getDescription(categorie, 'DescriptionEn', 'DescriptionAr') }}
+                                            {{ currentLanguage == 1 ? categorie.DescriptionEn : categorie.DescriptionAr
+                                            }}
                                         </div>
                                     </div>
                                 </div>
@@ -929,7 +988,8 @@
                                                     <div (click)="addItemOrGroup(product)"
                                                         class="prod-desc prod-desc-class"
                                                         title="{{product.DescriptionEn}}" aria-label="Details">
-                                                        {{ getDescription(product, 'DescriptionEn', 'DescriptionAr') }}
+                                                        {{ currentLanguage == 1 ? product.DescriptionEn :
+                                                        product.DescriptionAr }}
                                                     </div>
                                                     <i class="fa fa-caret-down txt-color-dangerLight"
                                                         style="padding: 10px;" (click)="openMenuDrilldown(product)"
@@ -962,34 +1022,38 @@
                         <div class="center-text">{{userInfo.SalesDivision?.StoreDescription}}</div>
                         <table class="info-table">
                             <tr>
-                                <td><strong>Phone:</strong></td>
+                                <td><strong>{{(sysLabels['Mobile']) ? sysLabels['Mobile'].Caption : 'Mobile'}}:</strong>
+                                </td>
                                 <td>{{selectedInvoice?.Mobile}}</td>
                             </tr>
                             <tr>
-                                <td><strong>Invoice #:</strong></td>
+                                <td><strong>{{(sysLabels['Invoice']) ? sysLabels['Invoice'].Caption : 'Invoice'}}
+                                        #:</strong></td>
                                 <td>{{selectedInvoice?.ID}}</td>
                             </tr>
                             <tr>
-                                <td><strong>Date:</strong></td>
+                                <td><strong>{{(sysLabels['Date']) ? sysLabels['Date'].Caption : 'Date'}}:</strong></td>
                                 <td>{{selectedInvoice?.CreatedDate | date:'shortDate'}}</td>
                             </tr>
                             <tr>
-                                <td><strong>Customer Name:</strong></td>
+                                <td><strong>{{(sysLabels['Customer']) ? sysLabels['Customer'].Caption :
+                                        'Customer'}}:</strong></td>
                                 <td>{{selectedInvoice?.CustDescription}}</td>
                             </tr>
                         </table>
                         <div class="cashier-info">
-                            <p><strong>Cashier:</strong> {{selectedInvoice?.CashierDescription}}</p>
+                            <p><strong>{{(sysLabels['Cashier']) ? sysLabels['Cashier'].Caption : 'Cashier'}}:</strong>
+                                {{selectedInvoice?.CashierDescription}}</p>
                         </div>
 
                         <table>
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Product</th>
-                                    <th>Qty</th>
-                                    <th>Amount</th>
-                                    <th>Total</th>
+                                    <th>{{(sysLabels['Product']) ? sysLabels['Product'].Caption : 'Product'}}</th>
+                                    <th>{{(sysLabels['Qty']) ? sysLabels['Qty'].Caption : 'Qty'}}</th>
+                                    <th>{{(sysLabels['Amount']) ? sysLabels['Amount'].Caption : 'Amount'}}</th>
+                                    <th>{{(sysLabels['Total']) ? sysLabels['Total'].Caption : 'Total'}}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1008,28 +1072,28 @@
                                 <tr>
                                     <td></td>
                                     <td></td>
-                                    <td>Total Amount</td>
+                                    <td>{{currentLanguage == 1 ? 'Total Amount' : 'المبلغ الإجمالي'}}</td>
                                     <td>{{selectedInvoice?.TotalAmount}}</td>
                                     <td>{{selectedInvoice?.CurrencyID}}</td>
                                 </tr>
                                 <tr>
                                     <td></td>
                                     <td></td>
-                                    <td>Discount</td>
+                                    <td>{{(sysLabels['Discount']) ? sysLabels['Discount'].Caption : 'Discount'}}</td>
                                     <td>{{selectedInvoice?.DiscountTotal}}</td>
                                     <td>{{selectedInvoice?.CurrencyID}}</td>
                                 </tr>
                                 <tr>
                                     <td></td>
                                     <td></td>
-                                    <td>Vat</td>
+                                    <td>{{(sysLabels['Vat']) ? sysLabels['Vat'].Caption : 'Vat'}}</td>
                                     <td>{{selectedInvoice?.TotalTax}}</td>
                                     <td>{{selectedInvoice?.CurrencyID}}</td>
                                 </tr>
                                 <tr style="font-weight: bold;">
                                     <td></td>
                                     <td></td>
-                                    <td>Net Total</td>
+                                    <td>{{(sysLabels['Net Total']) ? sysLabels['Net Total'].Caption : 'Net Total'}}</td>
                                     <td>{{selectedInvoice?.NetTotalAfterTax}}</td>
                                     <td>{{selectedInvoice?.CurrencyID}}</td>
                                 </tr>
@@ -1039,11 +1103,11 @@
                             <qrcode [qrdata]="'https://github.com/Cordobo/angularx-qrcode'" [allowEmptyString]="true"
                                 [ariaLabel]="'QR Code image with the following content...'" [cssClass]="'center'"
                                 [colorDark]="'#000000ff'" [colorLight]="'#ffffffff'" [elementType]="'canvas'"
-                                [errorCorrectionLevel]="'M'" [imageSrc]="'./assets/angular-logo.png'" [imageHeight]="75"
-                                [imageWidth]="75" [margin]="4" [scale]="1" [title]="'A custom title attribute'"
-                                [width]="100"></qrcode>
+                                [errorCorrectionLevel]="'M'" [imageHeight]="75" [imageWidth]="75" [margin]="4"
+                                [scale]="1" [title]="'A custom title attribute'" [width]="100"></qrcode>
                         </div>
-                        <div class="center-text m-t-60">Thanks for your visit</div>
+                        <div class="center-text m-t-60">{{currentLanguage == 1 ? 'Thanks for your visit' : 'شكرا
+                            لزيارتكم'}}</div>
                     </div>
                 </header>
             </div>
