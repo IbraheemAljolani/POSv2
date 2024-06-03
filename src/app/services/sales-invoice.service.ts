@@ -10,35 +10,35 @@ export class SalesInvoiceService {
 
     constructor(private http: HttpClient) {
         // Comment for testing purpose only
-        // const recordDetailsJSON = (window as any).recordDetails;
-        // if (recordDetailsJSON) {
-        //     this.userInfo = {
-        //         baseUrl: recordDetailsJSON.baseUrl,
-        //         token: recordDetailsJSON.c,
-        //         languageID: recordDetailsJSON.languageId,
-        //         companyID: recordDetailsJSON.companyId,
-        //         userID: 0
-        //     };
-        // }
+        const recordDetailsJSON = (window as any).recordDetails;
+        if (recordDetailsJSON) {
+            this.userInfo = {
+                baseUrl: recordDetailsJSON.baseUrl,
+                token: recordDetailsJSON.c,
+                languageID: recordDetailsJSON.languageId,
+                companyID: recordDetailsJSON.companyId,
+                userID: 0
+            };
+        }
     }
 
     // Test data for userInfo object
-    public userInfo: { baseUrl: string; token: string; userID: number; languageID: number, companyID: number } = {
-        baseUrl: "https://proxypos.trio365.com",
-        token: "UgSZMY1gUZQ40VnIs82Sa85yLjRkZaelRCR53IrRoKhCYbnQ3UqtwxxZAvo4vxWyAl5OSnl78JSWYLuz0E51xvviG1O3JBn5KVsjmX_Av9bvgfNz3MSVaqFtvudlsNf56wXls3tr6aBw4CxyCDGO0f6PsP-rQ8F6Ne3unPSxu0tj9ekt0NXx7GDymX8YswWsAii1N8U9kQZ6vdoyorb5xA51u9X4scvGnuil3jtSX6DzC290uZnIpdaMPguBb4kOcBs2iinb9j9iXJr6425CiHckA4-V33quazVWvNBDstqg865bubCAhF4n-xL-xplpDk1VE8kgnSeSfLStyyGa8Q",
-        userID: 87,
-        languageID: 2,
-        companyID: 1,
-    }
+    // public userInfo: { baseUrl: string; token: string; userID: number; languageID: number, companyID: number } = {
+    //     baseUrl: "https://proxypos.trio365.com",
+    //     token: "UgSZMY1gUZQ40VnIs82Sa85yLjRkZaelRCR53IrRoKhCYbnQ3UqtwxxZAvo4vxWyAl5OSnl78JSWYLuz0E51xvviG1O3JBn5KVsjmX_Av9bvgfNz3MSVaqFtvudlsNf56wXls3tr6aBw4CxyCDGO0f6PsP-rQ8F6Ne3unPSxu0tj9ekt0NXx7GDymX8YswWsAii1N8U9kQZ6vdoyorb5xA51u9X4scvGnuil3jtSX6DzC290uZnIpdaMPguBb4kOcBs2iinb9j9iXJr6425CiHckA4-V33quazVWvNBDstqg865bubCAhF4n-xL-xplpDk1VE8kgnSeSfLStyyGa8Q",
+    //     userID: 87,
+    //     languageID: 2,
+    //     companyID: 1,
+    // }
 
     // Live data for userInfo object
-    // public userInfo: { baseUrl: string; token: string; languageID: number, companyID: number, userID: number } = {
-    //     baseUrl: '',
-    //     token: '',
-    //     languageID: 0,
-    //     companyID: 0,
-    //     userID: 0
-    // };
+    public userInfo: { baseUrl: string; token: string; languageID: number, companyID: number, userID: number } = {
+        baseUrl: '',
+        token: '',
+        languageID: 0,
+        companyID: 0,
+        userID: 0
+    };
 
     Sys_Labels(currentLanguage: number): Observable<any> {
         if (!this.userInfo) {

@@ -7,7 +7,6 @@ import {
 } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { SalesInvoiceService } from 'src/app/services/sales-invoice.service';
-import Swal from 'sweetalert2';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -30,13 +29,9 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(modifiedReq).pipe(
       catchError(err => {
         if (err.status === 401) {
-          Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "Unauthorized access. Please login again.",
-          });
+          window.location.href = 'https://www.triosuite.com/';
         }
-        return throwError(err);
+        return throwError(() => err);
       })
     );
   }

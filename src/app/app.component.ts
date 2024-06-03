@@ -18,6 +18,8 @@ export class AppComponent {
 
     constructor(public dialog: MatDialog, private salesInvoiceService: SalesInvoiceService, @Inject(DOCUMENT) private document: any) { }
 
+    currentYear = new Date().getFullYear();
+    version: string = '';
     activeInvoiceTab = 'invoice';
     isDropdownVisible = false;
     branchTables: any = [];
@@ -58,6 +60,8 @@ export class AppComponent {
     currentLanguage = this.salesInvoiceService.userInfo.languageID;
 
     ngOnInit(): void {
+        const packageJson = require('../../package.json');
+        this.version = packageJson.version;
         this.getUserInfo();
         this.Sys_Labels();
 
@@ -95,6 +99,16 @@ export class AppComponent {
                 this.sysLabels[String(result[i].LabelID).trim()] = result[i];
             }
         });
+
+        if (this.currentLanguage === 1) {
+            this.document.body.classList.remove('trio-rtl');
+            this.document.body.classList.add('trio-ltr');
+            this.document.body.dir = 'ltr';
+        } else {
+            this.document.body.classList.remove('trio-ltr');
+            this.document.body.classList.add('trio-rtl');
+            this.document.body.dir = 'rtl';
+        }
     }
 
     changeLanguage() {
@@ -109,6 +123,8 @@ export class AppComponent {
         this.getReceiptMethods();
     }
 
+
+
     toggleDropdownVisible() {
         this.isDropdownVisible = !this.isDropdownVisible;
         this.isDropdownInSession = sessionStorage.getItem('branchTables');
@@ -120,14 +136,16 @@ export class AppComponent {
                 } else {
                     Swal.fire({
                         icon: "question",
-                        title: "Warning...",
-                        text: "Error in getting branch tables.",
+                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                        text: this.currentLanguage === 1 ? "Error in getting branch tables." : "خطأ في الحصول على الجداول الفرعية.",
                     });
                 }
             }, (error) => {
                 Swal.fire({
                     icon: "error",
-                    title: "Oops...",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
                     text: error.error.Message,
                 });
             });
@@ -153,22 +171,26 @@ export class AppComponent {
     }
 
     getUserInfo() {
-        this.salesInvoiceService.getUserInfo().subscribe((result: any) => {
-            if (result) {
-                this.userInfo = result;
-            } else {
+        this.salesInvoiceService.getUserInfo().subscribe({
+            next: (result) => {
+                if (result && typeof result === 'object') {
+                    this.userInfo = result;
+                } else {
+                    Swal.fire({
+                        icon: "question",
+                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                        text: this.currentLanguage === 1 ? "Error in getting user info." : "خطأ في الحصول على معلومات المستخدم.",
+                    });
+                }
+            }, error: (error) => {
                 Swal.fire({
-                    icon: "question",
-                    title: "Warning...",
-                    text: "Error in getting user info.",
+                    icon: "error",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
+                    text: error && error.error && error.error.Message ? error.error.Message : 'Unknown error',
                 });
             }
-        }, (error) => {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error.error.Message,
-            });
         });
     }
 
@@ -182,9 +204,7 @@ export class AppComponent {
             data: { dataType: "POS", isMultiCheck: false, title: "POS", idName: "POSID", selectedPOSID: this.userInfo.RetailUserPOS.SalesDivisionPOSID },
         });
 
-        dialogRef.afterClosed().subscribe((result) => {
-            //   dialogRef.componentInstance.data = null;
-        });
+        dialogRef.afterClosed().subscribe((result) => { });
     }
 
     openCustomerDialog() {
@@ -192,8 +212,9 @@ export class AppComponent {
         if (!this.selectedInvoice) {
             Swal.fire({
                 icon: "warning",
-                title: "Warning...",
-                text: "Please create a new invoice or select an existing invoice.",
+                confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                text: this.currentLanguage === 1 ? "Please select an invoice." : "الرجاء تحديد فاتورة.",
             });
             return;
         }
@@ -201,7 +222,7 @@ export class AppComponent {
         const dialogRef = this.dialog.open(CustomerSelectComponent, {
             disableClose: true,
             data: { title: "Customer", DefaultCustomer: this.userInfo.DefaultCustomer },
-            direction: "ltr",
+            direction: this.currentLanguage === 1 ? "ltr" : "rtl",
         });
 
         dialogRef.afterClosed().subscribe((result) => {
@@ -219,7 +240,7 @@ export class AppComponent {
             maxHeight: '98%',
             width: "80%",
             minWidth: '300px',
-            direction: "ltr",
+            direction: this.currentLanguage === 1 ? "ltr" : "rtl",
             data: { dataType: "drillDown", isMultiCheck: false, productItem: productItem, title: productItem.DescriptionEn + ' Qty', SalesDivisionPOSID: this.userInfo?.RetailUserPOS?.SalesDivisionPOSID },
         });
 
@@ -234,7 +255,7 @@ export class AppComponent {
             maxHeight: '98%',
             width: "70%",
             minWidth: '300px',
-            direction: "ltr",
+            direction: this.currentLanguage === 1 ? "ltr" : "rtl",
             data: { dataType: "salesMen", isMultiCheck: false, title: "Sales Man" },
         });
 
@@ -257,28 +278,33 @@ export class AppComponent {
     }
 
     getCategories() {
-        this.salesInvoiceService.getCategories().subscribe((result: any) => {
-            if (result) {
-                this.categories = result.filter((item: { CategoryParentID: number; }) => item.CategoryParentID === 0);
-                sessionStorage.setItem('categories', JSON.stringify(this.categories));
-                if (this.categories.length > 0) {
-                    if (this.categories && this.categories.length > 0) {
-                        this.getProducts(this.categories[0].CategoryID);
+        this.salesInvoiceService.getCategories().subscribe({
+            next: (result: any) => {
+                if (result) {
+                    this.categories = result.filter((item: { CategoryParentID: number; }) => item.CategoryParentID === 0);
+                    sessionStorage.setItem('categories', JSON.stringify(this.categories));
+                    if (this.categories.length > 0) {
+                        if (this.categories && this.categories.length > 0) {
+                            this.getProducts(this.categories[0].CategoryID);
+                        }
                     }
+                } else {
+                    Swal.fire({
+                        icon: "question",
+                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                        text: this.currentLanguage === 1 ? "Error in getting categories." : "خطأ في الحصول على الفئات.",
+                    });
                 }
-            } else {
+            },
+            error: (error) => {
                 Swal.fire({
-                    icon: "question",
-                    title: "Warning...",
-                    text: "Error in getting categories.",
+                    icon: "error",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
+                    text: error.error.Message,
                 });
             }
-        }, (error) => {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error.error.Message,
-            });
         });
     }
 
@@ -287,25 +313,30 @@ export class AppComponent {
         this.searchProduct = '';
         this.newProducts = [];
         sessionStorage.setItem('selectedCategory', JSON.stringify(categoryID));
-        this.salesInvoiceService.getProducts().subscribe((result: any) => {
-            if (result) {
-                this.products = result.filter((item: { CategoryID: number; }) => item.CategoryID === categoryID);
-                this.selectedCategory = sessionStorage.getItem('selectedCategory');
-            } else {
+        this.salesInvoiceService.getProducts().subscribe({
+            next: (result: any) => {
+                if (result) {
+                    this.products = result.filter((item: { CategoryID: number; }) => item.CategoryID === categoryID);
+                    this.selectedCategory = sessionStorage.getItem('selectedCategory');
+                } else {
+                    Swal.fire({
+                        icon: "question",
+                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                        text: this.currentLanguage === 1 ? "Error in getting products." : "خطأ في الحصول على المنتجات.",
+                    });
+                }
+                this.loading = false;
+            },
+            error: (error) => {
                 Swal.fire({
-                    icon: "question",
-                    title: "Warning...",
-                    text: "Error in getting products.",
+                    icon: "error",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
+                    text: error.error.Message,
                 });
+                this.loading = false;
             }
-            this.loading = false;
-        }, (error) => {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error.error.Message,
-            });
-            this.loading = false;
         });
     }
 
@@ -317,7 +348,7 @@ export class AppComponent {
         );
 
         if (this.newProducts.length === 0) {
-            this.message = 'No products found in this category.';
+            this.message = this.currentLanguage === 1 ? "No products found." : "لم يتم العثور على منتجات.";
         }
 
         this.loading = false;
@@ -327,7 +358,6 @@ export class AppComponent {
         { label: 'Date', value: 'date', color: 'gray', checked: true },
         { label: 'Created', value: 'created', color: '#47bb47', checked: false },
         { label: 'Printed', value: 'printed', color: '#F1DA91', checked: false },
-        // { label: 'Under Delivery', value: 'underDelivery', color: '#96c7e7', checked: false },
         { label: 'Void', value: 'rejected', color: '#f25022', checked: false },
     ];
 
@@ -356,28 +386,33 @@ export class AppComponent {
     }
 
     getRetailInvoices() {
-        this.salesInvoiceService.getRetailInvoices(this.userInfo?.RetailUserPOS?.SalesDivisionPOSID).subscribe((result: any) => {
-            if (result) {
+        this.salesInvoiceService.getRetailInvoices(this.userInfo?.RetailUserPOS?.SalesDivisionPOSID).subscribe({
+            next: (result: any) => {
+                if (result) {
 
-                if (this.filterRecallSearch.includes('date')) {
-                    this.retailInvoices = this.filterByDate(result);
+                    if (this.filterRecallSearch.includes('date')) {
+                        this.retailInvoices = this.filterByDate(result);
+                    } else {
+                        this.retailInvoices = this.filterByStatus(result);
+                    }
+
                 } else {
-                    this.retailInvoices = this.filterByStatus(result);
+                    Swal.fire({
+                        icon: "question",
+                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                        text: this.currentLanguage === 1 ? "Error in getting retail invoices." : "خطأ في الحصول على الفواتير التجزئة.",
+                    });
                 }
-
-            } else {
+            },
+            error: (error) => {
                 Swal.fire({
-                    icon: "question",
-                    title: "Warning...",
-                    text: "Error in getting retail invoices.",
+                    icon: "error",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
+                    text: error.error.Message,
                 });
             }
-        }, (error) => {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error.error.Message,
-            });
         });
     }
 
@@ -420,7 +455,6 @@ export class AppComponent {
             this.selectedPayments = [];
 
             this.selectedPayments.unshift({
-                // ReceiptMethodID: methodID,
                 ReceiptMethodTypeID: invoice.Payments[0].ReceiptMethodTypeID,
                 Description: invoice.Payments[0].DescriptionEn,
                 Note: invoice.Payments[0].Note,
@@ -482,42 +516,52 @@ export class AppComponent {
     }
 
     getPromotions() {
-        this.salesInvoiceService.getPromotions().subscribe((result: any) => {
-            if (result) {
-                this.promosList = result;
-            } else {
+        this.salesInvoiceService.getPromotions().subscribe({
+            next: (result: any) => {
+                if (result) {
+                    this.promosList = result;
+                } else {
+                    Swal.fire({
+                        icon: "question",
+                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                        text: this.currentLanguage === 1 ? "Error in getting promotions." : "خطأ في الحصول على العروض.",
+                    });
+                }
+            },
+            error: (error) => {
                 Swal.fire({
-                    icon: "question",
-                    title: "Warning...",
-                    text: "Error in getting promos.",
+                    icon: "error",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
+                    text: error.error.Message,
                 });
             }
-        }, (error) => {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error.error.Message,
-            });
         });
     }
 
     getReceiptMethods() {
-        this.salesInvoiceService.getReceiptMethods().subscribe((result: any) => {
-            if (result) {
-                this.receiptMethods = result;
-            } else {
+        this.salesInvoiceService.getReceiptMethods().subscribe({
+            next: (result: any) => {
+                if (result) {
+                    this.receiptMethods = result;
+                } else {
+                    Swal.fire({
+                        icon: "question",
+                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                        text: this.currentLanguage === 1 ? "Error in getting receipt methods." : "خطأ في الحصول على طرق الدفع.",
+                    });
+                }
+            },
+            error: (error) => {
                 Swal.fire({
-                    icon: "question",
-                    title: "Warning...",
-                    text: "Error in getting receipt methods.",
+                    icon: "error",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
+                    text: error.error.Message,
                 });
             }
-        }, (error) => {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error.error.Message,
-            });
         });
 
     }
@@ -526,8 +570,9 @@ export class AppComponent {
         if (this.selectedInvoice.SalesInvoiceStatusID === 'Printed') {
             Swal.fire({
                 icon: "warning",
-                title: "Warning...",
-                text: "You can't add another payment method for this invoice.",
+                confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                text: this.currentLanguage === 1 ? "Invoice is already paid." : "الفاتورة مدفوعة بالفعل.",
             });
             return;
         }
@@ -542,7 +587,7 @@ export class AppComponent {
         const dialogRef = this.dialog.open(CashComponent, {
             disableClose: true,
             width: "300px",
-            direction: "ltr",
+            direction: this.currentLanguage === 1 ? "ltr" : "rtl",
             data: {
                 dataType: "Cash",
                 isMultiCheck: true,
@@ -563,7 +608,7 @@ export class AppComponent {
         const dialogRef = this.dialog.open(CardComponent, {
             disableClose: true,
             width: "300px",
-            direction: "ltr",
+            direction: this.currentLanguage === 1 ? "ltr" : "rtl",
             data: {
                 dataType: "Card",
                 isMultiCheck: true,
@@ -665,24 +710,29 @@ export class AppComponent {
             Amounts: this.selectedInvoice?.NetTotalAfterTax ?? 0,
         }
 
-        this.salesInvoiceService.retailInvoice_Create(this.data).subscribe((result: any) => {
-            if (result) {
-                this.selectedInvoice = result;
-                this.selectedInvoiceProducts = result.Products;
-                this.userInfo.DefaultCustomer.CustomerDescription = result.CustDescription;
-            } else {
+        this.salesInvoiceService.retailInvoice_Create(this.data).subscribe({
+            next: (result: any) => {
+                if (result) {
+                    this.selectedInvoice = result;
+                    this.selectedInvoiceProducts = result.Products;
+                    this.userInfo.DefaultCustomer.CustomerDescription = result.CustDescription;
+                } else {
+                    Swal.fire({
+                        icon: "question",
+                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                        text: this.currentLanguage === 1 ? "Error in creating invoice." : "خطأ في إنشاء الفاتورة.",
+                    });
+                }
+            },
+            error: (error) => {
                 Swal.fire({
-                    icon: "question",
-                    title: "Warning...",
-                    text: "Error in creating invoice.",
-                });
+                    icon: "error",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
+                    text: error.error.Message,
+                })
             }
-        }, (error) => {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error.error.Message,
-            })
         });
     }
 
@@ -731,8 +781,9 @@ export class AppComponent {
             } else {
                 Swal.fire({
                     icon: "warning",
-                    title: "Warning...",
-                    text: "No stock available.",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                    text: this.currentLanguage === 1 ? "Product is out of stock." : "المنتج غير متوفر.",
                 });
             }
         })
@@ -758,8 +809,9 @@ export class AppComponent {
         } else {
             Swal.fire({
                 icon: "warning",
-                title: "Warning...",
-                text: "Paid amount is less than the total amount.",
+                confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                text: this.currentLanguage === 1 ? "Paid amount is less than total amount." : "المبلغ المدفوع أقل من المبلغ الإجمالي.",
             });
         }
     }
@@ -780,9 +832,9 @@ export class AppComponent {
         if (this.selectedInvoice && this.selectedInvoice.SalesInvoiceStatusID === 'Created') {
 
             Swal.fire({
-                title: "Do you want to void the invoice?",
+                title: this.currentLanguage === 1 ? 'Do you want to void the invoice?' : 'هل تريد إلغاء الفاتورة؟',
                 showCancelButton: true,
-                confirmButtonText: "Ok",
+                confirmButtonText: this.currentLanguage === 1 ? 'Yes' : 'نعم',
             }).then((result) => {
                 if (result.isConfirmed) {
                     this.salesInvoiceService.RetailInvoice_Void(this.selectedInvoice.ID).subscribe((result: any) => {
@@ -790,14 +842,16 @@ export class AppComponent {
                             this.selectedInvoice.SalesInvoiceStatusID = 'Void';
                             Swal.fire({
                                 icon: "success",
-                                title: "Success...",
-                                text: "Invoice has been voided successfully.",
+                                confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                                title: this.currentLanguage === 1 ? "Success..." : "نجاح...",
+                                text: this.currentLanguage === 1 ? "Invoice voided successfully." : "تم إلغاء الفاتورة بنجاح.",
                             });
                         } else {
                             Swal.fire({
                                 icon: "question",
-                                title: "Warning...",
-                                text: "Error in voiding invoice.",
+                                confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                                title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+                                text: this.currentLanguage === 1 ? "Error in voiding invoice." : "خطأ في إلغاء الفاتورة.",
                             });
                         }
                     });
@@ -819,13 +873,10 @@ export class AppComponent {
         if (this.elem.requestFullscreen) {
             this.elem.requestFullscreen();
         } else if (this.elem.mozRequestFullScreen) {
-            /* Firefox */
             this.elem.mozRequestFullScreen();
         } else if (this.elem.webkitRequestFullscreen) {
-            /* Chrome, Safari and Opera */
             this.elem.webkitRequestFullscreen();
         } else if (this.elem.msRequestFullscreen) {
-            /* IE/Edge */
             this.elem.msRequestFullscreen();
         }
     }
@@ -834,13 +885,10 @@ export class AppComponent {
         if (this.document.exitFullscreen) {
             this.document.exitFullscreen();
         } else if (this.document.mozCancelFullScreen) {
-            /* Firefox */
             this.document.mozCancelFullScreen();
         } else if (this.document.webkitExitFullscreen) {
-            /* Chrome, Safari and Opera */
             this.document.webkitExitFullscreen();
         } else if (this.document.msExitFullscreen) {
-            /* IE/Edge */
             this.document.msExitFullscreen();
         }
     }

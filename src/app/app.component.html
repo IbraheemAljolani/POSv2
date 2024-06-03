@@ -140,8 +140,7 @@
             </div>
             <!-- end logout button -->
 
-            <span id="fullscreen" class="btn-header" style="margin-right: 10px; cursor: pointer;"
-                (click)="changeLanguage()">
+            <span id="fullscreen" class="btn-header m-r-10" style="cursor: pointer;" (click)="changeLanguage()">
                 <span>
                     <a href="javascript:void(0);" data-action="launchLanguage" title="Language">
                         {{currentLanguage == 1 ? 'EN' : 'AR'}}
@@ -221,31 +220,31 @@
 
             <!-- RIBBON --> <!--//emad-->
             <div id="ribbon" class="ribbon-inside">
-                <div class="m-t-5" style="font-size:12px">
+                <div class="m-t-5">
 
                     <span>
                         <strong>
                             {{(sysLabels['Division'])?sysLabels['Division'].Caption:'Division'}}:
                         </strong>
-                        <span>Amman Division</span>
+                        <span>{{userInfo.SalesDivision?.DivisionDescription}}</span>
                     </span>
                     <span>
                         <strong>
                             {{(sysLabels['Site'])?sysLabels['Site'].Caption:'Site'}}:
                         </strong>
-                        <span>Riyadh</span>
+                        <span>{{userInfo.SalesDivision?.SiteDescription}}</span>
                     </span>
                     <span>
                         <strong>
                             {{(sysLabels['Store'])?sysLabels['Store'].Caption:'Store'}}:
                         </strong>
-                        <span>NakhelMall</span>
+                        <span>{{userInfo.SalesDivision?.StoreDescription}}</span>
                     </span>
                     <span>
                         <strong>
                             {{(sysLabels['Cashier'])?sysLabels['Cashier'].Caption:'Cashier'}}:
                         </strong>
-                        <span>Talal Younes Cashier</span>
+                        <span>{{userInfo.SalesDivision?.CashierDescription}}</span>
                     </span>
 
                 </div>
@@ -265,7 +264,6 @@
                                             'Invoice'}}
                                         </span>
                                         {{selectedInvoice.ID}}
-                                        <!-- <strong>(orderNumber number)</strong> -->
                                     </span>
 
                                     <span *ngIf="!selectedInvoice" style="color:#ddd">
@@ -276,9 +274,7 @@
                                 </h3>
 
                                 <div class="trio-window-ctrls" *ngIf="selectedInvoice">
-                                    <!-- <a class="button-icon pointer" aria-label="Save">
-                                        <i class="fa fa-save invoice-icon" aria-hidden="true"></i>
-                                    </a> -->
+
                                     <a class="button-icon pointer" title="Print" aria-label="Print"
                                         (click)="printPage()">
                                         <i class="fa fa-print invoice-icon" aria-hidden="true"></i>
@@ -291,23 +287,13 @@
                                     <a class="button-icon pointer" (click)="addNewInvoice()" aria-label="New">
                                         <i class="fa fa-plus invoice-icon" aria-hidden="true"></i>
                                     </a>
-                                    <!-- <a class="button-icon pointer" title="Refresh" aria-label="Refresh">
-                                        <i class="fa fa-refresh invoice-icon" aria-hidden="true"></i>
-                                    </a> -->
                                 </div>
                                 <div class="widget-toolbar hidden-sm hidden-xs" role="menu" style="cursor:default">
                                     <div class="label" *ngIf="selectedInvoice"
                                         [ngStyle]="{'background-color': getColor(selectedInvoice.SalesInvoiceStatusID)}">
-                                        {{selectedInvoice.SalesInvoiceStatusID}}
+                                        {{(sysLabels[selectedInvoice.SalesInvoiceStatusID])?sysLabels[selectedInvoice.SalesInvoiceStatusID].Caption:selectedInvoice.SalesInvoiceStatusID}}
                                     </div>
                                 </div>
-
-                                <!-- <h3>Recall</h3> -->
-                                <!-- <div class="trio-window-ctrls">
-                                    <a class="button-icon pointer" title="Refresh" aria-label="Refresh">
-                                        <i class="fa fa-refresh" aria-hidden="true"></i>
-                                    </a>
-                                </div> -->
 
                             </header>
 
@@ -317,11 +303,6 @@
                                     <div class="text-muted">
                                         <small>{{(sysLabels['Code'])?sysLabels['Code'].Caption:'Code'}}:
                                             {{selectedInvoice.Code}}</small>
-
-                                        <!-- <button class="btn btn-primary btn-xs m-l-10" style="margin-top: -2px"> Actions
-                                            <span class="caret" aria-readonly="true">
-                                            </span>
-                                        </button> -->
 
                                         <small class="pull-right">{{selectedInvoice.SalesInvoiceDate | date:
                                             'MM-dd-yyyy'}}</small>
@@ -399,14 +380,7 @@
                                                     </div>
 
                                                     <table class="table-condensed table-striped" *ngIf="product.opened">
-                                                        <!-- <tr>
-                                                            <td>
-                                                                Additions Amount
-                                                            </td>
-                                                            <td colspan="2"><i class="fa fa-caret-right m-r-5"
-                                                                    aria-hidden="true"></i>
-                                                                100 pice</td>
-                                                        </tr> -->
+
                                                         <tr>
                                                             <td>{{(sysLabels['Tax'])?sysLabels['Tax'].Caption:'Tax'}}
                                                             </td>
@@ -435,9 +409,8 @@
 
                                                         <tr>
                                                             <td>
-                                                                {{(sysLabels['Promo
-                                                                Notes'])?sysLabels['Promo Notes'].Caption:'Promo
-                                                                Notes'}}
+                                                                {{(sysLabels['Promo Notes'])?sysLabels['Promo
+                                                                Notes'].Caption:'Promo Notes'}}
                                                             </td>
                                                             <td colspan="2">
                                                                 <i class="fa fa-caret-right m-r-5"
@@ -1015,7 +988,7 @@
             <!-- END #MAIN CONTENT -->
             <div style="display: none;" id="agrrement-section" class="trio-window trio-window-color-blueLight">
                 <header>
-                    <h1>{{userInfo.CompanyInfo?.CompanyDescription}}</h1>
+                    <img [src]="'data:image/jpeg;base64,' + userInfo.CompanyInfo?.Logo" />
                     <div>
                         <div class="center-text">{{userInfo.SalesDivision?.DivisionDescription}},
                             {{userInfo.SalesDivision?.SiteDescription}}</div>
@@ -1115,3 +1088,27 @@
         <!-- END #MAIN PANEL -->
     </div>
 </div>
+<footer style="margin-left: 20px;" dir="ltr">
+    <div style="color:#666">
+        <div>
+            &copy;{{currentYear}}
+            <a target="_blank" href="https://triosuite.com/">
+                <span>
+                    <strong>
+                        <span style="color:#494949">Trio</span><span style="color:#01a4ef">3</span>
+                        <span style="color:#f15023">6</span>
+                        <span style="color:#7fba00">5</span>
+                    </strong>
+                </span>
+            </a>
+            <i>
+                (v. {{version}})
+            </i>, All Rights Reserved.
+            <br>
+            <span style="font-size:11px" class="ng-star-inserted">Powered by <a href="https://triosuite.com/"
+                    target="_blank">Triosuite</a>
+                technology
+            </span>
+        </div>
+    </div>
+</footer>

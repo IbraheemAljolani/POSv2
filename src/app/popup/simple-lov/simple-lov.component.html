@@ -8,12 +8,15 @@
     <div class="modal-body">
         <div class="row" *ngIf="data.title != 'POS' && !data.title.includes('Qty')">
             <div class="col-lg-3">
-                <label for=" searchID" style="margin-left: 5px;">ID</label>
+                <label for=" searchID" style="margin-left: 5px;">{{(sysLabels['ID']) ? sysLabels['ID'].Caption :
+                    'ID'}}</label>
                 <input style=" margin-bottom: 10px; margin-left: 5px;" type="number" class="form-control"
                     placeholder="SearchID" [(ngModel)]="searchID" (ngModelChange)="onSearchChange(searchID, '')" />
             </div>
             <div class="col-lg-3">
-                <label for=" searchID" style="margin-left: 5px;">Description</label>
+                <label for=" searchID" style="margin-left: 5px;">{{(sysLabels['Description']) ?
+                    sysLabels['Description'].Caption :
+                    'Description'}}</label>
                 <input style=" margin-bottom: 10px; margin-left: 5px;" type="text" class="form-control"
                     [(ngModel)]="searchDescription" (ngModelChange)="onSearchChange(0, searchDescription)" />
             </div>

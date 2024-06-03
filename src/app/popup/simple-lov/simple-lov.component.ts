@@ -99,121 +99,126 @@ export class SimpleLOVComponent {
     }
 
     _loadCustomers(id: number, text?: string) {
-        this.salesInvoiceService.getCustomers().subscribe((result: any) => {
-            this.lookupRowFields = [
-                this.currentLanguage === 1 ? 'ID' : 'الرقم',
-                this.currentLanguage === 1 ? 'Description' : 'الاسم',
-                this.currentLanguage === 1 ? 'Code' : 'الكود',
-                this.currentLanguage === 1 ? 'Tel' : 'التليفون'
-            ];
-            let matchedSalesMen = [];
-            for (let i = 0; i < result.length; i++) {
-                if (result[i].CustID == id) {
-                    matchedSalesMen.push(result[i]);
+        this.salesInvoiceService.getCustomers().subscribe({
+            next: (result: any) => {
+                this.lookupRowFields = [
+                    this.currentLanguage === 1 ? 'ID' : 'الرقم',
+                    this.currentLanguage === 1 ? 'Description' : 'الاسم',
+                    this.currentLanguage === 1 ? 'Code' : 'الكود',
+                    this.currentLanguage === 1 ? 'Tel' : 'التليفون'
+                ];
+                let matchedSalesMen = [];
+                for (let i = 0; i < result.length; i++) {
+                    if (result[i].CustID == id) {
+                        matchedSalesMen.push(result[i]);
+                    }
                 }
+
+                var results = matchedSalesMen;
+
+                if (results.length == 0) {
+                    results = result;
+                }
+
+                results = results.filter((item: any) => item.DescriptionEn.toLowerCase().includes((text ?? '').toLowerCase()));
+
+                for (let i = 0; i < result.length; i++) {
+                    this.lookupRows.push([results[i].CustID, results[i].DescriptionEn, results[i].Code, results[i].Tel]);
+                }
+            },
+            error: (error) => {
+                Swal.fire({
+                    icon: "error",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? 'Oops...' : 'خطأ',
+                    text: error.error.Message,
+                });
             }
-
-            var results = matchedSalesMen;
-
-            if (results.length == 0) {
-                results = result;
-            }
-
-            results = results.filter((item: any) => item.DescriptionEn.toLowerCase().includes((text ?? '').toLowerCase()));
-
-            for (let i = 0; i < result.length; i++) {
-                this.lookupRows.push([results[i].CustID, results[i].DescriptionEn, results[i].Code, results[i].Tel]);
-            }
-        }, (error) => {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error.error.Message,
-            });
         });
     }
 
     _loadSalesMen(id?: number, text?: string) {
-        this.salesInvoiceService.getLookups().subscribe((result: any) => {
-            this.lookupRowFields = [
-                this.currentLanguage === 1 ? 'ID' : 'الرقم',
-                this.currentLanguage === 1 ? 'Description' : 'الاسم',
-                this.currentLanguage === 1 ? 'SalesDivisionID' : 'القسم'
-            ];
-            let salesMen = result.SalesMans;
-            let matchedSalesMen = [];
-            for (let i = 0; i < salesMen.length; i++) {
-                if (salesMen[i].ID == id) {
-                    matchedSalesMen.push(salesMen[i]);
+        this.salesInvoiceService.getLookups().subscribe({
+            next: (result: any) => {
+                this.lookupRowFields = [
+                    this.currentLanguage === 1 ? 'ID' : 'الرقم',
+                    this.currentLanguage === 1 ? 'Description' : 'الاسم',
+                    this.currentLanguage === 1 ? 'SalesDivisionID' : 'القسم'
+                ];
+                let salesMen = result.SalesMans;
+                let matchedSalesMen = [];
+                for (let i = 0; i < salesMen.length; i++) {
+                    if (salesMen[i].ID == id) {
+                        matchedSalesMen.push(salesMen[i]);
+                    }
                 }
+
+                salesMen = matchedSalesMen;
+
+                if (salesMen.length == 0) {
+                    salesMen = result.SalesMans;
+                }
+
+                salesMen = salesMen.filter((item: any) => item.Description.toLowerCase().includes((text ?? '').toLowerCase()));
+
+                for (let i = 0; i < salesMen.length; i++) {
+                    this.lookupRows.push([salesMen[i].ID, salesMen[i].Description, salesMen[i].SalesDivisionID]);
+                }
+
+            },
+            error: (error) => {
+                Swal.fire({
+                    icon: "error",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? 'Oops...' : 'خطأ',
+                    text: error.error.Message,
+                });
             }
-
-            salesMen = matchedSalesMen;
-
-            if (salesMen.length == 0) {
-                salesMen = result.SalesMans;
-            }
-
-            salesMen = salesMen.filter((item: any) => item.Description.toLowerCase().includes((text ?? '').toLowerCase()));
-
-            for (let i = 0; i < salesMen.length; i++) {
-                this.lookupRows.push([salesMen[i].ID, salesMen[i].Description, salesMen[i].SalesDivisionID]);
-            }
-
-        }, (error) => {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error.error.Message,
-            });
         });
     }
 
     _loadPOS() {
-        this.salesInvoiceService.getUserPOS().subscribe((result: any) => {
-            this.lookupRowFields = [
-                this.currentLanguage === 1 ? 'ID' : 'الرقم',
-                this.currentLanguage === 1 ? 'Description' : 'الاسم',
-                this.currentLanguage === 1 ? 'POSID' : 'الموقع'
-            ];
-            for (let i = 0; i < result.length; i++) {
-                this.lookupRows.push([result[i].ID, result[i].POSDescription, result[i].PosID]);
+        this.salesInvoiceService.getUserPOS().subscribe({
+            next: (result: any) => {
+                this.lookupRowFields = [
+                    this.currentLanguage === 1 ? 'ID' : 'الرقم',
+                    this.currentLanguage === 1 ? 'Description' : 'الاسم',
+                    this.currentLanguage === 1 ? 'POSID' : 'الموقع'
+                ];
+                for (let i = 0; i < result.length; i++) {
+                    this.lookupRows.push([result[i].ID, result[i].POSDescription, result[i].PosID]);
+                }
+            }, error: (error) => {
+                Swal.fire({
+                    icon: "error",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? 'Oops...' : 'خطأ',
+                    text: error.error.Message,
+                });
             }
-        }, (error) => {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error.error.Message,
-            });
         });
     }
 
-    // _loadProducts() {
-    //     const params = { CompanyID: 1, "PageSize": this.pagination.PageSize, "SelectedPageNumber": this.pagination.SelectedPageNumber, SearchFilterQuery: this.filterText };
-    //     this._http.post(this._baseUrl + `api/POS/FetchProudcts`, params).subscribe((result: any) => {
-    //         this.inprocessing = false;
-
-    //         // this._drawData(result);
-
-    //     }, error => { this.inprocessing = false; this.loadingStatus = (error) ? error.Message || error : "Error"; console.error(error) });
-    // }
-
     _loadDrillDownData() {
-        this.salesInvoiceService.getProductsStock(this.data.SalesDivisionPOSID, this.data.productItem.ProductID).subscribe((result: any) => {
-            this.lookupRowFields = [
-                this.currentLanguage === 1 ? 'Code' : 'الكود',
-                this.currentLanguage === 1 ? 'UOM Description' : 'الوحدة',
-                this.currentLanguage === 1 ? 'Available Qty' : 'الكمية'
-            ];
-            for (let i = 0; i < result.length; i++) {
-                this.lookupRows.push([result[i].Code, result[i].UOMDescription, result[i].DeviceAvailableQty]);
+        this.salesInvoiceService.getProductsStock(this.data.SalesDivisionPOSID, this.data.productItem.ProductID).subscribe({
+            next: (result: any) => {
+                this.lookupRowFields = [
+                    this.currentLanguage === 1 ? 'Code' : 'الكود',
+                    this.currentLanguage === 1 ? 'UOM Description' : 'الوحدة',
+                    this.currentLanguage === 1 ? 'Available Qty' : 'الكمية'
+                ];
+                for (let i = 0; i < result.length; i++) {
+                    this.lookupRows.push([result[i].Code, result[i].UOMDescription, result[i].DeviceAvailableQty]);
+                }
+            },
+            error: (error) => {
+                Swal.fire({
+                    icon: "error",
+                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+                    title: this.currentLanguage === 1 ? 'Oops...' : 'خطأ',
+                    text: error.error.Message,
+                });
             }
-        }, (error) => {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error.error.Message,
-            });
         });
     }
 
@@ -235,13 +240,10 @@ export class SimpleLOVComponent {
             this._loadPOS();
         else if (this.data.dataType === "drillDown")
             this._loadDrillDownData();
-        // else
-        //     this._loadProducts();
     }
 
     ngOnInit() {
         this.Sys_Labels();
-        console.log(this.currentLanguage);
         if (!this.data.idName)
             this.data.idName = "ID";
 

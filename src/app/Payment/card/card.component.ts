@@ -98,8 +98,9 @@ export class CardComponent {
     } catch (err) {
       Swal.fire({
         icon: 'error',
-        title: 'Oops...',
-        text: 'Invalid amount!',
+        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+        title: this.currentLanguage == 1 ? 'Error' : 'خطأ',
+        text: this.currentLanguage == 1 ? 'Please enter a valid amount' : 'الرجاء إدخال مبلغ صحيح',
       });
     }
   }
