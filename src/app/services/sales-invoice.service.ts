@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { IUserInfo } from '../Interface/iuser-info';
 
 @Injectable({
     providedIn: 'root'
@@ -8,19 +9,9 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
 export class SalesInvoiceService {
 
-    constructor(private http: HttpClient) {
-        // Comment for testing purpose only
-        const recordDetailsJSON = (window as any).recordDetails;
-        if (recordDetailsJSON) {
-            this.userInfo = {
-                baseUrl: recordDetailsJSON.baseUrl,
-                token: recordDetailsJSON.c,
-                languageID: recordDetailsJSON.languageId,
-                companyID: recordDetailsJSON.companyId,
-                userID: 0
-            };
-        }
-    }
+    constructor(
+        private http: HttpClient,
+    ) { }
 
     // Test data for userInfo object
     // public userInfo: { baseUrl: string; token: string; userID: number; languageID: number, companyID: number } = {
@@ -32,13 +23,7 @@ export class SalesInvoiceService {
     // }
 
     // Live data for userInfo object
-    public userInfo: { baseUrl: string; token: string; languageID: number, companyID: number, userID: number } = {
-        baseUrl: '',
-        token: '',
-        languageID: 0,
-        companyID: 0,
-        userID: 0
-    };
+    userInfo: IUserInfo = (window as any).recordDetails;
 
     Sys_Labels(currentLanguage: number): Observable<any> {
         if (!this.userInfo) {
@@ -46,7 +31,7 @@ export class SalesInvoiceService {
         }
 
         const dataUserInfo = new HttpParams()
-            .set('LanguageID', currentLanguage.toString() ?? '1');
+            .set('LanguageID', (currentLanguage ?? '1').toString());
 
         const url = `${this.userInfo.baseUrl}/api/sec/Gen_Sys_Labels`;
 
@@ -60,7 +45,7 @@ export class SalesInvoiceService {
 
         const dataUserInfo = new HttpParams()
             .set('UserID', this.userInfo.userID != null ? this.userInfo.userID.toString() : '')
-            .set('LanguageID', this.userInfo.languageID != null ? this.userInfo.languageID.toString() : '');
+            .set('LanguageID', this.userInfo.languageId != null ? this.userInfo.languageId.toString() : '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_UserInfo`;
 
@@ -77,11 +62,11 @@ export class SalesInvoiceService {
         }
 
         const dataUserPOS = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID ? this.userInfo.companyID.toString() : '')
+            .set('CompanyID', this.userInfo.companyId ? this.userInfo.companyId.toString() : '')
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
             .set('Query', JSON.stringify(query))
             .set('Paging', '')
-            .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
+            .set('LanguageID', this.userInfo.languageId ? this.userInfo.languageId.toString() : '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_GetUserPOS`;
 
@@ -99,11 +84,11 @@ export class SalesInvoiceService {
         }
 
         const dataCustomers = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID ? this.userInfo.companyID.toString() : '')
+            .set('CompanyID', this.userInfo.companyId ? this.userInfo.companyId.toString() : '')
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
             .set('Query', JSON.stringify(query))
             .set('Paging', '')
-            .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
+            .set('LanguageID', this.userInfo.languageId ? this.userInfo.languageId.toString() : '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_GetCustomers`;
 
@@ -120,11 +105,11 @@ export class SalesInvoiceService {
         }
 
         const dataBranchTables = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID ? this.userInfo.companyID.toString() : '')
+            .set('CompanyID', this.userInfo.companyId ? this.userInfo.companyId.toString() : '')
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
             .set('Query', JSON.stringify(query))
             .set('Paging', '')
-            .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
+            .set('LanguageID', this.userInfo.languageId ? this.userInfo.languageId.toString() : '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_GetBranchTables`;
 
@@ -139,11 +124,11 @@ export class SalesInvoiceService {
         let query = {}
 
         const dataCategories = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID ? this.userInfo.companyID.toString() : '')
+            .set('CompanyID', this.userInfo.companyId ? this.userInfo.companyId.toString() : '')
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
             .set('Query', JSON.stringify(query))
             .set('Paging', '')
-            .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
+            .set('LanguageID', this.userInfo.languageId ? this.userInfo.languageId.toString() : '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_GetCategories`;
 
@@ -158,11 +143,11 @@ export class SalesInvoiceService {
         let query = {}
 
         const dataProducts = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID ? this.userInfo.companyID.toString() : '')
+            .set('CompanyID', this.userInfo.companyId ? this.userInfo.companyId.toString() : '')
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
             .set('Query', JSON.stringify(query))
             .set('Paging', '')
-            .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
+            .set('LanguageID', this.userInfo.languageId ? this.userInfo.languageId.toString() : '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_GetProducts`;
 
@@ -180,11 +165,11 @@ export class SalesInvoiceService {
 
 
         const dataRetailInvoices = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID ? this.userInfo.companyID.toString() : '')
+            .set('CompanyID', this.userInfo.companyId ? this.userInfo.companyId.toString() : '')
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
             .set('Query', JSON.stringify(query))
             .set('Paging', '')
-            .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
+            .set('LanguageID', this.userInfo.languageId ? this.userInfo.languageId.toString() : '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_GetRetailInvoices`;
 
@@ -199,11 +184,11 @@ export class SalesInvoiceService {
         let query = {}
 
         const dataPromotions = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID ? this.userInfo.companyID.toString() : '')
+            .set('CompanyID', this.userInfo.companyId ? this.userInfo.companyId.toString() : '')
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
             .set('Query', JSON.stringify(query))
             .set('Paging', '')
-            .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
+            .set('LanguageID', this.userInfo.languageId ? this.userInfo.languageId.toString() : '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_GetPromotions`;
 
@@ -216,9 +201,9 @@ export class SalesInvoiceService {
         }
 
         const dataReceiptMethods = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID ? this.userInfo.companyID.toString() : '')
+            .set('CompanyID', this.userInfo.companyId ? this.userInfo.companyId.toString() : '')
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
-            .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
+            .set('LanguageID', this.userInfo.languageId ? this.userInfo.languageId.toString() : '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_GetReceiptMethods`;
 
@@ -231,9 +216,9 @@ export class SalesInvoiceService {
         }
 
         const dataLookups = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID ? this.userInfo.companyID.toString() : '')
+            .set('CompanyID', this.userInfo.companyId ? this.userInfo.companyId.toString() : '')
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
-            .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
+            .set('LanguageID', this.userInfo.languageId ? this.userInfo.languageId.toString() : '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_GetLookups`;
 
@@ -251,11 +236,11 @@ export class SalesInvoiceService {
         }
 
         const dataProductsStock = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID ? this.userInfo.companyID.toString() : '')
+            .set('CompanyID', this.userInfo.companyId ? this.userInfo.companyId.toString() : '')
             .set('UserID', this.userInfo.userID ? this.userInfo.userID.toString() : '')
             .set('Query', JSON.stringify(query))
             .set('Paging', '')
-            .set('LanguageID', this.userInfo.languageID ? this.userInfo.languageID.toString() : '');
+            .set('LanguageID', this.userInfo.languageId ? this.userInfo.languageId.toString() : '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_GetProductsStock`;
 
@@ -267,52 +252,49 @@ export class SalesInvoiceService {
             throw new Error('User info is not defined');
         }
 
-        const createProductObject = (product: { ProductID: any; RetailInvoiceID: any; UOMID: any; TaxGroupID: any; Description: any; UOMDescription: any; ReturnedQty: any; ReturnQty: any; Qty: any; RemainingQty: any; Amount: any; TaxPercentage: any; DiscountPercentage: any; DiscountPerUnit: any; NetTotalBeforeDiscount: any; TotalDiscount: any; NetTotalAfterDiscount: any; TaxAmount: any; NetTotalAfterTax: any; SalesPrice: any; CurrencyID: any; RetailOrderReferenceTransCode: any; Note: any; }) => ({
-            ProductID: product?.ProductID,
-            RetailInvoiceID: product?.RetailInvoiceID,
-            UOMID: product?.UOMID,
-            TaxGroupID: product?.TaxGroupID,
-            Description: product?.Description,
-            UOMDescription: product?.UOMDescription,
-            ReturnedQty: product?.ReturnedQty,
-            ReturnQty: product?.ReturnQty,
-            Qty: product?.Qty,
-            RemainingQty: product?.RemainingQty,
-            Amount: product?.Amount,
-            TaxPercentage: product?.TaxPercentage,
-            DiscountPercentage: product?.DiscountPercentage,
-            DiscountPerUnit: product?.DiscountPerUnit,
-            NetTotalBeforeDiscount: product?.NetTotalBeforeDiscount,
-            TotalDiscount: product?.TotalDiscount,
-            NetTotalAfterDiscount: product?.NetTotalAfterDiscount,
-            TaxAmount: product?.TaxAmount,
-            NetTotalAfterTax: product?.NetTotalAfterTax,
-            Additions: [],
-            Seriales: [],
-            Batches: [],
-            SalesPrice: product?.SalesPrice,
-            CurrencyID: product?.CurrencyID,
-            AppReferenceTransCode: data?.AppReferenceTransCode,
-            RetailOrderReferenceTransCode: product?.RetailOrderReferenceTransCode,
-            Note: product?.Note,
+        const createProductObject = (product: any) => ({
+            ProductID: product.ProductID,
+            RetailInvoiceID: product.RetailInvoiceID,
+            UOMID: product.UOMID,
+            TaxGroupID: product.TaxGroupID,
+            Description: product.Description,
+            UOMDescription: product.UOMDescription,
+            ReturnedQty: product.ReturnedQty,
+            ReturnQty: product.ReturnQty,
+            Qty: product.Qty,
+            RemainingQty: product.RemainingQty,
+            Amount: product.Amount,
+            TaxPercentage: product.TaxPercentage,
+            DiscountPercentage: product.DiscountPercentage,
+            DiscountPerUnit: product.DiscountPerUnit,
+            NetTotalBeforeDiscount: product.NetTotalBeforeDiscount,
+            TotalDiscount: product.TotalDiscount,
+            NetTotalAfterDiscount: product.NetTotalAfterDiscount,
+            TaxAmount: product.TaxAmount,
+            NetTotalAfterTax: product.NetTotalAfterTax,
+            SalesPrice: product.SalesPrice,
+            CurrencyID: product.CurrencyID,
+            AppReferenceTransCode: data.AppReferenceTransCode,
+            RetailOrderReferenceTransCode: product.RetailOrderReferenceTransCode,
+            Note: product.Note,
         });
 
-        const createPaymentObject = (payment: { RetailInvoiceID: any; SalesDivisionID: any; Amount: any; CashReceiptAmount: any; CashReturnedAmount: any; ReceiptMethodID: any; ReceiptMethodTypeID: any; ReceiptTypeID: any; CardNumber: any; CouponID: any; LoyaltyCardID: any; LoyaltyPoints: any; invoiceDate: any; CashierID: any; Note: any; }) => ({
-            RetailInvoiceID: payment?.RetailInvoiceID ?? null,
+        const createPaymentObject = (payment: any) => ({
+            RetailInvoiceID: payment.RetailInvoiceID ?? null,
             SalesDivisionID: data.SalesDivisionPOSID ?? null,
             Amount: data.Amounts ?? 0,
-            CashReceiptAmount: payment?.Amount ?? 0,
-            CashReturnedAmount: (payment?.Amount - data.Amounts ?? 0).toFixed(3),
-            ReceiptMethodID: payment?.ReceiptMethodID,
-            ReceiptMethodTypeID: payment?.ReceiptMethodTypeID,
-            ReceiptTypeID: payment?.ReceiptTypeID,
-            CardNumber: payment?.CardNumber,
-            CouponID: payment?.CouponID,
-            LoyaltyCardID: payment?.LoyaltyCardID,
-            LoyaltyPoints: payment?.LoyaltyPoints,
-            PaymentDate: payment?.invoiceDate,
-            CashierID: payment?.CashierID,
-            Note: payment?.Note,
+            CashReceiptAmount: payment.Amount ?? 0,
+            CashReturnedAmount: (payment.Amount - data.Amounts ?? 0).toFixed(3),
+            ReceiptMethodID: payment.ReceiptMethodID,
+            ReceiptMethodTypeID: payment.ReceiptMethodTypeID,
+            ReceiptTypeID: payment.ReceiptTypeID,
+            CardNumber: payment.CardNumber,
+            CouponID: payment.CouponID,
+            LoyaltyCardID: payment.LoyaltyCardID,
+            LoyaltyPoints: payment.LoyaltyPoints,
+            PaymentDate: payment.invoiceDate,
+            CashierID: payment.CashierID,
+            Note: payment.Note,
         });
 
         const dataString = {
@@ -331,8 +313,8 @@ export class SalesInvoiceService {
             RetailOrderReferenceCode: data.RetailOrderReferenceCode,
             RetailOrderID: data.RetailOrderID,
             SalesInvoiceDate: data.SalesInvoiceDate,
-            Products: data.Products.map((product: { ProductID: any; RetailInvoiceID: any; UOMID: any; TaxGroupID: any; Description: any; UOMDescription: any; ReturnedQty: any; ReturnQty: any; Qty: any; RemainingQty: any; Amount: any; TaxPercentage: any; DiscountPercentage: any; DiscountPerUnit: any; NetTotalBeforeDiscount: any; TotalDiscount: any; NetTotalAfterDiscount: any; TaxAmount: any; NetTotalAfterTax: any; SalesPrice: any; CurrencyID: any; RetailOrderReferenceTransCode: any; Note: any; }) => createProductObject(product)),
-            Payments: data.Payments.map((payment: { RetailInvoiceID: any; SalesDivisionID: any; Amount: any; CashReceiptAmount: any; CashReturnedAmount: any; ReceiptMethodID: any; ReceiptMethodTypeID: any; ReceiptTypeID: any; CardNumber: any; CouponID: any; LoyaltyCardID: any; LoyaltyPoints: any; invoiceDate: any; CashierID: any; Note: any; }) => createPaymentObject(payment)),
+            Products: data.Products.map(createProductObject),
+            Payments: data.Payments.map(createPaymentObject),
             Note: data.Note,
             ReferenceCode: data.ReferenceCode,
             CashBookID: data.CashBookID,
@@ -340,10 +322,10 @@ export class SalesInvoiceService {
         };
 
         const dataRetailInvoice_Create = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID?.toString() || '')
+            .set('CompanyID', this.userInfo.companyId?.toString() || '')
             .set('UserID', this.userInfo.userID?.toString() || '')
             .set('DataString', JSON.stringify(dataString))
-            .set('LanguageID', this.userInfo.languageID?.toString() || '');
+            .set('LanguageID', this.userInfo.languageId?.toString() || '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_RetailInvoice_Create`;
 
@@ -356,10 +338,10 @@ export class SalesInvoiceService {
         }
 
         const dataRetailInvoice_Create = new HttpParams()
-            .set('CompanyID', this.userInfo.companyID?.toString() || '')
+            .set('CompanyID', this.userInfo.companyId?.toString() || '')
             .set('UserID', this.userInfo.userID?.toString() || '')
             .set('RetailInvoiceID', retailInvoiceID?.toString() || '')
-            .set('LanguageID', this.userInfo.languageID?.toString() || '');
+            .set('LanguageID', this.userInfo.languageId?.toString() || '');
 
         const url = `${this.userInfo.baseUrl}/api/sec/POS_RetailInvoice_Void`;
 

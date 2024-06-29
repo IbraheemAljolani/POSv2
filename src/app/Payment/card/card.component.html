@@ -16,8 +16,8 @@
                 <div class="row">
                     <div class="col-xs-8">
                         <label>
-                            {{sysLabels["Card number"]? sysLabels["Card number"].Caption: "Card
-                            number"}}
+                            {{sysLabels["Card number"]?
+                            sysLabels["Card number"].Caption: "Card number"}}
                             <span class="fa fa-question-circle txt-color-blue" role="tooltip" title="Card No"></span>
                         </label>
                         <input #cardNumberRef (focus)="focusedElement = cardNumberElement" [(ngModel)]="cardNumber"

@@ -12,10 +12,10 @@ export class CashComponent {
 
   constructor(public dialogRef: MatDialogRef<any>, @Inject(MAT_DIALOG_DATA) public data: any, private salesInvoiceService: SalesInvoiceService) { }
 
-  displayValue = '';
+  displayValue = this.data.amount;
   sysLabels: any = {};
 
-  currentLanguage = this.salesInvoiceService.userInfo.languageID;
+  currentLanguage = this.salesInvoiceService.userInfo.languageId;
 
   ngOnInit(): void {
     this.Sys_Labels();
@@ -23,33 +23,19 @@ export class CashComponent {
 
   Sys_Labels() {
     this.salesInvoiceService.Sys_Labels(this.currentLanguage).subscribe((result: any) => {
-      for (let i = 0; i < result.length; i++) {
-        this.sysLabels[String(result[i].LabelID).trim()] = result[i];
-      }
+      result.forEach((label: any) => {
+        this.sysLabels[label.LabelID.trim()] = label;
+      });
     });
   }
 
-  numberOnly(event: { which: any; keyCode: any; }): boolean {
-    const charCode = (event.which) ? event.which : event.keyCode;
-
-    if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46) {
-      return false;
-    }
-    return true;
-
+  numberOnly(event: KeyboardEvent): boolean {
+    const charCode = event.which || event.keyCode;
+    return !(charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 46);
   }
 
   addNumber(n: string) {
-    if (this.displayValue != '') {
-
-      let amountTemp = this.displayValue.toString();
-      amountTemp += n;
-      this.displayValue = (amountTemp);
-
-    } else {
-      this.displayValue = n;
-
-    }
+    this.displayValue = this.displayValue ? this.displayValue + n : n;
   }
 
   clearDisplay() {
@@ -61,15 +47,15 @@ export class CashComponent {
   }
 
   onConfirm() {
-    try {
-      let amount = parseFloat(this.displayValue);
+    const amount = parseFloat(this.displayValue);
+    if (!isNaN(amount)) {
       this.dialogRef.close(amount);
-    } catch (err) {
+    } else {
       Swal.fire({
         icon: 'error',
         confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-        title: this.currentLanguage == 1 ? 'Error' : 'خطأ',
-        text: this.currentLanguage == 1 ? 'Please enter a valid amount' : 'الرجاء إدخال مبلغ صحيح',
+        title: this.currentLanguage === 1 ? 'Error' : 'خطأ',
+        text: this.currentLanguage === 1 ? 'Please enter a valid amount' : 'الرجاء إدخال مبلغ صحيح',
       });
     }
   }

@@ -27,25 +27,29 @@ export class CustomerSelectComponent {
 
     sysLabels: any = {};
 
-    currentLanguage = this.salesInvoiceService.userInfo.languageID;
+    currentLanguage = this.salesInvoiceService.userInfo.languageId;
 
     ngOnInit(): void {
         this.Sys_Labels();
+        this.initializeCustomerDetails();
+    }
+
+    private initializeCustomerDetails(): void {
         if (this.result) {
-            this.parsedResult = JSON.parse(this.result);
-            this.customerID = this.parsedResult[0];
-            this.customerDescription = this.parsedResult[1];
+            const [customerID, customerDescription] = JSON.parse(this.result);
+            this.customerID = customerID;
+            this.customerDescription = customerDescription;
         } else {
-            this.customerID = this.data.DefaultCustomer.CustID ? this.data.DefaultCustomer.CustID : '---'
-            this.customerDescription = this.data.DefaultCustomer.CustID ? this.data.DefaultCustomer.CustomerDescription : '---'
+            this.customerID = this.data.DefaultCustomer.CustID || '---';
+            this.customerDescription = this.data.DefaultCustomer.CustomerDescription || '---';
         }
     }
 
-    Sys_Labels() {
+    Sys_Labels(): void {
         this.salesInvoiceService.Sys_Labels(this.currentLanguage).subscribe((result: any) => {
-            for (let i = 0; i < result.length; i++) {
-                this.sysLabels[String(result[i].LabelID).trim()] = result[i];
-            }
+            result.forEach((label: any) => {
+                this.sysLabels[label.LabelID.trim()] = label;
+            });
         });
     }
 

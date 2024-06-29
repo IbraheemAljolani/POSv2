@@ -36,7 +36,7 @@
             </div>
 
             <!-- tables dropdown-menu-->
-            <div class="parameter-context m-l-20" clickOutside (clickOutside)="clickedOutsideTable()">
+            <div class="parameter-context m-l-20" clickOutside (clickOutside)="isDropdownVisible = false">
                 <div class="dropdown" style="position:relative">
                     <div>{{(sysLabels['Table'])?sysLabels['Table'].Caption:'Table'}}</div>
                     <div class="dropdown-toggle btn-trans" (click)="toggleDropdownVisible()" title="{{selectedTable}}">
@@ -326,13 +326,13 @@
 
                                                                 <div class="btn-flat" data-toggle="dropdown"
                                                                     [style.pointer-events]="selectedInvoice.SalesInvoiceStatusID === 'Printed' ? 'none' : 'auto' && selectedInvoice.SalesInvoiceStatusID === 'Rejected' ? 'none' : 'auto'"
-                                                                    (click)="increaseQty(product)">
+                                                                    (click)="updateProductQuantity(product, true)">
                                                                     <i class="fa fa-plus txt-color-green"></i>
                                                                 </div>
 
                                                                 <div class="btn-flat"
                                                                     [style.pointer-events]="selectedInvoice.SalesInvoiceStatusID === 'Printed' ? 'none' : 'auto' && selectedInvoice.SalesInvoiceStatusID === 'Rejected' ? 'none' : 'auto'"
-                                                                    (click)="decreaseQty(product)">
+                                                                    (click)="updateProductQuantity(product, false)">
 
                                                                     <i class="fa fa-minus txt-color-dangerLight"></i>
                                                                 </div>
@@ -363,7 +363,7 @@
                                                             <a role="button" class="pointer" title="Remove"
                                                                 *ngIf="selectedInvoice.SalesInvoiceStatusID == 'Created'"
                                                                 aria-label="Remove">
-                                                                <i (click)="deleteItem(product)"
+                                                                <i (click)="deleteProductFromCart(product)"
                                                                     class="fa fa-trash txt-color-dangerLight"
                                                                     aria-hidden="true">
                                                                 </i>
@@ -409,8 +409,8 @@
 
                                                         <tr>
                                                             <td>
-                                                                {{(sysLabels['Promo Notes'])?sysLabels['Promo
-                                                                Notes'].Caption:'Promo Notes'}}
+                                                                {{(sysLabels['Promo Notes'])?
+                                                                sysLabels['Promo Notes'].Caption:'Promo Notes'}}
                                                             </td>
                                                             <td colspan="2">
                                                                 <i class="fa fa-caret-right m-r-5"
@@ -438,9 +438,9 @@
                                                         </tr>
 
                                                         <tr>
-                                                            <td>{{(sysLabels['Total
-                                                                Discount'])?sysLabels['Total
-                                                                Discount'].Caption:'Total Discount'}}</td>
+                                                            <td>{{(sysLabels['Total Discount'])?
+                                                                sysLabels['Total Discount'].Caption:'Total Discount'}}
+                                                            </td>
                                                             <td>
                                                                 <i class="fa fa-caret-right m-r-5"
                                                                     aria-hidden="true"></i>
@@ -479,14 +479,14 @@
                                                             <span>
                                                                 <ng-container
                                                                     *ngIf="promoSelectAllFlag; else noSelectAll">
-                                                                    {{(sysLabels['Deselect All
-                                                                    Promotions'])?sysLabels['Deselect All
-                                                                    Promotions'].Caption:'Deselect All Promotions'}}
+                                                                    {{(sysLabels['Deselect All Promotions'])?
+                                                                    sysLabels['Deselect All Promotions'].
+                                                                    Caption:'Deselect All Promotions'}}
                                                                 </ng-container>
                                                                 <ng-template #noSelectAll>
-                                                                    {{(sysLabels['Select All
-                                                                    Promotions'])?sysLabels['Select All
-                                                                    Promotions'].Caption:'Select All Promotions'}}
+                                                                    {{(sysLabels['Select All Promotions'])?
+                                                                    sysLabels['Select All Promotions'].
+                                                                    Caption:'Select All Promotions'}}
                                                                 </ng-template>
                                                             </span>
                                                         </label>
@@ -542,9 +542,9 @@
                                                                 </td>
                                                                 <td> ---</td>
                                                                 <td>
-                                                                    <strong>{{(sysLabels['Minimum
-                                                                        Qty'])?sysLabels['Minimum
-                                                                        Qty'].Caption:'Minimum Qty'}}</strong>
+                                                                    <strong>{{(sysLabels['Minimum Qty'])?
+                                                                        sysLabels['Minimum Qty'].
+                                                                        Caption:'Minimum Qty'}}</strong>
                                                                 </td>
                                                                 <td> ---</td>
                                                             </tr>
@@ -634,7 +634,7 @@
                                                             <a role="button"
                                                                 *ngIf="selectedInvoice.SalesInvoiceStatusID != 'Printed'"
                                                                 class="pointer m-r-15" title="Delete"
-                                                                (click)="deleteCash(item)" aria-label="Delete">
+                                                                (click)="deletePayment(item)" aria-label="Delete">
                                                                 <i class="fa fa-trash txt-color-dangerLight"></i>
                                                             </a>
                                                             <a role="button" class="pointer" title="Show more"
@@ -814,9 +814,9 @@
                                                     *ngIf="activeInvoiceTab === 'invoice' && selectedInvoice.SalesInvoiceStatusID != 'Printed'"
                                                     class="btn btn-success m-t-10 m-l-5 pull-left">
                                                     <i class="fa fa-chevron-left m-r-5" aria-hidden="true"></i>
-                                                    {{(sysLabels['Check Out
-                                                    Invoice'])?sysLabels['Check Out Invoice'].Caption:'Check
-                                                    Out Invoice'}}
+                                                    {{(sysLabels['Check Out Invoice'])?
+                                                    sysLabels['Check Out Invoice'].
+                                                    Caption:'Check Out Invoice'}}
                                                 </button>
 
                                                 <button type="button" *ngIf="activeInvoiceTab === 'promo'"
@@ -842,9 +842,8 @@
                                             <div class="col-sm-9">
                                                 <ul class="" id="sparks">
                                                     <li class="sparks-info">
-                                                        <h5 style="margin:0;"> {{(sysLabels['Net
-                                                            Total'])?sysLabels['Net Total'].Caption:'Net
-                                                            Total'}}
+                                                        <h5 style="margin:0;"> {{(sysLabels['Net Total'])?
+                                                            sysLabels['Net Total'].Caption:'Net Total'}}
                                                             <span class="txt-color-blue">
                                                                 <i class="fa fa-money"></i>
                                                                 &nbsp; {{selectedInvoice.NetTotalAfterTax}}
@@ -883,9 +882,8 @@
                                                             style="margin-top:0" class="m-r-5"
                                                             [disabled]="selectedInvoice.SalesInvoiceStatusID === 'Printed' || selectedInvoice.SalesInvoiceStatusID === 'Rejected'"
                                                             [ngStyle]="{'cursor': (selectedInvoice.SalesInvoiceStatusID === 'Printed' || selectedInvoice.SalesInvoiceStatusID === 'Rejected') ? 'no-drop' : 'auto'}" />
-                                                        {{(sysLabels['Service
-                                                        Charge'])?sysLabels['Service Charge'].Caption:'Service
-                                                        Charge'}}
+                                                        {{(sysLabels['Service Charge'])?
+                                                        sysLabels['Service Charge'].Caption:'Service Charge'}}
                                                     </strong>
                                                 </div>
                                                 <div class="col-sm-4 text-center">
@@ -894,9 +892,9 @@
                                                     selectedInvoice.DiscountTotal : 0.000}} $
                                                 </div>
                                                 <div class="col-sm-4 text-right">
-                                                    <strong>{{(sysLabels['Total
-                                                        Tax'])?sysLabels['Total Tax'].Caption:'Total
-                                                        Tax'}}:</strong> {{selectedInvoice.TotalTax ?
+                                                    <strong>{{(sysLabels['Total Tax'])?
+                                                        sysLabels['Total Tax'].Caption:'Total Tax'}}:</strong>
+                                                    {{selectedInvoice.TotalTax ?
                                                     selectedInvoice.TotalTax : 0.000}} $
                                                 </div>
                                             </div>
@@ -1079,8 +1077,8 @@
                                 [errorCorrectionLevel]="'M'" [imageHeight]="75" [imageWidth]="75" [margin]="4"
                                 [scale]="1" [title]="'A custom title attribute'" [width]="100"></qrcode>
                         </div>
-                        <div class="center-text m-t-60">{{currentLanguage == 1 ? 'Thanks for your visit' : 'شكرا
-                            لزيارتكم'}}</div>
+                        <div class="center-text m-t-60">{{currentLanguage == 1 ?
+                            'Thanks for your visit' : 'شكرا لزيارتكم'}}</div>
                     </div>
                 </header>
             </div>

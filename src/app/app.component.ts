@@ -6,7 +6,7 @@ import { CashComponent } from 'src/app/Payment/cash/cash.component';
 import { CustomerSelectComponent } from 'src/app/popup/customer-select/customer-select.component';
 import { SimpleLOVComponent } from 'src/app/popup/simple-lov/simple-lov.component';
 import { SalesInvoiceService } from 'src/app/services/sales-invoice.service';
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertIcon } from 'sweetalert2';
 import { v4 as uuid } from 'uuid';
 
 @Component({
@@ -16,7 +16,11 @@ import { v4 as uuid } from 'uuid';
 })
 export class AppComponent {
 
-    constructor(public dialog: MatDialog, private salesInvoiceService: SalesInvoiceService, @Inject(DOCUMENT) private document: any) { }
+    constructor(
+        public dialog: MatDialog,
+        private salesInvoiceService: SalesInvoiceService,
+        @Inject(DOCUMENT) private document: any
+    ) { }
 
     currentYear = new Date().getFullYear();
     version: string = '';
@@ -32,7 +36,6 @@ export class AppComponent {
     selectedCategory: any;
     searchProduct: string = '';
     newProducts: any = [];
-    languageID = this.salesInvoiceService.userInfo.languageID;
     message: string = '';
     datepicker = new Date().toISOString().slice(0, 10);
     filterRecallSearch: string[] = ['date'];
@@ -57,64 +60,123 @@ export class AppComponent {
     isFullscreen = false;
     isDisabled = true;
     sysLabels: any = {};
-    currentLanguage = this.salesInvoiceService.userInfo.languageID;
+    currentLanguage = this.salesInvoiceService.userInfo.languageId;
+
+    private showDialog(icon: SweetAlertIcon, title: string, text: string) {
+        const titles: { [key: string]: string } = { "Warning...": "تحذير...", "Oops...": "عذرا..." };
+        const texts: { [key: string]: string } = {
+            "Error in getting branch tables.": "خطأ في الحصول على الجداول الفرعية.",
+        };
+
+        Swal.fire({
+            icon: icon,
+            confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+            title: this.currentLanguage === 1 ? title : titles[title],
+            text: this.currentLanguage === 1 ? text : texts[text] || text,
+        });
+    }
+
+    private showWarningDialog(errorMessage: string) {
+        const languageSettings = this.getLanguageSettings(errorMessage);
+        Swal.fire({
+            icon: "question",
+            confirmButtonText: languageSettings.confirmButtonText,
+            title: languageSettings.title,
+            text: languageSettings.text,
+        });
+    }
+
+    private getLanguageSettings(errorMessage: string) {
+        const messages: { [key: string]: string[] } = {
+            branchTables: ["Error in getting branch tables.", "خطأ في الحصول على جداول الفروع."],
+            userInfo: ["Error in getting user info.", "خطأ في الحصول على معلومات المستخدم."],
+            invoice: ["Please select an invoice.", "الرجاء تحديد فاتورة."],
+            categories: ["Error in getting categories.", "خطأ في الحصول على الفئات."],
+            products: ["Error in getting products.", "خطأ في الحصول على المنتجات."],
+            retailInvoices: ["Error in getting retail invoices.", "خطأ في الحصول على الفواتير التجزئة."],
+            promotions: ["Error in getting promotions.", "خطأ في الحصول على العروض."],
+            receiptMethods: ["Error in getting receipt methods.", "خطأ في الحصول على طرق الدفع."],
+            alreadyPaid: ["Invoice is already paid.", "الفاتورة مدفوعة بالفعل."],
+            creatingInvoice: ["Error in creating invoice.", "خطأ في إنشاء الفاتورة."],
+            outOfStock: ["Product is out of stock.", "المنتج غير متوفر."],
+            paidLessAmount: ["Paid amount is less than total amount.", "المبلغ المدفوع أقل من المبلغ الإجمالي."]
+        };
+
+        const defaultMsg = ["An unknown error occurred.", "حدث خطأ غير معروف."];
+        const [en, ar] = messages[errorMessage] || defaultMsg;
+        const textMessage = this.currentLanguage === 1 ? en : ar;
+
+        return {
+            confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
+            title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
+            text: textMessage
+        };
+    }
+
+    private showErrorDialog(errorMessage: string) {
+        this.showDialog("error", "Oops...", errorMessage);
+    }
 
     ngOnInit(): void {
-        const packageJson = require('../../package.json');
-        this.version = packageJson.version;
+        this.loadPackageVersion();
         this.getUserInfo();
         this.Sys_Labels();
+        this.initializeFullScreenElement();
+        this.loadCategories();
+    }
 
+    private loadPackageVersion(): void {
+        const packageJson = require('../../package.json');
+        this.version = packageJson.version;
+    }
+
+    private initializeFullScreenElement(): void {
         this.elem = document.documentElement;
+    }
 
+    private loadCategories(): void {
         let categories = sessionStorage.getItem('categories');
         if (categories) {
             this.categories = JSON.parse(categories);
         } else {
             this.getCategories();
         }
+        this.loadInitialProducts();
+    }
+
+    private loadInitialProducts(): void {
         if (this.categories && this.categories.length > 0) {
             this.getProducts(this.categories[0].CategoryID);
         }
     }
 
     getColor(statusId: string): string {
-        switch (statusId) {
-            case 'Created':
-                return '#6eb66e';
-            case 'Printed':
-                return '#f1da91';
-            case 'Under Delivery':
-                return '#96c7e7';
-            case 'Void':
-                return '#f25022';
-            default:
-                return '';
-        }
+        const statusColors: { [key: string]: string } = {
+            'Created': '#6eb66e',
+            'Printed': '#f1da91',
+            'Under Delivery': '#96c7e7',
+            'Void': '#f25022'
+        };
+
+        return statusColors[statusId as keyof typeof statusColors] || '';
     }
 
     Sys_Labels() {
         this.salesInvoiceService.Sys_Labels(this.currentLanguage).subscribe((result: any) => {
-            for (let i = 0; i < result.length; i++) {
-                this.sysLabels[String(result[i].LabelID).trim()] = result[i];
-            }
+            result.forEach((label: { LabelID: any; }) => {
+                this.sysLabels[String(label.LabelID).trim()] = label;
+            });
         });
 
-        if (this.currentLanguage === 1) {
-            this.document.body.classList.remove('trio-rtl');
-            this.document.body.classList.add('trio-ltr');
-            this.document.body.dir = 'ltr';
-        } else {
-            this.document.body.classList.remove('trio-ltr');
-            this.document.body.classList.add('trio-rtl');
-            this.document.body.dir = 'rtl';
-        }
+        const direction = this.currentLanguage === 1 ? 'ltr' : 'rtl';
+        this.document.body.classList.remove('trio-' + (direction === 'ltr' ? 'rtl' : 'ltr'));
+        this.document.body.classList.add('trio-' + direction);
+        this.document.body.dir = direction;
     }
 
     changeLanguage() {
-        this.languageID = this.languageID === 1 ? 2 : 1;
-        this.salesInvoiceService.userInfo.languageID = this.languageID;
-        this.currentLanguage = this.languageID;
+        this.currentLanguage = this.currentLanguage === 1 ? 2 : 1;
+        this.salesInvoiceService.userInfo.languageId = this.currentLanguage;
         this.Sys_Labels();
         this.getUserInfo();
         this.getCategories();
@@ -123,75 +185,73 @@ export class AppComponent {
         this.getReceiptMethods();
     }
 
-
-
     toggleDropdownVisible() {
         this.isDropdownVisible = !this.isDropdownVisible;
         this.isDropdownInSession = sessionStorage.getItem('branchTables');
-        if (this.isDropdownVisible && !this.isDropdownInSession) {
-            this.salesInvoiceService.getBranchTables(this.userInfo.SalesDivision.SalesDivisionPosID).subscribe((result: any) => {
-                if (result) {
-                    this.branchTables = result;
-                    sessionStorage.setItem('branchTables', JSON.stringify(result));
-                } else {
-                    Swal.fire({
-                        icon: "question",
-                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                        text: this.currentLanguage === 1 ? "Error in getting branch tables." : "خطأ في الحصول على الجداول الفرعية.",
-                    });
-                }
-            }, (error) => {
-                Swal.fire({
-                    icon: "error",
-                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
-                    text: error.error.Message,
-                });
-            });
-        } else {
-            this.branchTables = JSON.parse(this.isDropdownInSession);
+
+        if (!this.isDropdownVisible) {
+            this.setBranchTablesFromSession();
+            return;
         }
+
+        if (this.isDropdownInSession) return;
+
+        this.fetchAndStoreBranchTables();
+    }
+
+    private setBranchTablesFromSession() {
+        this.branchTables = JSON.parse(this.isDropdownInSession);
+    }
+
+    private fetchAndStoreBranchTables() {
+        this.salesInvoiceService.getBranchTables(this.userInfo.SalesDivision.SalesDivisionPosID).subscribe(
+            result => this.handleBranchTablesResult(result),
+            error => this.handleError(error)
+        );
+    }
+
+    private handleBranchTablesResult(result: any) {
+        if (result) {
+            this.branchTables = result;
+            sessionStorage.setItem('branchTables', JSON.stringify(result));
+        } else {
+            this.showWarningDialog("branchTables");
+        }
+    }
+
+    private handleError(error: any) {
+        this.showErrorDialog(error.error.Message);
     }
 
     goTab(tab: string) {
         this.activeInvoiceTab = tab;
 
-        if (tab === 'recall') {
-            this.getRetailInvoices();
-        }
-
-        if (tab === 'promo') {
-            this.getPromotions();
-        }
-
-        if (tab === 'cash') {
-            this.getReceiptMethods();
+        switch (tab) {
+            case 'recall':
+                this.getRetailInvoices();
+                break;
+            case 'promo':
+                this.getPromotions();
+                break;
+            case 'cash':
+                this.getReceiptMethods();
+                break;
         }
     }
 
     getUserInfo() {
         this.salesInvoiceService.getUserInfo().subscribe({
-            next: (result) => {
-                if (result && typeof result === 'object') {
-                    this.userInfo = result;
-                } else {
-                    Swal.fire({
-                        icon: "question",
-                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                        text: this.currentLanguage === 1 ? "Error in getting user info." : "خطأ في الحصول على معلومات المستخدم.",
-                    });
-                }
-            }, error: (error) => {
-                Swal.fire({
-                    icon: "error",
-                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
-                    text: error && error.error && error.error.Message ? error.error.Message : 'Unknown error',
-                });
-            }
+            next: (result) => this.handleUserInfoResponse(result),
+            error: (error) => this.showErrorDialog(error.error.Message)
         });
+    }
+
+    private handleUserInfoResponse(result: any) {
+        if (result && typeof result === 'object') {
+            this.userInfo = result;
+        } else {
+            this.showWarningDialog("userInfo");
+        }
     }
 
     openPOSDialog() {
@@ -200,7 +260,7 @@ export class AppComponent {
             maxHeight: '98%',
             width: "60%",
             minWidth: '300px',
-            direction: "ltr",
+            direction: this.currentLanguage === 1 ? "ltr" : "rtl",
             data: { dataType: "POS", isMultiCheck: false, title: "POS", idName: "POSID", selectedPOSID: this.userInfo.RetailUserPOS.SalesDivisionPOSID },
         });
 
@@ -210,12 +270,7 @@ export class AppComponent {
     openCustomerDialog() {
 
         if (!this.selectedInvoice) {
-            Swal.fire({
-                icon: "warning",
-                confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                text: this.currentLanguage === 1 ? "Please select an invoice." : "الرجاء تحديد فاتورة.",
-            });
+            this.showWarningDialog("invoice");
             return;
         }
 
@@ -267,44 +322,27 @@ export class AppComponent {
         });
     }
 
-    setTable(tbl: any) {
+    setTable(tbl: { ID: string; Description: string }): void {
         sessionStorage.setItem('selectedTable', JSON.stringify(tbl));
         this.selectedTable = `${tbl.ID} - ${tbl.Description}`;
-        this.isDropdownVisible = false;
-    }
-
-    clickedOutsideTable(): void {
         this.isDropdownVisible = false;
     }
 
     getCategories() {
         this.salesInvoiceService.getCategories().subscribe({
             next: (result: any) => {
-                if (result) {
-                    this.categories = result.filter((item: { CategoryParentID: number; }) => item.CategoryParentID === 0);
-                    sessionStorage.setItem('categories', JSON.stringify(this.categories));
-                    if (this.categories.length > 0) {
-                        if (this.categories && this.categories.length > 0) {
-                            this.getProducts(this.categories[0].CategoryID);
-                        }
-                    }
-                } else {
-                    Swal.fire({
-                        icon: "question",
-                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                        text: this.currentLanguage === 1 ? "Error in getting categories." : "خطأ في الحصول على الفئات.",
-                    });
+                if (!result) {
+                    this.showWarningDialog("categories");
+                    return;
+                }
+
+                this.categories = result.filter((item: { CategoryParentID: number; }) => item.CategoryParentID === 0);
+                sessionStorage.setItem('categories', JSON.stringify(this.categories));
+                if (this.categories.length > 0) {
+                    this.getProducts(this.categories[0].CategoryID);
                 }
             },
-            error: (error) => {
-                Swal.fire({
-                    icon: "error",
-                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
-                    text: error.error.Message,
-                });
-            }
+            error: (error) => this.showErrorDialog(error.error.Message)
         });
     }
 
@@ -313,38 +351,35 @@ export class AppComponent {
         this.searchProduct = '';
         this.newProducts = [];
         sessionStorage.setItem('selectedCategory', JSON.stringify(categoryID));
+
         this.salesInvoiceService.getProducts().subscribe({
             next: (result: any) => {
-                if (result) {
-                    this.products = result.filter((item: { CategoryID: number; }) => item.CategoryID === categoryID);
-                    this.selectedCategory = sessionStorage.getItem('selectedCategory');
-                } else {
-                    Swal.fire({
-                        icon: "question",
-                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                        text: this.currentLanguage === 1 ? "Error in getting products." : "خطأ في الحصول على المنتجات.",
-                    });
-                }
+                this.handleProductResult(result, categoryID);
                 this.loading = false;
             },
             error: (error) => {
-                Swal.fire({
-                    icon: "error",
-                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
-                    text: error.error.Message,
-                });
+                this.showErrorDialog(error.error.Message);
                 this.loading = false;
             }
         });
     }
 
-    async searchProducts(searchProduct: string) {
-        this.loading = true;
+    private handleProductResult(result: any, categoryID: number) {
+        if (result) {
+            this.products = result.filter((item: { CategoryID: number; }) => item.CategoryID === categoryID);
+            this.selectedCategory = sessionStorage.getItem('selectedCategory');
+        } else {
+            this.showWarningDialog("products");
+        }
+    }
 
-        this.newProducts = this.products.filter((product: { DescriptionEn: any; DescriptionAr: any; }) =>
-            (this.languageID === 1 ? product.DescriptionEn : product.DescriptionAr).toLowerCase().includes(searchProduct.toLowerCase())
+    searchProducts(searchTerm: string) {
+        this.loading = true;
+        this.message = '';
+
+        const descriptionKey = this.currentLanguage === 1 ? 'DescriptionEn' : 'DescriptionAr';
+        this.newProducts = this.products.filter((product: { [x: string]: string; }) =>
+            product[descriptionKey].toLowerCase().includes(searchTerm.toLowerCase())
         );
 
         if (this.newProducts.length === 0) {
@@ -363,17 +398,17 @@ export class AppComponent {
 
     toggleFilter(filter: { checked: boolean; value: any; }): void {
         filter.checked = !filter.checked;
-        if (filter.checked) {
-            this.filterRecallSearch.push(filter.value);
-        } else {
-            this.filterRecallSearch = this.filterRecallSearch.filter(item => item !== filter.value);
-        }
+        this.filterRecallSearch = filter.checked
+            ? [...this.filterRecallSearch, filter.value]
+            : this.filterRecallSearch.filter(item => item !== filter.value);
+
         this.getRetailInvoices();
     }
 
-    changeDate(date: any) {
-        date.setDate(date.getDate() + 1);
-        this.datepicker = date.toISOString().slice(0, 10);
+    changeDate(date: Date): void {
+        const nextDay = new Date(date);
+        nextDay.setDate(date.getDate() + 1);
+        this.datepicker = nextDay.toISOString().split('T')[0];
         this.getRetailInvoices();
     }
 
@@ -385,118 +420,103 @@ export class AppComponent {
         }
     }
 
-    getRetailInvoices() {
-        this.salesInvoiceService.getRetailInvoices(this.userInfo?.RetailUserPOS?.SalesDivisionPOSID).subscribe({
-            next: (result: any) => {
-                if (result) {
-
-                    if (this.filterRecallSearch.includes('date')) {
-                        this.retailInvoices = this.filterByDate(result);
-                    } else {
-                        this.retailInvoices = this.filterByStatus(result);
-                    }
-
-                } else {
-                    Swal.fire({
-                        icon: "question",
-                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                        text: this.currentLanguage === 1 ? "Error in getting retail invoices." : "خطأ في الحصول على الفواتير التجزئة.",
-                    });
-                }
-            },
-            error: (error) => {
-                Swal.fire({
-                    icon: "error",
-                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
-                    text: error.error.Message,
-                });
-            }
+    getRetailInvoices(): void {
+        const posId = this.userInfo?.RetailUserPOS?.SalesDivisionPOSID;
+        this.salesInvoiceService.getRetailInvoices(posId).subscribe({
+            next: (result: any) => this.processInvoices(result),
+            error: (error) => this.showErrorDialog(error.error.Message)
         });
     }
 
-    filterByDate(result: any[]) {
-        const filterFunc = (item: { CreatedDate: string; SalesInvoiceStatusID?: string }) => {
-            const isDateMatch = item.CreatedDate.slice(0, 10) === this.datepicker;
-            const isStatusMatch = this.filterRecallSearch.length > 1 ? (item.SalesInvoiceStatusID && this.filterRecallSearch.includes(item.SalesInvoiceStatusID.toLowerCase())) : true;
-            return isDateMatch && isStatusMatch;
-        };
-        return result.filter(filterFunc);
-    }
-
-    filterByStatus(result: any[]) {
-        if (this.filterRecallSearch.length === 1) {
-            return result.filter((item: { SalesInvoiceStatusID: string }) =>
-                this.filterRecallSearch.includes(item.SalesInvoiceStatusID.toLowerCase())
-            );
+    private processInvoices(invoices: any[]): void {
+        if (!invoices) {
+            this.showWarningDialog("retailInvoices");
+            return;
         }
-        return result;
+        this.retailInvoices = this.filterRecallSearch.includes('date')
+            ? this.filterByDate(invoices)
+            : this.filterByStatus(invoices);
     }
 
-    invoiceDetails(invoice: any) {
-        this.addToCart = [];
+    filterByDate(invoices: any[]): any[] {
+        return invoices.filter(({ CreatedDate, SalesInvoiceStatusID }) => {
+            const dateMatches = CreatedDate.slice(0, 10) === this.datepicker;
+            const statusMatches = this.filterRecallSearch.length > 1
+                ? SalesInvoiceStatusID && this.filterRecallSearch.includes(SalesInvoiceStatusID.toLowerCase())
+                : true;
+            return dateMatches && statusMatches;
+        });
+    }
+
+    filterByStatus(invoices: any[]): any[] {
+        return this.filterRecallSearch.length === 1
+            ? invoices.filter(({ SalesInvoiceStatusID }) =>
+                this.filterRecallSearch.includes(SalesInvoiceStatusID.toLowerCase())
+            )
+            : invoices;
+    }
+
+    invoiceDetails(invoice: any): void {
+        this.resetInvoiceDetails();
         this.selectedInvoice = invoice;
-        this.selectedInvoiceProducts = this.selectedInvoice.Products;
+        this.selectedInvoiceProducts = invoice.Products;
         this.addToCart.push(...this.selectedInvoiceProducts);
         this.activeInvoiceTab = 'invoice';
-        this.paidAmount = this.selectedInvoice.NetTotalAfterTax;
+        this.paidAmount = invoice.NetTotalAfterTax;
+
         if (invoice.SalesInvoiceStatusID === "Printed") {
-            if (!this.selectedPayments) {
-                this.selectedPayments = [];
-            }
-
-            this.totalAmount = this.selectedInvoice.Payments[0].CashReceiptAmount;
-
-            this.paidAmount = this.selectedInvoice.Payments[0].CashReturnedAmount;
-
-            this.serviceCharge = this.selectedInvoice.ServiceCharge;
-
-            this.selectedPayments = [];
-
-            this.selectedPayments.unshift({
-                ReceiptMethodTypeID: invoice.Payments[0].ReceiptMethodTypeID,
-                Description: invoice.Payments[0].DescriptionEn,
-                Note: invoice.Payments[0].Note,
-                Amount: invoice.Payments[0].Amount,
-                SoldAmount: 0,
-                invoiceDate: invoice.Payments[0].PaymentDate
-            });
+            this.processPrintedInvoice(invoice);
         }
     }
 
-    increaseQty(product: any) {
-        product.Qty++;
+    private resetInvoiceDetails(): void {
+        this.addToCart = [];
+        this.selectedPayments = [];
+    }
+
+    private processPrintedInvoice(invoice: any): void {
+        const payment = invoice.Payments[0];
+        this.totalAmount = payment.CashReceiptAmount;
+        this.paidAmount = payment.CashReturnedAmount;
+        this.serviceCharge = invoice.ServiceCharge;
+
+        this.selectedPayments.unshift({
+            ReceiptMethodTypeID: payment.ReceiptMethodTypeID,
+            Description: payment.DescriptionEn,
+            Note: payment.Note,
+            Amount: payment.Amount,
+            SoldAmount: 0,
+            invoiceDate: payment.PaymentDate
+        });
+    }
+
+    updateProductQuantity(product: any, increment: boolean): void {
+        const qtyChange = increment ? 1 : -1;
+        if (!increment && product.Qty === 1) return;
+
+        product.Qty += qtyChange;
         this.addToCart.forEach((item: any) => {
             if (item.ProductID === product.ProductID) {
                 item.Qty = product.Qty;
             }
         });
         this.newInvoice(this.addToCart);
-
     }
 
-    decreaseQty(product: any) {
-        if (product.Qty > 1) {
-            product.Qty--;
-            this.addToCart.forEach((item: any) => {
-                if (item.ProductID === product.ProductID) {
-                    item.Qty = product.Qty;
-                }
-            });
-            this.newInvoice(this.addToCart);
-        }
-    }
-
-    adjustInputWidth(event: KeyboardEvent, product: any) {
+    adjustInputWidth(event: KeyboardEvent, product: any): void {
         const inputElement = event.target as HTMLInputElement;
-        inputElement.style.width = ((inputElement.value.length + 10) * 8) + 'px';
-        this.addToCart.forEach((item: any) => {
-            if (item.ProductID === product.ProductID) {
-                item.Qty = inputElement.value;
+        inputElement.style.width = `${Math.max(inputElement.value.length + 1, 10) * 8}px`;
+
+        this.updateCartQuantity(product.ProductID, inputElement.value);
+        this.newInvoice(this.addToCart);
+    }
+
+    private updateCartQuantity(productId: number, quantity: string): void {
+        this.addToCart.forEach((item: { ProductID: number; Qty: number; }) => {
+            if (item.ProductID === productId) {
+                item.Qty = parseInt(quantity, 10) || 0;
             }
         });
-        this.newInvoice(this.addToCart);
     }
 
     openDetails(product: { opened: boolean; }) {
@@ -507,79 +527,57 @@ export class AppComponent {
         this.promoSelectAllFlag = !this.promoSelectAllFlag;
     }
 
-    promoSelectAll() {
-        this.promosList.forEach((item: { SelectFlag: boolean; }) => (item.SelectFlag = this.promoSelectAllFlag));
-    }
-
     expandArea(item: { opened: boolean; }) {
         item.opened = !item.opened;
+    }
+
+    promoSelectAll() {
+        this.promosList.forEach((item: { SelectFlag: boolean; }) => (item.SelectFlag = this.promoSelectAllFlag));
     }
 
     getPromotions() {
         this.salesInvoiceService.getPromotions().subscribe({
             next: (result: any) => {
-                if (result) {
-                    this.promosList = result;
-                } else {
-                    Swal.fire({
-                        icon: "question",
-                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                        text: this.currentLanguage === 1 ? "Error in getting promotions." : "خطأ في الحصول على العروض.",
-                    });
+                if (!result) {
+                    this.showWarningDialog("promotions.");
+                    return;
                 }
+
+                this.promosList = result;
             },
-            error: (error) => {
-                Swal.fire({
-                    icon: "error",
-                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
-                    text: error.error.Message,
-                });
-            }
+            error: (error) => { this.showErrorDialog(error.error.Message); }
         });
     }
 
     getReceiptMethods() {
         this.salesInvoiceService.getReceiptMethods().subscribe({
             next: (result: any) => {
-                if (result) {
-                    this.receiptMethods = result;
-                } else {
-                    Swal.fire({
-                        icon: "question",
-                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                        text: this.currentLanguage === 1 ? "Error in getting receipt methods." : "خطأ في الحصول على طرق الدفع.",
-                    });
+                if (!result) {
+                    this.showWarningDialog("receiptMethods.");
+                    return;
                 }
+                this.receiptMethods = result;
             },
-            error: (error) => {
-                Swal.fire({
-                    icon: "error",
-                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
-                    text: error.error.Message,
-                });
-            }
+            error: (error) => { this.showErrorDialog(error.error.Message); }
         });
 
     }
 
-    collectMethodDetails(methodsType: string, discreption: string, methods: any) {
+    collectMethodDetails(methodType: string, description: string, methods: any): void {
         if (this.selectedInvoice.SalesInvoiceStatusID === 'Printed') {
-            Swal.fire({
-                icon: "warning",
-                confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                text: this.currentLanguage === 1 ? "Invoice is already paid." : "الفاتورة مدفوعة بالفعل.",
-            });
+            this.showWarningDialog("alreadyPaid");
             return;
         }
-        if (methodsType === 'Cash') {
-            this._getCash(discreption, methodsType, methods);
-        } else if (methodsType === 'Card') {
-            this._getCard(discreption, methodsType, methods);
+
+        switch (methodType) {
+            case 'Cash':
+                this._getCash(description, methodType, methods);
+                break;
+            case 'Card':
+                this._getCard(description, methodType, methods);
+                break;
+            default:
+                this.showWarningDialog("unsupportedMethod");
         }
     }
 
@@ -593,6 +591,7 @@ export class AppComponent {
                 isMultiCheck: true,
                 title: methodsType,
                 image: methods.Image,
+                amount: this.selectedInvoice.NetTotalAfterTax - this.totalAmount,
             },
         });
 
@@ -614,6 +613,7 @@ export class AppComponent {
                 isMultiCheck: true,
                 title: methodsType,
                 image: methods.Image,
+                amount: this.selectedInvoice.NetTotalAfterTax - this.totalAmount,
             },
         });
 
@@ -624,22 +624,17 @@ export class AppComponent {
         });
     }
 
-    addPayment(amount: number, ReceiptMethodTypeID: string, methods: any) {
+    addPayment(amount: number, receiptMethodTypeID: string, methodDetails: any): void {
+        if (!this.selectedPayments) this.selectedPayments = [];
 
-        if (!this.selectedPayments) {
-            this.selectedPayments = [];
-        }
+        const paymentIndex = this.selectedPayments.findIndex((payment: { ReceiptMethodTypeID: string; }) => payment.ReceiptMethodTypeID === receiptMethodTypeID);
 
-        if (this.selectedPayments.some((item: { ReceiptMethodTypeID: string; }) => item.ReceiptMethodTypeID === ReceiptMethodTypeID)) {
-            this.selectedPayments.forEach((item: { ReceiptMethodTypeID: string; Amount: number; }) => {
-                if (item.ReceiptMethodTypeID === ReceiptMethodTypeID) {
-                    item.Amount = amount;
-                }
-            });
+        if (paymentIndex >= 0) {
+            this.selectedPayments[paymentIndex].Amount = amount;
         } else {
             this.selectedPayments.unshift({
-                ReceiptMethodID: methods.ID,
-                ReceiptMethodTypeID: ReceiptMethodTypeID,
+                ReceiptMethodID: methodDetails.ID,
+                ReceiptMethodTypeID: receiptMethodTypeID,
                 Description: "",
                 Amount: amount,
                 SoldAmount: 0,
@@ -647,311 +642,250 @@ export class AppComponent {
             });
         }
 
-        this.totalAmount = this.selectedPayments.reduce((sum: any, item: { Amount: any; }) => sum + item.Amount, 0.000);
+        this.updateTotalAndPaidAmount();
+        this.selectedPaymentsData.push(methodDetails);
+    }
 
+    private updateTotalAndPaidAmount(): void {
+        this.totalAmount = this.selectedPayments.reduce((sum: any, payment: { Amount: any; }) => sum + payment.Amount, 0);
         this.paidAmount = this.selectedInvoice.NetTotalAfterTax - this.totalAmount;
-
-        this.selectedPaymentsData.push(methods)
     }
 
-    deleteCash(item: any) {
-        this.selectedPayments.splice(this.selectedPayments.indexOf(item), 1);
-        this.totalAmount = this.selectedPayments.reduce((sum: any, item: { Amount: any; }) => item.Amount - sum, 0);
-    }
-
-    deleteItem(item: any) {
-        for (let i = 0; i < this.addToCart.length; i++) {
-            if (this.addToCart[i].ProductID === item.ProductID) {
-                this.addToCart.splice(i, 1);
-                break;
-            }
+    deletePayment(payment: any): void {
+        const paymentIndex = this.selectedPayments.findIndex((p: any) => p === payment);
+        if (paymentIndex > -1) {
+            this.selectedPayments.splice(paymentIndex, 1);
+            this.updateTotalAmount();
         }
+    }
 
+    deleteProductFromCart(product: any): void {
+        const productIndex = this.addToCart.findIndex((cartItem: { ProductID: any; }) => cartItem.ProductID === product.ProductID);
+        if (productIndex !== -1) {
+            this.addToCart.splice(productIndex, 1);
+            this.refreshInvoice();
+        }
+    }
+
+    private updateTotalAmount(): void {
+        this.totalAmount = this.selectedPayments.reduce((total: any, { Amount }: any) => total + Amount, 0);
+    }
+
+    private refreshInvoice(): void {
         this.newInvoice(this.addToCart);
     }
 
-    newInvoice(cart: any) {
+
+    newInvoice(cart: any): void {
         const currentDate = new Date();
+        const POSCode = this.generatePOSCode(currentDate);
+        const tableID = this.getTableID();
+        const customer = this.getCustomer();
 
-        const POSCode = `${this.userInfo.SalesDivision.SalesDivisionID}/${this.userInfo.SalesDivision.SalesDivisionPosID}/${currentDate.getFullYear().toString().slice(-2)}/${currentDate.getMonth() + 1}-${Math.floor(Math.random() * 100)}`;
-
-        let table = sessionStorage.getItem('selectedTable');
-        if (table) {
-            var tableID = JSON.parse(table).ID;
-        } else {
-            var tableID = null;
-        }
-
-        var customer = sessionStorage.getItem('selectCustomer');
-        customer = customer ? JSON.parse(customer) : null;
-
-        this.data = {
-            Code: this.selectedInvoice?.Code ? this.selectedInvoice.Code : null,
-            POSCode: this.selectedInvoice?.POSCode ? this.selectedInvoice.POSCode : POSCode,
-            SalesInvoiceStatusID: this.selectedInvoice?.SalesInvoiceStatusID ? this.selectedInvoice.SalesInvoiceStatusID : 'Created',
-            CustID: this.userInfo.DefaultCustomer.CustID,
-            Description: customer ? customer[1] : null,
-            CustDescription: customer ? customer[1] : null,
-            ManualDiscountAmount: this.selectedInvoice?.ManualDiscountAmount ? this.selectedInvoice.ManualDiscountAmount : 0.0,
-            DiscountPercentage: this.selectedInvoice?.DiscountPercentage ? this.selectedInvoice.DiscountPercentage : 0.0,
-            TipAmount: this.selectedInvoice?.TipAmount ? this.selectedInvoice.TipAmount : 0.0,
-            TableID: tableID,
-            ServiceCharge: this.serviceCharge ? 1 : 0,
-            SalesDivisionPOSID: this.userInfo.RetailUserPOS.SalesDivisionPOSID ? this.userInfo.RetailUserPOS.SalesDivisionPOSID : 0,
-            RetailOrderReferenceCode: this.selectedInvoice?.RetailOrderReferenceCode ? this.selectedInvoice.RetailOrderReferenceCode : null,
-            RetailOrderID: this.selectedInvoice?.RetailOrderID ? this.selectedInvoice.RetailOrderID : null,
-            SalesInvoiceDate: this.selectedInvoice?.SalesInvoiceDate ? this.selectedInvoice.SalesInvoiceDate : new Date(),
-            Products: cart,
-            Payments: this.selectedPayments,
-            Notes: this.selectedInvoice?.Notes ? this.selectedInvoice.Notes : null,
-            ReferenceCode: this.selectedInvoice?.ReferenceCode ? this.selectedInvoice.ReferenceCode : uuid(),
-            CashBookID: this.selectedInvoice?.CashBookID ? this.selectedInvoice.CashBookID : null,
-            CreatedDate: this.selectedInvoice?.CreatedDate ? this.selectedInvoice.CreatedDate : new Date(),
-            Amounts: this.selectedInvoice?.NetTotalAfterTax ?? 0,
-        }
+        this.data = this.constructInvoiceData(cart, POSCode, tableID, customer, currentDate);
 
         this.salesInvoiceService.retailInvoice_Create(this.data).subscribe({
-            next: (result: any) => {
-                if (result) {
-                    this.selectedInvoice = result;
-                    this.selectedInvoiceProducts = result.Products;
-                    this.userInfo.DefaultCustomer.CustomerDescription = result.CustDescription;
-                } else {
-                    Swal.fire({
-                        icon: "question",
-                        confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                        title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                        text: this.currentLanguage === 1 ? "Error in creating invoice." : "خطأ في إنشاء الفاتورة.",
-                    });
-                }
-            },
-            error: (error) => {
-                Swal.fire({
-                    icon: "error",
-                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                    title: this.currentLanguage === 1 ? "Oops..." : "عذرا...",
-                    text: error.error.Message,
-                })
-            }
+            next: (result: any) => this.processInvoiceCreationResult(result),
+            error: (error) => this.showErrorDialog(error.error.Message)
         });
     }
 
-    addItemOrGroup(product: any) {
+    private generatePOSCode(currentDate: Date): string {
+        return `${this.userInfo.SalesDivision.SalesDivisionID}/${this.userInfo.SalesDivision.SalesDivisionPosID}/${currentDate.getFullYear().toString().slice(-2)}/${currentDate.getMonth() + 1}-${Math.floor(Math.random() * 100)}`;
+    }
 
+    private getTableID(): string | null {
+        const table = sessionStorage.getItem('selectedTable');
+        return table ? JSON.parse(table).ID : null;
+    }
+
+    private getCustomer(): any {
+        const customer = sessionStorage.getItem('selectCustomer');
+        return customer ? JSON.parse(customer) : null;
+    }
+
+    private constructInvoiceData(cart: any, POSCode: string, tableID: string | null, customer: any, currentDate: Date): any {
+        const invoiceDate = this.selectedInvoice?.SalesInvoiceDate ? new Date(this.selectedInvoice.SalesInvoiceDate) : new Date();
+        const adjustedDate = new Date(invoiceDate.getTime() + 3 * 60 * 60 * 1000);
+        return {
+            Code: this.selectedInvoice?.Code || null,
+            POSCode: this.selectedInvoice?.POSCode || POSCode,
+            SalesInvoiceStatusID: this.selectedInvoice?.SalesInvoiceStatusID || 'Created',
+            CustID: this.userInfo.DefaultCustomer.CustID,
+            Description: customer ? customer[1] : null,
+            CustDescription: customer ? customer[1] : null,
+            ManualDiscountAmount: this.selectedInvoice?.ManualDiscountAmount || 0.0,
+            DiscountPercentage: this.selectedInvoice?.DiscountPercentage || 0.0,
+            TipAmount: this.selectedInvoice?.TipAmount || 0.0,
+            TableID: tableID,
+            ServiceCharge: this.serviceCharge ? 1 : 0,
+            SalesDivisionPOSID: this.userInfo.RetailUserPOS.SalesDivisionPOSID || 0,
+            RetailOrderReferenceCode: this.selectedInvoice?.RetailOrderReferenceCode || null,
+            RetailOrderID: this.selectedInvoice?.RetailOrderID || null,
+            SalesInvoiceDate: adjustedDate,
+            Products: cart,
+            Payments: this.selectedPayments,
+            Notes: this.selectedInvoice?.Notes || null,
+            ReferenceCode: this.selectedInvoice?.ReferenceCode || uuid(),
+            CashBookID: this.selectedInvoice?.CashBookID || null,
+            CreatedDate: this.selectedInvoice?.CreatedDate || new Date(),
+            Amounts: this.selectedInvoice?.NetTotalAfterTax ?? 0,
+        };
+    }
+
+    private processInvoiceCreationResult(result: any): void {
+        if (result) {
+            this.selectedInvoice = result;
+            this.selectedInvoiceProducts = result.Products;
+            this.userInfo.DefaultCustomer.CustomerDescription = result.CustDescription;
+        } else {
+            this.showWarningDialog("creatingInvoice");
+        }
+    }
+
+    addItemOrGroup(product: any): void {
         if (['Printed', 'Rejected'].includes(this.selectedInvoice?.SalesInvoiceStatusID)) return;
-
 
         let item = this.addToCart.find((item: { ProductID: any; }) => item.ProductID === product.ProductID);
 
-        this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, product.ProductID).subscribe((result: any) => {
-            if (result[0] && result[0].DeviceAvailableQty > 0) {
-                if (item) {
-                    item.Qty++;
+        this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, product.ProductID)
+            .subscribe(stock => {
+                if (stock[0]?.DeviceAvailableQty > 0) {
+                    item ? item.Qty++ : this.addNewProductToCart(product);
+                    this.newInvoice(this.addToCart);
+                    this.goTab('invoice');
                 } else {
-                    this.addToCart.push({
-                        "ProductID": product.ProductID,
-                        "TaxGroupID": product.TaxGroupID,
-                        "UOMID": product.UOMID,
-                        "Description": this.currentLanguage === 1 ? product.DescriptionEn : product.DescriptionAr,
-                        "UOMDescription": this.currentLanguage === 1 ? product.DescriptionEn : product.DescriptionAr,
-                        "ReturnedQty": 0,
-                        "ReturnQty": 0,
-                        "Qty": 1,
-                        "RemainingQty": 1,
-                        "SalesPrice": product.SalesPrice,
-                        "Amount": product.SalesPrice * 1,
-                        "NetTotalBeforeDiscount": product.SalesPrice * 1,
-                        "TotalDiscount": 0,
-                        "DiscountPercentage": 0,
-                        "DiscountPerUnit": 0,
-                        "NetTotalAfterDiscount": product.SalesPrice * 1,
-                        "TaxAmount": 0,
-                        "TaxPercent": 0,
-                        "NetTotalAfterTax": product.SalesPrice * 1,
-                        "Additions": [],
-                        "Seriales": [],
-                        "Batches": [],
-                        "CurrencyID": this.userInfo?.CompanyInfo.CurrencyID,
-                        "AppReferenceTransCode": uuid(),
-                        "RetailOrderReferenceTransCode": "",
-                        "Note": product.Note,
-                    });
+                    this.showWarningDialog("outOfStock");
                 }
-                this.newInvoice(this.addToCart);
-            } else {
-                Swal.fire({
-                    icon: "warning",
-                    confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                    title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                    text: this.currentLanguage === 1 ? "Product is out of stock." : "المنتج غير متوفر.",
-                });
-            }
-        })
+            });
+    }
+
+    private addNewProductToCart(product: any): void {
+        const description = this.currentLanguage === 1 ? product.DescriptionEn : product.DescriptionAr;
+        this.addToCart.push({
+            ProductID: product.ProductID,
+            TaxGroupID: product.TaxGroupID,
+            UOMID: product.UOMID,
+            Description: description,
+            UOMDescription: description,
+            ReturnedQty: 0,
+            ReturnQty: 0,
+            Qty: 1,
+            RemainingQty: 1,
+            SalesPrice: product.SalesPrice,
+            Amount: product.SalesPrice,
+            NetTotalBeforeDiscount: product.SalesPrice,
+            TotalDiscount: 0,
+            DiscountPercentage: 0,
+            DiscountPerUnit: 0,
+            NetTotalAfterDiscount: product.SalesPrice,
+            TaxAmount: 0,
+            TaxPercent: 0,
+            NetTotalAfterTax: product.SalesPrice,
+            Additions: [],
+            Seriales: [],
+            Batches: [],
+            CurrencyID: this.userInfo?.CompanyInfo.CurrencyID,
+            AppReferenceTransCode: uuid(),
+            RetailOrderReferenceTransCode: "",
+            Note: product.Note,
+        });
     }
 
     postCash() {
         if (this.totalAmount >= this.selectedInvoice.NetTotalAfterTax) {
             this.newInvoice(this.addToCart);
-            this.selectedInvoice = null;
-            this.selectedInvoiceProducts = [];
-            this.addToCart = [];
-            this.selectedPayments = [];
-            this.totalAmount = 0;
-            this.paidAmount = 0.000;
-            this.activeInvoiceTab = 'invoice';
-            sessionStorage.removeItem('selectCustomer');
-            sessionStorage.removeItem('selectedTable');
-            this.salesManID = 0;
-            this.salesManName = '';
-            this.selectedTable = '---';
-            this.userInfo.DefaultCustomer.CustID = this.userInfo.DefaultCustomer.CustID;
-            this.userInfo.DefaultCustomer.CustomerDescription = this.userInfo.DefaultCustomer.CustomerDescription;
+            this.resetInvoiceState();
         } else {
-            Swal.fire({
-                icon: "warning",
-                confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                text: this.currentLanguage === 1 ? "Paid amount is less than total amount." : "المبلغ المدفوع أقل من المبلغ الإجمالي.",
-            });
+            this.showWarningDialog("paidLessAmount");
         }
     }
 
-    addNewInvoice() {
-        if (this.selectedInvoice) {
-            this.selectedInvoice = null;
-            this.selectedInvoiceProducts = [];
-            this.addToCart = [];
-            this.selectedPayments = [];
-            this.totalAmount = 0;
-            this.paidAmount = 0.000;
-            this.activeInvoiceTab = 'invoice';
-        }
+    private resetInvoiceState(): void {
+        this.selectedInvoice = null;
+        this.selectedInvoiceProducts = [];
+        this.addToCart = [];
+        this.selectedPayments = [];
+        this.totalAmount = 0;
+        this.paidAmount = 0;
+        this.activeInvoiceTab = 'invoice';
+        sessionStorage.removeItem('selectCustomer');
+        sessionStorage.removeItem('selectedTable');
+        this.salesManID = 0;
+        this.salesManName = '';
+        this.selectedTable = '---';
+    }
+
+    addNewInvoice(): void {
+        if (!this.selectedInvoice) return;
+        this.resetInvoiceState();
     }
 
     RetailInvoice_Void() {
         if (this.selectedInvoice && this.selectedInvoice.SalesInvoiceStatusID === 'Created') {
 
-            Swal.fire({
-                title: this.currentLanguage === 1 ? 'Do you want to void the invoice?' : 'هل تريد إلغاء الفاتورة؟',
-                showCancelButton: true,
-                confirmButtonText: this.currentLanguage === 1 ? 'Yes' : 'نعم',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    this.salesInvoiceService.RetailInvoice_Void(this.selectedInvoice.ID).subscribe((result: any) => {
-                        if (result) {
-                            this.selectedInvoice.SalesInvoiceStatusID = 'Void';
-                            Swal.fire({
-                                icon: "success",
-                                confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                                title: this.currentLanguage === 1 ? "Success..." : "نجاح...",
-                                text: this.currentLanguage === 1 ? "Invoice voided successfully." : "تم إلغاء الفاتورة بنجاح.",
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: "question",
-                                confirmButtonText: this.currentLanguage === 1 ? "OK" : "حسنا",
-                                title: this.currentLanguage === 1 ? "Warning..." : "تحذير...",
-                                text: this.currentLanguage === 1 ? "Error in voiding invoice." : "خطأ في إلغاء الفاتورة.",
-                            });
-                        }
-                    });
-                }
+            this.salesInvoiceService.RetailInvoice_Void(this.selectedInvoice.ID).subscribe((result) => {
+                this.getRetailInvoices();
+                this.resetInvoiceState();
             });
         }
     }
 
-    toggleFullscreen() {
-        if (this.isFullscreen) {
-            this.closeFullscreen();
-        } else {
-            this.openFullscreen();
-        }
+    toggleFullscreen(): void {
+        this.isFullscreen ? this.closeFullscreen() : this.openFullscreen();
         this.isFullscreen = !this.isFullscreen;
     }
 
-    openFullscreen() {
-        if (this.elem.requestFullscreen) {
-            this.elem.requestFullscreen();
-        } else if (this.elem.mozRequestFullScreen) {
-            this.elem.mozRequestFullScreen();
-        } else if (this.elem.webkitRequestFullscreen) {
-            this.elem.webkitRequestFullscreen();
-        } else if (this.elem.msRequestFullscreen) {
-            this.elem.msRequestFullscreen();
-        }
+    private openFullscreen(): void {
+        const requestMethods = [
+            "requestFullscreen",
+            "mozRequestFullScreen",
+            "webkitRequestFullscreen",
+            "msRequestFullscreen"
+        ];
+        requestMethods.forEach(method => {
+            if (this.elem[method]) this.elem[method]();
+        });
     }
 
-    closeFullscreen() {
-        if (this.document.exitFullscreen) {
-            this.document.exitFullscreen();
-        } else if (this.document.mozCancelFullScreen) {
-            this.document.mozCancelFullScreen();
-        } else if (this.document.webkitExitFullscreen) {
-            this.document.webkitExitFullscreen();
-        } else if (this.document.msExitFullscreen) {
-            this.document.msExitFullscreen();
-        }
+    private closeFullscreen(): void {
+        const exitMethods = [
+            "exitFullscreen",
+            "mozCancelFullScreen",
+            "webkitExitFullscreen",
+            "msExitFullscreen"
+        ];
+        exitMethods.forEach(method => {
+            if ((document as any)[method]) (document as any)[method]();
+        });
     }
 
-    printPage() {
-        let printContents, popupWin;
+    printPage(): void {
         const agreementSection = document.getElementById('agrrement-section');
-        printContents = agreementSection ? agreementSection.innerHTML : '';
-        popupWin = window.open('', '_blank', 'top=0,left=0,height=100%,width=auto');
+        const printContents = agreementSection ? agreementSection.innerHTML : '';
+        const popupWin = window.open('', '_blank', 'top=0,left=0,height=100%,width=auto');
+
         if (popupWin) {
+            const htmlContent = `
+            <html>
+                <head>
+                    <title>Print Document</title>
+                    <style>
+                        .center-text { display: flex; justify-content: center; font-size: 16px; font-weight: bold; }
+                        .info-table { border: 1px solid #ccc; padding: 10px 20px; margin-top: 20px; width: 100%; }
+                        .info-table td:first-child { width: 200px; }
+                        .cashier-info { display: flex; justify-content: flex-end; }
+                        table { width: 100%; border-collapse: collapse; }
+                        thead th { border-bottom: 2px dotted #ccc; padding: 10px; text-align: left; }
+                        tbody td { padding: 10px; text-align: left; }
+                        .m-t-60 { margin-top: 60px; }
+                    </style>
+                </head>
+                <body onload="window.print();window.close()">${printContents}</body>
+            </html>
+        `;
             popupWin.document.open();
-            popupWin.document.write(`
-				<html>
-					<head>
-						<title>Trio365</title>
-						<style type="text/css">
-              .center-text {
-            display: flex;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .info-table {
-            border: 1px solid #ccc;
-            padding: 10px 20px;
-            margin-top: 20px;
-            width: 100%;
-        }
-
-        .info-table td:first-child {
-            width: 200px;
-        }
-
-        .cashier-info {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead th {
-            border-bottom: 2px dotted #ccc;
-            padding: 10px;
-            text-align: left;
-        }
-
-        tbody td {
-            padding: 10px;
-            text-align: left;
-        }
-
-        .m-t-60 {
-            margin-top: 60px;
-        }
-            </style>
-            <body onload="window.print();window.close()">${printContents}</body>
-          </head>
-        </html>
-      `)
+            popupWin.document.write(htmlContent);
             popupWin.document.close();
         }
     }

@@ -17,7 +17,7 @@ export class AuthInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    this.token = this.salesInvoiceService.userInfo.token;
+    this.token = this.salesInvoiceService.userInfo.c;
     const authToken = this.token;
 
     const modifiedReq = req.clone({
