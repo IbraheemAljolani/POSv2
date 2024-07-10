@@ -290,18 +290,28 @@ export class AppComponent {
     }
 
     openMenuDrilldown(productItem: any): void {
-        const dialogRef = this.dialog.open(SimpleLOVComponent, {
-            disableClose: true,
-            maxHeight: '98%',
-            width: "80%",
-            minWidth: '300px',
-            direction: this.currentLanguage === 1 ? "ltr" : "rtl",
-            data: { dataType: "drillDown", isMultiCheck: false, productItem: productItem, title: productItem.DescriptionEn + ' Qty', SalesDivisionPOSID: this.userInfo?.RetailUserPOS?.SalesDivisionPOSID },
-        });
+        this.loading = true;
+        this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, productItem.ProductID)
+            .subscribe(stock => {
+                if (stock[0]?.DeviceAvailableQty > 0) {
+                    const dialogRef = this.dialog.open(SimpleLOVComponent, {
+                        disableClose: true,
+                        maxHeight: '98%',
+                        width: "80%",
+                        minWidth: '300px',
+                        direction: this.currentLanguage === 1 ? "ltr" : "rtl",
+                        data: { dataType: "drillDown", isMultiCheck: false, productItem: productItem, title: productItem.DescriptionEn + ' Qty', SalesDivisionPOSID: this.userInfo?.RetailUserPOS?.SalesDivisionPOSID },
+                    });
 
-        dialogRef.afterClosed().subscribe((selectedResult) => {
+                    dialogRef.afterClosed().subscribe((selectedResult) => {
 
-        });
+                    });
+                    this.loading = false;
+                } else {
+                    this.loading = false;
+                    this.showWarningDialog("outOfStock");
+                }
+            });
     }
 
     selectSalesMan(): void {
@@ -744,20 +754,14 @@ export class AppComponent {
     }
 
     addItemOrGroup(product: any): void {
+        this.loading = true;
         if (['Printed', 'Rejected'].includes(this.selectedInvoice?.SalesInvoiceStatusID)) return;
 
         let item = this.addToCart.find((item: { ProductID: any; }) => item.ProductID === product.ProductID);
-
-        this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, product.ProductID)
-            .subscribe(stock => {
-                if (stock[0]?.DeviceAvailableQty > 0) {
-                    item ? item.Qty++ : this.addNewProductToCart(product);
-                    this.newInvoice(this.addToCart);
-                    this.goTab('invoice');
-                } else {
-                    this.showWarningDialog("outOfStock");
-                }
-            });
+        item ? item.Qty++ : this.addNewProductToCart(product);
+        this.newInvoice(this.addToCart);
+        this.goTab('invoice');
+        this.loading = false;
     }
 
     private addNewProductToCart(product: any): void {
