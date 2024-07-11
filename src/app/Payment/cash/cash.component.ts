@@ -12,10 +12,10 @@ export class CashComponent {
 
     constructor(public dialogRef: MatDialogRef<any>, @Inject(MAT_DIALOG_DATA) public data: any, private salesInvoiceService: SalesInvoiceService) { }
 
-    displayValue = this.data.amount;
+    displayValue = this.data.amount.toFixed(3);
     sysLabels: any = {};
 
-    currentLanguage = this.salesInvoiceService.userInfo.languageId;
+    currentLanguage = this.salesInvoiceService.translationService.userInfo.languageId;
 
     ngOnInit(): void {
         this.Sys_Labels();

@@ -12,7 +12,7 @@ export class CardComponent {
 
     constructor(public dialogRef: MatDialogRef<any>, @Inject(MAT_DIALOG_DATA) public data: any, private salesInvoiceService: SalesInvoiceService) { }
 
-    amountCashnumber: string = this.data.amount;
+    amountCashnumber: string = this.data.amount.toFixed(3);
     cardNumber: string = '';
     cardObj: any = [];
 
@@ -23,7 +23,7 @@ export class CardComponent {
 
     sysLabels: any = {};
 
-    currentLanguage = this.salesInvoiceService.userInfo.languageId;
+    currentLanguage = this.salesInvoiceService.translationService.userInfo.languageId;
 
     ngOnInit(): void {
         this.Sys_Labels();
@@ -70,7 +70,7 @@ export class CardComponent {
         const amount = parseFloat(this.amountCashnumber);
         if (amount > 0) {
             const finalAmount = amount;
-            this.dialogRef.close(finalAmount);
+            this.dialogRef.close({ finalAmount, cardNumber: this.cardNumber });
         } else {
             this.onCancel();
         }

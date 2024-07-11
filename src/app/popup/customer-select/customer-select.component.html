@@ -8,12 +8,6 @@
     </div>
     <div class="modal-body">
         <div class="row">
-            <!-- <div class="col-sm-12">
-                <input id="is_cach_cust_pop_up_chbox" class="m-r-5" type="checkbox" />
-                <label aria-label="is_cach_cust_pop_up_chbox">
-                    Cash Customer
-                </label>
-            </div> -->
             <div class="col-sm-12 m-b-10">
                 <div class="input-group btn-block">
                     <input type="text" class="form-control">
@@ -33,11 +27,6 @@
                             <i class="fa fa-search  fa-fw"></i>
                         </button>
                     </span>
-                    <!-- <span class="input-group-btn">
-                        <button class="btn btn-default-gray" type="button" tabindex="-1">
-                            <i class="fa fa-plus  fa-fw"></i>
-                        </button>
-                    </span> -->
 
                 </div>
 
@@ -49,12 +38,8 @@
                 <fieldset style="border:1px dashed #eee; padding: 10px;">
 
                     <legend class="legend1">
-                        {{(sysLabels['Selected Customer ID']) ? sysLabels['Selected Customer ID'].Caption : 'Selected
-                        Customer ID'}} {{ customerID }}
-                        <!-- <a href="javascript:void(0)" title="Open record DescriptionEn value"
-                            aria-label="Open record DescriptionEn value">
-                            <i class="fa fa-share" aria-hidden="true"></i>
-                        </a> -->
+                        {{(sysLabels['Selected Customer ID']) ? sysLabels['Selected Customer ID'].Caption
+                        : 'Selected Customer ID'}} {{ customerID }}
                     </legend>
 
                     <table class="table m-b-10">
@@ -107,8 +92,8 @@
                             <td></td>
                             <td>
                                 <strong class="m-r-5">
-                                    {{(sysLabels['Loyalty Point']) ? sysLabels['Loyalty Point'].Caption : 'Loyalty
-                                    Point'}}
+                                    {{(sysLabels['Loyalty Point']) ? sysLabels['Loyalty Point'].Caption :
+                                    'Loyalty Point'}}
                                 </strong>
                             </td>
                             <td>
@@ -166,8 +151,7 @@
                             <td>
                                 <!-- deliveryDate datepicker-->
                                 <div>
-                                    {{(sysLabels['Delivery Date'])?sysLabels['Delivery
-                                    Date'].Caption:'Delivery Date'}}
+                                    {{(sysLabels['Delivery Date'])?sysLabels['Delivery Date'].Caption:'Delivery Date'}}
                                 </div>
                                 <div class="btn-trans" (click)="deliveryDateDatepicker.open()">
                                     <i class="fa fa-calendar-plus-o"></i>
@@ -179,8 +163,7 @@
                             <td>
                                 <!-- deliveryDate Timeepicker-->
                                 <div>
-                                    {{(sysLabels['Delivery Time'])?sysLabels['Delivery
-                                    Time'].Caption:'Delivery Time'}}
+                                    {{(sysLabels['Delivery Time'])?sysLabels['Delivery Time'].Caption:'Delivery Time'}}
                                 </div>
                                 <div class="btn-trans">
                                     <i class="fa fa-clock-o"></i>
@@ -192,8 +175,8 @@
                             <td>
                                 <!--Cash on delivery-->
                                 <div>
-                                    {{(sysLabels['Cash On Delivery'])?sysLabels['Cash On
-                                    Delivery'].Caption:'Cash On Delivery'}}
+                                    {{(sysLabels['Cash On Delivery'])?sysLabels['Cash On Delivery']
+                                    .Caption:'Cash On Delivery'}}
                                 </div>
                                 <div>
                                     <input type="checkbox" />

@@ -8,7 +8,7 @@
             <div class="parameter-context ">
 
                 <div>{{(sysLabels['POS']) ? sysLabels['POS'].Caption : 'POS'}}</div>
-                <div class="btn-trans" (click)="openPOSDialog()">
+                <div class="btn-trans" (click)="openDynamicDialog('POS')">
                     <img src="assets/2084-512.webp" />
                     <div>
                         {{ userInfo?.SalesDivision?.DivisionPOSDescription ?
@@ -24,7 +24,7 @@
                 <div>{{(sysLabels['Customer']) ? sysLabels['Customer'].Caption : 'Customer'}}</div>
                 <div class="btn-trans" title="{{ userInfo?.DefaultCustomer?.CustID ? userInfo?.DefaultCustomer?.CustID : '---' }} - {{
                         userInfo?.DefaultCustomer?.CustomerDescription ? userInfo?.DefaultCustomer?.CustomerDescription :
-                        '---'}}" (click)="openCustomerDialog()">
+                        '---'}}" (click)="openDynamicDialog('customer')">
                     <img src="assets/customer.svg" />
                     <div>
                         {{ userInfo?.DefaultCustomer?.CustID ? userInfo.DefaultCustomer.CustID : '---' }} - {{
@@ -39,7 +39,8 @@
             <div class="parameter-context m-l-20" clickOutside (clickOutside)="isDropdownVisible = false">
                 <div class="dropdown" style="position:relative">
                     <div>{{(sysLabels['Table'])?sysLabels['Table'].Caption:'Table'}}</div>
-                    <div class="dropdown-toggle btn-trans" (click)="toggleDropdownVisible()" title="{{selectedTable}}">
+                    <div class="dropdown-toggle btn-trans" (click)="toggleDropdownVisibility()"
+                        title="{{selectedTable}}">
                         <img src="assets/branchtable32.png" />
                         <div>{{selectedTable}}</div>
                         <i class="fa fa-caret-down"></i>
@@ -47,7 +48,7 @@
                     <ul class="dropdown-content dropdown-menu  table-responsive custom-scroll mx-height-300"
                         [ngStyle]="{'display': isDropdownVisible ? 'block' : 'none'}">
                         <li *ngFor="let tbl of branchTables">
-                            <a href="javascript:void(0);" (click)="setTable(tbl)">
+                            <a href="javascript:void(0);" (click)="setSelectedTable(tbl)">
                                 {{tbl.ID}} - {{tbl.Description}}
                             </a>
                         </li>
@@ -56,7 +57,7 @@
             </div>
 
             <!-- salesmen dropdown-menu-->
-            <div class="parameter-context m-l-20" (click)="selectSalesMan()">
+            <div class="parameter-context m-l-20" (click)="openDynamicDialog('salesMan')">
 
                 <div>{{(sysLabels['Sales Man'])?sysLabels['Sales Man'].Caption:'Sales Man'}}</div>
                 <div class="btn-trans" [title]="salesManName ? salesManID + ' - ' + salesManName : ''">
@@ -276,7 +277,7 @@
                                 <div class="trio-window-ctrls" *ngIf="selectedInvoice">
 
                                     <a class="button-icon pointer" title="Print" aria-label="Print"
-                                        (click)="printPage()">
+                                        (click)="salesInvoiceService.printInvoiceService.printPage()">
                                         <i class="fa fa-print invoice-icon" aria-hidden="true"></i>
                                     </a>
                                     <a class="button-icon pointer" (click)="RetailInvoice_Void()"
@@ -290,7 +291,7 @@
                                 </div>
                                 <div class="widget-toolbar hidden-sm hidden-xs" role="menu" style="cursor:default">
                                     <div class="label" *ngIf="selectedInvoice"
-                                        [ngStyle]="{'background-color': getColor(selectedInvoice.SalesInvoiceStatusID)}">
+                                        [ngStyle]="{'background-color': salesInvoiceService.initService.getColor(selectedInvoice.SalesInvoiceStatusID)}">
                                         {{(sysLabels[selectedInvoice.SalesInvoiceStatusID])?sysLabels[selectedInvoice.SalesInvoiceStatusID].Caption:selectedInvoice.SalesInvoiceStatusID}}
                                     </div>
                                 </div>
@@ -371,8 +372,8 @@
 
 
                                                             <a role="button" NgClass="pointer" class="pointer"
-                                                                (click)="openDetails(product)" title="Show more"
-                                                                aria-label="Show more">
+                                                                (click)="product.opened = !product.opened"
+                                                                title="Show more" aria-label="Show more">
                                                                 <i class="fa fa-arrows-alt txt-color-green"
                                                                     aria-hidden="true"></i>
                                                             </a>
@@ -475,7 +476,7 @@
                                                         <label>
                                                             <input type="checkbox" class="checkbox style-0"
                                                                 [(ngModel)]="promoSelectAllFlag"
-                                                                (change)="promoSelectAll()">
+                                                                (change)="salesInvoiceService.promoAndMethodService.promoSelectAll(promoSelectAllFlag, promosList)">
                                                             <span>
                                                                 <ng-container
                                                                     *ngIf="promoSelectAllFlag; else noSelectAll">
@@ -515,7 +516,8 @@
 
                                                             <div class="item-controls">
                                                                 <a role="button" class="pointer" title="Show more"
-                                                                    (click)="expandArea(item)" aria-label="Show more">
+                                                                    (click)="item.opened = !item.opened"
+                                                                    aria-label="Show more">
                                                                     <i class="fa fa-arrows-alt txt-color-green"></i>
                                                                 </a>
                                                             </div>
@@ -592,7 +594,7 @@
 
                                                     <div class="s-item-list"
                                                         *ngFor="let item of selectedPayments;let first = first">
-                                                        <div class="p-5-10" (click)="expandArea(item)">
+                                                        <div class="p-5-10" (click)="item.opened = !item.opened">
                                                             <div class="input-group input-group-rounded"
                                                                 title="{{(item.ReceiptMethodTypeID == 'Card')?'InvoiceID':(item.ReceiptMethodTypeID == 'Loyalty Card' || item.ReceiptMethodTypeID == 'Coupon')?'Card number':'Value'}}">
                                                                 <ng-container
@@ -638,7 +640,8 @@
                                                                 <i class="fa fa-trash txt-color-dangerLight"></i>
                                                             </a>
                                                             <a role="button" class="pointer" title="Show more"
-                                                                aria-label="Show more" (click)="expandArea(item)">
+                                                                aria-label="Show more"
+                                                                (click)="item.opened = !item.opened">
                                                                 <i class="fa fa-arrows-alt txt-color-green"></i>
                                                             </a>
                                                         </div>
@@ -709,7 +712,7 @@
                                                                     [matDatepicker]="myDatepicker"
                                                                     placeholder="{{(sysLabels['Search by Date']) ? sysLabels['Search by Date'].Caption : 'Search by Date'}}"
                                                                     [(ngModel)]="datepicker"
-                                                                    (ngModelChange)="changeDate($event)"
+                                                                    (ngModelChange)="changeRecallFilterDate($event)"
                                                                     class="form-control">
                                                                 <span class="input-group-btn">
                                                                     <button class="btn btn-default-gray" type="button"
@@ -739,7 +742,7 @@
                                                                 [style.color]="filter.color" class="filter-label">
                                                                 <input type="checkbox" class="checkbox style-0"
                                                                     [checked]="filter.checked"
-                                                                    (change)="toggleFilter(filter)">
+                                                                    (change)="toggleRecallFilter(filter)">
                                                                 <span>{{(sysLabels[filter.label])
                                                                     ?
                                                                     sysLabels[filter.label].Caption
@@ -755,7 +758,7 @@
                                                         <div class="s-item-list">
                                                             <div class="p-5-10">
                                                                 <i class="fa fa-stop fa-stop-style"
-                                                                    [ngStyle]="{'color': getColor(invoices.SalesInvoiceStatusID)}"
+                                                                    [ngStyle]="{'color': salesInvoiceService.initService.getColor(invoices.SalesInvoiceStatusID)}"
                                                                     aria-hidden="true">
                                                                 </i>
                                                                 <strong>{{invoices.ID}}</strong> -
@@ -799,8 +802,9 @@
                                         <div *ngIf="!selectedInvoice && activeInvoiceTab !== 'recall'">
                                             <div class="text-center" style="position: relative; bottom: 300px;">
                                                 <a class="btn-lg m-t-50" style="text-decoration: none; ">
-                                                    {{currentLanguage == 1 ? 'Select Your First Product to Invoice' :
-                                                    'حدد منتجك الأول لفاتورة'}}
+                                                    {{
+                                                    salesInvoiceService.translationService.getLanguageSettings('firstInvoice').text
+                                                    }}
                                                 </a>
                                             </div>
                                         </div>
@@ -1044,7 +1048,9 @@
                                 <tr>
                                     <td></td>
                                     <td></td>
-                                    <td>{{currentLanguage == 1 ? 'Total Amount' : 'المبلغ الإجمالي'}}</td>
+                                    <td>{{
+                                        salesInvoiceService.translationService.getLanguageSettings('totalAmount').text
+                                        }}</td>
                                     <td>{{selectedInvoice?.TotalAmount}}</td>
                                     <td>{{selectedInvoice?.CurrencyID}}</td>
                                 </tr>
@@ -1078,8 +1084,8 @@
                                 [errorCorrectionLevel]="'M'" [imageHeight]="75" [imageWidth]="75" [margin]="4"
                                 [scale]="1" [title]="'A custom title attribute'" [width]="100"></qrcode>
                         </div>
-                        <div class="center-text m-t-60">{{currentLanguage == 1 ?
-                            'Thanks for your visit' : 'شكرا لزيارتكم'}}</div>
+                        <div class="center-text m-t-60">{{
+                            salesInvoiceService.translationService.getLanguageSettings('thanksVisit').text }}</div>
                     </div>
                 </header>
             </div>

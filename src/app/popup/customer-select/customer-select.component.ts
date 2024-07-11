@@ -10,8 +10,11 @@ import { SalesInvoiceService } from 'src/app/services/sales-invoice.service';
 })
 export class CustomerSelectComponent {
 
-    constructor(public dialogRef: MatDialogRef<CustomerSelectComponent>, public dialog: MatDialog,
-        @Inject(MAT_DIALOG_DATA) public data: any, private salesInvoiceService: SalesInvoiceService
+    constructor(
+        public dialogRef: MatDialogRef<CustomerSelectComponent>,
+        public dialog: MatDialog,
+        @Inject(MAT_DIALOG_DATA) public data: any,
+        private salesInvoiceService: SalesInvoiceService,
     ) { }
 
     parsedResult: any;
@@ -27,7 +30,7 @@ export class CustomerSelectComponent {
 
     sysLabels: any = {};
 
-    currentLanguage = this.salesInvoiceService.userInfo.languageId;
+    currentLanguage = this.salesInvoiceService.translationService.userInfo.languageId;
 
     ngOnInit(): void {
         this.Sys_Labels();
@@ -40,8 +43,8 @@ export class CustomerSelectComponent {
             this.customerID = customerID;
             this.customerDescription = customerDescription;
         } else {
-            this.customerID = this.data.DefaultCustomer.CustID || '---';
-            this.customerDescription = this.data.DefaultCustomer.CustomerDescription || '---';
+            this.customerID = this.data.defaultCustomer.CustID || '---';
+            this.customerDescription = this.data.defaultCustomer.CustomerDescription || '---';
         }
     }
 

@@ -2,27 +2,44 @@ import { Injectable } from '@angular/core';
 import { IUserInfo } from '../Interface/iuser-info';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class TranslationService {
 
-  constructor() { }
+    constructor() { }
 
-  recordDetails: IUserInfo = (window as any).recordDetails;
-  languageId = this.recordDetails.languageId
+    userInfo: IUserInfo = (window as any).recordDetails;
+    languageId = this.userInfo.languageId
 
-  getTranslation(key: string): string {
-    const translations: { [key: number]: { [key: string]: string } } = {
-      1: {
-        'uploadFileText': 'Drag & drop any file here or click to browse',
-      },
-      2: {
-        'uploadFileText': 'اسحب وأسقط أي ملف هنا أو انقر للتصفح',
-      }
-    };
+    getLanguageSettings(errorMessage: string) {
+        const messages: { [key: string]: string[] } = {
+            branchTables: ["Error in getting branch tables.", "خطأ في الحصول على جداول الفروع."],
+            userInfo: ["Error in getting user info.", "خطأ في الحصول على معلومات المستخدم."],
+            invoice: ["Please select an invoice.", "الرجاء تحديد فاتورة."],
+            categories: ["Error in getting categories.", "خطأ في الحصول على الفئات."],
+            products: ["Error in getting products.", "خطأ في الحصول على المنتجات."],
+            retailInvoices: ["Error in getting retail invoices.", "خطأ في الحصول على الفواتير التجزئة."],
+            promotions: ["Error in getting promotions.", "خطأ في الحصول على العروض."],
+            receiptMethods: ["Error in getting receipt methods.", "خطأ في الحصول على طرق الدفع."],
+            alreadyPaid: ["Invoice is already paid.", "الفاتورة مدفوعة بالفعل."],
+            creatingInvoice: ["Error in creating invoice.", "خطأ في إنشاء الفاتورة."],
+            outOfStock: ["Product is out of stock.", "المنتج غير متوفر."],
+            paidLessAmount: ["Paid amount is less than total amount.", "المبلغ المدفوع أقل من المبلغ الإجمالي."],
+            noProducts: ["No products found.", "لم يتم العثور على منتجات."],
+            firstInvoice: ["Select Your First Product to Invoice", "حدد المنتج الأول للفاتورة"],
+            totalAmount: ["Total Amount", "المبلغ الإجمالي"],
+            thanksVisit: ["Thanks for your visit", "شكرا لزيارتك"],
+            Description: ["DescriptionEn", "DescriptionAr"],
+        };
 
-    return translations[this.languageId] && translations[this.languageId][key]
-      ? translations[this.languageId][key]
-      : 'Translation not found';
-  }
+        const defaultMsg = ["An unknown error occurred.", "حدث خطأ غير معروف."];
+        const [en, ar] = messages[errorMessage] || defaultMsg;
+        const textMessage = this.languageId === 1 ? en : ar;
+
+        return {
+            confirmButtonText: this.languageId === 1 ? "OK" : "حسنا",
+            title: this.languageId === 1 ? "Warning..." : "تحذير...",
+            text: textMessage
+        };
+    }
 }
