@@ -1,6 +1,6 @@
 {
     "name": "posv2",
-    "version": "0.0.2",
+    "version": null,
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
