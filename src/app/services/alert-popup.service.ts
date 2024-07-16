@@ -13,12 +13,12 @@ export class AlertPopupService {
 
   showDialog(icon: SweetAlertIcon, title: string, errorMessage: string): void {
     const languageSettings = this.getLanguageSettings(errorMessage);
-    this.showAlert(icon, languageSettings);
+    this.showAlert(icon, languageSettings, errorMessage);
   }
 
   showWarningDialog(errorMessage: string): void {
     const languageSettings = this.getLanguageSettings(errorMessage);
-    this.showAlert("question", languageSettings);
+    this.showAlert("question", languageSettings, errorMessage);
   }
 
   showErrorDialog(errorMessage: string): void {
@@ -29,12 +29,12 @@ export class AlertPopupService {
     return this.translationService.getLanguageSettings(errorMessage);
   }
 
-  showAlert(icon: SweetAlertIcon, languageSettings: { confirmButtonText: string; title: string; text: string; }): void {
+  showAlert(icon: SweetAlertIcon, languageSettings: { confirmButtonText: string; title: string; text: string; }, errorMessage: string): void {
     Swal.fire({
       icon: icon,
       confirmButtonText: languageSettings.confirmButtonText,
       title: languageSettings.title,
-      text: languageSettings.text,
+      text: errorMessage ?? languageSettings.text,
     });
   }
 }

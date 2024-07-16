@@ -15,7 +15,6 @@ import { FormsModule } from '@angular/forms';
 import { ClickOutsideDirective } from './directive/click-outside.directive';
 import { CashComponent } from './Payment/cash/cash.component';
 import { CardComponent } from './Payment/card/card.component';
-import { QRCodeModule } from 'angularx-qrcode';
 
 @NgModule({
     declarations: [
@@ -36,7 +35,6 @@ import { QRCodeModule } from 'angularx-qrcode';
         MatDialogModule,
         HttpClientModule,
         FormsModule,
-        QRCodeModule
     ],
     providers: [
         {

@@ -54,7 +54,7 @@ export class AppComponent {
         { label: 'Printed', value: 'printed', color: '#F1DA91', checked: false },
         { label: 'Void', value: 'rejected', color: '#f25022', checked: false },
     ];
-    currentLanguage = this.salesInvoiceService.translationService.userInfo.languageId;
+    currentLanguage = this.salesInvoiceService?.translationService?.userInfo.languageId ?? 1;
 
     constructor(
         public dialog: MatDialog,
@@ -130,7 +130,9 @@ export class AppComponent {
                             this.salesInvoiceService.alertPopupService.showWarningDialog("branchTables");
                         }
                     },
-                    error: (error) => this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message)
+                    error: (error) => {
+                        this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message)
+                    }
                 });
         }
     }

@@ -9,7 +9,7 @@ export class TranslationService {
     constructor() { }
 
     userInfo: IUserInfo = (window as any).recordDetails;
-    languageId = this.userInfo.languageId
+    languageId = this.userInfo?.languageId ?? 1;
 
     getLanguageSettings(errorMessage: string) {
         const messages: { [key: string]: string[] } = {
