@@ -9,7 +9,7 @@
 
                 <div>{{(sysLabels['POS']) ? sysLabels['POS'].Caption : 'POS'}}</div>
                 <div class="btn-trans" (click)="openDynamicDialog('POS')">
-                    <img src="assets/2084-512.webp" />
+                    <img src="assets/2084-512.webp" alt="POS" />
                     <div>
                         {{ userInfo?.SalesDivision?.DivisionPOSDescription ?
                         userInfo.SalesDivision.DivisionPOSDescription : '---' }}
@@ -25,7 +25,7 @@
                 <div class="btn-trans" title="{{ userInfo?.DefaultCustomer?.CustID ? userInfo?.DefaultCustomer?.CustID : '---' }} - {{
                         userInfo?.DefaultCustomer?.CustomerDescription ? userInfo?.DefaultCustomer?.CustomerDescription :
                         '---'}}" (click)="openDynamicDialog('customer')">
-                    <img src="assets/customer.svg" />
+                    <img src="assets/customer.svg" alt="Customer" />
                     <div>
                         {{ userInfo?.DefaultCustomer?.CustID ? userInfo.DefaultCustomer.CustID : '---' }} - {{
                         userInfo?.DefaultCustomer?.CustomerDescription ? userInfo.DefaultCustomer.CustomerDescription :
@@ -41,16 +41,16 @@
                     <div>{{(sysLabels['Table'])?sysLabels['Table'].Caption:'Table'}}</div>
                     <div class="dropdown-toggle btn-trans" (click)="toggleDropdownVisibility()"
                         title="{{selectedTable}}">
-                        <img src="assets/branchtable32.png" />
+                        <img src="assets/branchtable32.png" alt="Table" />
                         <div>{{selectedTable}}</div>
                         <i class="fa fa-caret-down"></i>
                     </div>
                     <ul class="dropdown-content dropdown-menu  table-responsive custom-scroll mx-height-300"
                         [ngStyle]="{'display': isDropdownVisible ? 'block' : 'none'}">
                         <li *ngFor="let tbl of branchTables">
-                            <a href="javascript:void(0);" (click)="setSelectedTable(tbl)">
+                            <span href="javascript:void(0);" (click)="setSelectedTable(tbl)">
                                 {{tbl.ID}} - {{tbl.Description}}
-                            </a>
+                            </span>
                         </li>
                     </ul>
                 </div>
@@ -62,12 +62,12 @@
                 <div>{{(sysLabels['Sales Man'])?sysLabels['Sales Man'].Caption:'Sales Man'}}</div>
                 <div class="btn-trans" [title]="salesManName ? salesManID + ' - ' + salesManName : ''">
                     <ng-container *ngIf="salesManName; else noSalesMan">
-                        <img src="assets/anonymous.png" />
+                        <img src="assets/anonymous.png" alt="Sales" />
                         <div>{{salesManID}} - {{salesManName}}</div>
                     </ng-container>
 
                     <ng-template #noSalesMan>
-                        <img src="assets/salesman32.png" />
+                        <img src="assets/salesman32.png" alt="Sales" />
                         <div>...</div>
                         <i class="fa fa-search border-left"></i>
                     </ng-template>
@@ -110,7 +110,8 @@
                     {{(sysLabels['COD']) ? sysLabels['COD'].Caption : 'COD'}}
                 </div>
                 <div>
-                    <input type="checkbox" />
+                    <input type="checkbox" id="exampleCheckbox" />
+                    <label class="visually-hidden" for="exampleCheckbox">Example Checkbox</label>
                 </div>
             </div>
 
@@ -121,7 +122,8 @@
                     {{(sysLabels['DP']) ? sysLabels['DP'].Caption : 'DP'}}
                 </div>
                 <div>
-                    <input type="checkbox" />
+                    <input type="checkbox" id="exampleCheckbox" />
+                    <label class="visually-hidden" for="exampleCheckbox">Example Checkbox</label>
                 </div>
             </div>
 
@@ -130,43 +132,18 @@
         <!-- pulled right: nav area -->
         <div class="pull-right">
 
-            <!-- logout button -->
-            <div id="logout" class="btn-header transparent pull-right visible-xs">
-                <span>
-                    <a href="javascript:void(0)" title="Sign Out" data-action="userLogout"
-                        data-logout-msg="You can improve your security further after logging out by closing this opened browser">
-                        <i class="fa fa-sign-out"></i>
-                    </a>
-                </span>
-            </div>
-            <!-- end logout button -->
-
             <span id="fullscreen" class="btn-header m-r-10" style="cursor: pointer;" (click)="changeLanguage()">
-                <span>
-                    <a href="javascript:void(0);" data-action="launchLanguage" title="Language">
-                        {{currentLanguage == 1 ? 'EN' : 'AR'}}
-                    </a>
+                <span class="nav-right-btn">
+                    {{currentLanguage == 1 ? 'EN' : 'AR'}}
                 </span>
             </span>
 
             <!-- fullscreen button -->
-            <span id="fullscreen" class="btn-header transparent">
-                <span>
-                    <a href="javascript:void(0);" data-action="launchFullscreen" (click)="toggleFullscreen()"
-                        title="Full Screen">
-                        <i class="fa fa-arrows-alt"></i>
-                    </a>
+            <span id="fullscreen" class="btn-header transparent" (click)="toggleFullscreen()">
+                <span class="nav-right-btn">
+                    <i class="fa fa-arrows-alt"></i>
                 </span>
             </span>
-
-            <span class="header-profile hidden-xs">
-                <a href="javascript:void(0);" id="show-shortcut" class="dropdown-toggle" data-toggle="dropdown"
-                    aria-haspopup="true" aria-expanded="false">
-                    <img [src]="userInfo.Employee?.Image ? 'data:image/jpeg;base64,' + userInfo.Employee.Image : 'assets/anonymous.png'"
-                        (error)="userInfo.Employee.Image = 'assets/anonymous.png'" alt="me" />
-                </a>
-            </span>
-
         </div>
         <!-- end pulled right: nav area -->
 
@@ -180,40 +157,40 @@
         <div class="side-list">
             <ul>
                 <li [class.active]="activeInvoiceTab === 'invoice'" (click)="goTab('invoice')">
-                    <a data-toggle="tab" class="pointer" title="Invoice">
+                    <p data-toggle="tab" class="pointer main-panel" title="Invoice">
                         <i class="fa fa-file"></i>
                         <br />
                         <span class="hidden-sm hidden-xs">
                             {{(sysLabels['Invoice']) ? sysLabels['Invoice'].Caption : 'Invoice'}}
                         </span>
-                    </a>
+                    </p>
                 </li>
                 <li [class.active]="activeInvoiceTab === 'promo'" (click)="goTab('promo')">
-                    <a data-toggle="tab" class="pointer" title="Promotion">
+                    <p data-toggle="tab" class="pointer main-panel" title="Promotion">
                         <i class="fa fa-snowflake-o"></i>
                         <br />
                         <span class="hidden-sm hidden-xs">
                             {{(sysLabels['Promo']) ? sysLabels['Promo'].Caption : 'Promo'}}
                         </span>
-                    </a>
+                    </p>
                 </li>
                 <li [class.active]="activeInvoiceTab === 'cash'" (click)="goTab('cash')">
-                    <a data-toggle="tab" class="pointer" title="Cash">
+                    <p data-toggle="tab" class="pointer main-panel" title="Cash">
                         <i class="fa fa-money"></i>
                         <br />
                         <span class="hidden-sm hidden-xs">
                             {{(sysLabels['Billing']) ? sysLabels['Billing'].Caption : 'Billing'}}
                         </span>
-                    </a>
+                    </p>
                 </li>
                 <li [class.active]="activeInvoiceTab === 'recall'" (click)="goTab('recall')">
-                    <a data-toggle="tab" class="pointer" title="ReCall">
+                    <p data-toggle="tab" class="pointer main-panel" title="ReCall">
                         <i class="fa fa-share"></i>
                         <br />
                         <span class="hidden-sm hidden-xs">
                             {{(sysLabels['Recall']) ? sysLabels['Recall'].Caption : 'Recall'}}
                         </span>
-                    </a>
+                    </p>
                 </li>
             </ul>
         </div>
@@ -797,17 +774,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <!--this tab will be shown  when no invoice-->
-                                        <div *ngIf="!selectedInvoice && activeInvoiceTab !== 'recall'">
-                                            <div class="text-center" style="position: relative; bottom: 300px;">
-                                                <a class="btn-lg m-t-50" style="text-decoration: none; ">
-                                                    {{
-                                                    salesInvoiceService.translationService.getLanguageSettings('firstInvoice').text
-                                                    }}
-                                                </a>
-                                            </div>
-                                        </div>
                                     </div>
 
                                     <div class="widget-footer" *ngIf="activeInvoiceTab !== 'recall' && selectedInvoice"
@@ -917,7 +883,8 @@
                                 <h3>{{(sysLabels['Products']) ? sysLabels['Products'].Caption :'Products'}}
                                     <i class="fa fa-refresh m-l-5 fa-spin" aria-hidden="true" *ngIf="loading"></i>
                                 </h3>
-                                <div class="widget-toolbar smart-form" role="menu">
+
+                                <div class="widget-toolbar smart-form">
                                     <label class="input">
                                         <i class="icon-append fa fa-times-circle pointer" *ngIf="searchProduct"
                                             style="color:#000" (click)="searchProduct = ''"></i>
@@ -935,10 +902,10 @@
                                 <div class="row widget-body-toolbar p-t-10">
                                     <div class="col-lg-3 row-category-list" *ngFor="let categorie of categories">
                                         <div class="btn m-7 prod-desc-class"
-                                            [ngClass]="{'btn-danger-light': categorie.CategoryID == selectedCategory, 'background-color': categorie.CategoryID != selectedCategory}"
+                                            [ngClass]="{'categorie-btn': categorie.CategoryID == selectedCategory, 'background-color': categorie.CategoryID != selectedCategory}"
                                             (click)="getProducts(categorie.CategoryID)" style="width: 100%;">
-                                            <img class="img-size" [alt]="categorie?.Description" width="25px"
-                                                height="25px"
+                                            <img class="img-size correct-aspect-ratio" [alt]="categorie?.Description"
+                                                width="25px" height="25px"
                                                 [src]="categorie?.Image ? 'data:image/jpeg;base64,' + categorie.Image : 'assets/default.webp'"
                                                 (error)="categorie.Image = 'assets/default.webp'" />
                                             {{ currentLanguage == 1 ? categorie.DescriptionEn : categorie.DescriptionAr

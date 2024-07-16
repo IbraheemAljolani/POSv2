@@ -30,7 +30,7 @@ export class CustomerSelectComponent {
 
     sysLabels: any = {};
 
-    currentLanguage = this.salesInvoiceService.translationService.userInfo.languageId;
+    currentLanguage = this.salesInvoiceService.translationService.userInfo.languageId ?? 1;
 
     ngOnInit(): void {
         this.Sys_Labels();

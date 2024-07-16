@@ -32,7 +32,7 @@ export class SalesInvoiceService {
 
     Sys_Labels(currentLanguage: number): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         const dataUserInfo = new HttpParams()
@@ -45,7 +45,7 @@ export class SalesInvoiceService {
 
     getUserInfo(): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         const dataUserInfo = new HttpParams()
@@ -59,7 +59,7 @@ export class SalesInvoiceService {
 
     getUserPOS(): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         let query = {
@@ -80,7 +80,7 @@ export class SalesInvoiceService {
 
     getCustomers(): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         let query = {
@@ -102,7 +102,7 @@ export class SalesInvoiceService {
 
     getBranchTables(salesDivisionID: number): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         let query = {
@@ -123,7 +123,7 @@ export class SalesInvoiceService {
 
     getCategories(): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         let query = {}
@@ -142,7 +142,7 @@ export class SalesInvoiceService {
 
     getProducts(): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         let query = {}
@@ -161,7 +161,7 @@ export class SalesInvoiceService {
 
     getRetailInvoices(POSID: number): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         let query = {
@@ -183,7 +183,7 @@ export class SalesInvoiceService {
 
     getPromotions(): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         let query = {}
@@ -202,7 +202,7 @@ export class SalesInvoiceService {
 
     getReceiptMethods(): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         const dataReceiptMethods = new HttpParams()
@@ -217,7 +217,7 @@ export class SalesInvoiceService {
 
     getLookups(): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         const dataLookups = new HttpParams()
@@ -232,7 +232,7 @@ export class SalesInvoiceService {
 
     getProductsStock(SalesDivisionPOSID: number, ProductID: number): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         let query = {
@@ -255,7 +255,7 @@ export class SalesInvoiceService {
 
     retailInvoice_Create(data: any): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         const dataRetailInvoice_Create = new HttpParams()
@@ -271,7 +271,7 @@ export class SalesInvoiceService {
 
     RetailInvoice_Void(retailInvoiceID: number): Observable<any> {
         if (!this.translationService.userInfo) {
-            throw new Error('User info is not defined');
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         const dataRetailInvoice_Create = new HttpParams()

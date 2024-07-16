@@ -6,6 +6,7 @@ import { CustomerSelectComponent } from 'src/app/popup/customer-select/customer-
 import { SimpleLOVComponent } from 'src/app/popup/simple-lov/simple-lov.component';
 import { SalesInvoiceService } from 'src/app/services/sales-invoice.service';
 import { ComponentType } from '@angular/cdk/portal';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-root',
@@ -54,7 +55,9 @@ export class AppComponent {
         { label: 'Printed', value: 'printed', color: '#F1DA91', checked: false },
         { label: 'Void', value: 'rejected', color: '#f25022', checked: false },
     ];
-    currentLanguage = this.salesInvoiceService?.translationService?.userInfo.languageId ?? 1;
+
+    currentLanguage = 1;
+
 
     constructor(
         public dialog: MatDialog,
@@ -74,6 +77,7 @@ export class AppComponent {
     ngOnInit(): void {
         this.loading = true;
         this.version = this.salesInvoiceService.initService.loadPackageVersion();
+        this.currentLanguage = this.salesInvoiceService?.translationService?.userInfo?.languageId ?? 1;
         this.loadInitialData();
     }
 
@@ -103,11 +107,10 @@ export class AppComponent {
         this.getReceiptMethods();
     }
 
-    Sys_Labels(): void {
-        this.salesInvoiceService.Sys_Labels(this.currentLanguage).subscribe((result: any) => {
-            result.forEach((label: { LabelID: any; }) => {
-                this.sysLabels[String(label.LabelID).trim()] = label;
-            });
+    async Sys_Labels(): Promise<void> {
+        const result = await this.salesInvoiceService.Sys_Labels(this.currentLanguage).toPromise();
+        result.forEach((label: { LabelID: any; }) => {
+            this.sysLabels[String(label.LabelID).trim()] = label;
         });
 
         this.salesInvoiceService.initService.updateDocumentDirection(this.currentLanguage);
@@ -119,70 +122,70 @@ export class AppComponent {
         this.branchTables = branchTables ?? this.retrieveAndStoreBranchTables();
     }
 
-    retrieveAndStoreBranchTables(): void {
+    async retrieveAndStoreBranchTables(): Promise<void> {
         if (this.userInfo?.SalesDivision?.SalesDivisionPosID) {
-            this.salesInvoiceService.getBranchTables(this.userInfo.SalesDivision.SalesDivisionPosID)
-                .subscribe({
-                    next: (result) => {
-                        if (result) {
-                            this.branchTables = this.salesInvoiceService.branchTablesService.handleBranchTablesResult(result);
-                        } else {
-                            this.salesInvoiceService.alertPopupService.showWarningDialog("branchTables");
-                        }
-                    },
-                    error: (error) => {
-                        this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message)
-                    }
-                });
+            try {
+                const result = await this.salesInvoiceService.getBranchTables(this.userInfo.SalesDivision.SalesDivisionPosID).toPromise();
+                if (result) {
+                    this.branchTables = this.salesInvoiceService.branchTablesService.handleBranchTablesResult(result);
+                } else {
+                    this.salesInvoiceService.alertPopupService.showWarningDialog("branchTables");
+                }
+            } catch (error: any) {
+                this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+            }
         }
     }
 
-    getUserInfo() {
-        this.salesInvoiceService.getUserInfo().subscribe({
-            next: (result) => {
-                if (result && typeof result === 'object') {
-                    this.userInfo = result;
-                } else {
-                    this.salesInvoiceService.alertPopupService.showWarningDialog("userInfo");
-                }
-            },
-            error: (error) => this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message)
-        });
+    async getUserInfo(): Promise<void> {
+        try {
+            const result = await this.salesInvoiceService.getUserInfo().toPromise();
+            if (result && typeof result === 'object') {
+                this.userInfo = result;
+            } else {
+                this.salesInvoiceService.alertPopupService.showWarningDialog("userInfo");
+            }
+        } catch (error: any) {
+            this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+        }
     }
 
-    openDynamicDialog(dialogType: string): void {
+    async openDynamicDialog(dialogType: string): Promise<void> {
         let dialogConfig = this.salesInvoiceService.dialogService.getDialogConfig(dialogType, this.userInfo, this.productItem);
 
         if (dialogType === 'customer' || dialogType === 'salesMan') {
             const componentType = dialogType === 'customer' ? CustomerSelectComponent : SimpleLOVComponent;
             const dialogRef = this.dialog.open(componentType as ComponentType<CustomerSelectComponent>, dialogConfig);
-            dialogRef.afterClosed().subscribe(result => {
-                if (!result) return;
 
-                if (dialogType === 'customer') {
-                    const updatedCustomer = this.salesInvoiceService.dialogService.updateDefaultCustomer(result.selectedCustomer);
-                    this.userInfo.DefaultCustomer = { ...this.userInfo.DefaultCustomer, ...updatedCustomer };
-                } else {
-                    [this.salesManID, this.salesManName] = result;
-                }
-            });
+            const result = await dialogRef.afterClosed().toPromise();
+            if (!result) return;
+
+            if (dialogType === 'customer') {
+                const updatedCustomer = this.salesInvoiceService.dialogService.updateDefaultCustomer(result.selectedCustomer);
+                this.userInfo.DefaultCustomer = { ...this.userInfo.DefaultCustomer, ...updatedCustomer };
+            } else {
+                [this.salesManID, this.salesManName] = result;
+            }
         } else {
             this.dialog.open(SimpleLOVComponent, dialogConfig);
         }
     }
 
-    openMenuDrilldown(productItem: any): void {
+    async openMenuDrilldown(productItem: any): Promise<void> {
         this.loading = true;
-        this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, productItem.ProductID)
-            .subscribe(stock => {
-                this.loading = false;
-                if (stock[0]?.DeviceAvailableQty > 0) {
-                    this.productItem = productItem;
-                    this.openDynamicDialog('productsStock');
-                } else {
-                    this.salesInvoiceService.alertPopupService.showWarningDialog("outOfStock");
-                }
-            });
+        try {
+            const stock = await this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, productItem.ProductID).toPromise();
+            this.loading = false;
+            if (stock[0]?.DeviceAvailableQty > 0) {
+                this.productItem = productItem;
+                await this.openDynamicDialog('productsStock');
+            } else {
+                this.salesInvoiceService.alertPopupService.showWarningDialog("outOfStock");
+            }
+        } catch (error: any) {
+            this.loading = false;
+            this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+        }
     }
 
     setSelectedTable(table: { ID: string; Description: string }): void {
@@ -191,39 +194,40 @@ export class AppComponent {
         this.isDropdownVisible = false;
     }
 
-    getCategories() {
+    async getCategories() {
         this.loading = true;
-        this.salesInvoiceService.getCategories().subscribe({
-            next: (result: any[]) => {
-                this.loading = false;
-                if (!result || result.length === 0) {
-                    this.salesInvoiceService.alertPopupService.showWarningDialog("categories");
-                    return;
-                }
-
-                this.categories = result.filter(item => item.CategoryParentID === 0);
-                sessionStorage.setItem('categories', JSON.stringify(this.categories));
-
-                if (this.categories.length > 0) {
-                    this.getProducts(this.categories[0].CategoryID);
-                }
-            },
-            error: (error) => {
-                this.loading = false;
-                this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+        try {
+            const result = await this.salesInvoiceService.getCategories().toPromise();
+            this.loading = false;
+            if (!result || result.length === 0) {
+                this.salesInvoiceService.alertPopupService.showWarningDialog("categories");
+                return;
             }
-        });
+
+            this.categories = result.filter((item: { CategoryParentID: number; }) => item.CategoryParentID === 0);
+            sessionStorage.setItem('categories', JSON.stringify(this.categories));
+
+            if (this.categories.length > 0) {
+                await this.getProducts(this.categories[0].CategoryID);
+            }
+        } catch (error: any) {
+            this.loading = false;
+            this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+        }
     }
 
-    getProducts(categoryID: number): void {
+    async getProducts(categoryID: number): Promise<void> {
         this.initializeProductLoading();
         sessionStorage.setItem('selectedCategory', JSON.stringify(categoryID));
 
-        this.salesInvoiceService.getProducts().subscribe({
-            next: (result: any) => this.handleProductResult(result, categoryID),
-            error: (error) => this.salesInvoiceService.alertPopupService.showErrorDialog(error?.error?.Message),
-            complete: () => this.loading = false
-        });
+        try {
+            const result = await this.salesInvoiceService.getProducts().toPromise();
+            this.handleProductResult(result, categoryID);
+        } catch (error: any) {
+            this.salesInvoiceService.alertPopupService.showErrorDialog(error?.error?.Message);
+        } finally {
+            this.loading = false;
+        }
     }
 
     private initializeProductLoading(): void {
@@ -256,12 +260,14 @@ export class AppComponent {
         this.loading = false;
     }
 
-    getRetailInvoices(): void {
+    async getRetailInvoices(): Promise<void> {
         const posId = this.userInfo?.RetailUserPOS?.SalesDivisionPOSID;
-        this.salesInvoiceService.getRetailInvoices(posId).subscribe({
-            next: (result: any) => this.handleInvoiceResult(result),
-            error: (error) => this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message)
-        });
+        try {
+            const result = await this.salesInvoiceService.getRetailInvoices(posId).toPromise();
+            this.handleInvoiceResult(result);
+        } catch (error: any) {
+            this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+        }
     }
 
     private handleInvoiceResult(result: any): void {
@@ -315,32 +321,31 @@ export class AppComponent {
         this.loading = false;
     }
 
-    getPromotions() {
-        this.salesInvoiceService.getPromotions().subscribe({
-            next: (result: any) => {
-                if (!result) {
-                    this.salesInvoiceService.alertPopupService.showWarningDialog("promotions.");
-                    return;
-                }
+    async getPromotions(): Promise<void> {
+        try {
+            const result = await this.salesInvoiceService.getPromotions().toPromise();
+            if (!result) {
+                this.salesInvoiceService.alertPopupService.showWarningDialog("promotions.");
+                return;
+            }
 
-                this.promosList = result;
-            },
-            error: (error) => { this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message); }
-        });
+            this.promosList = result;
+        } catch (error: any) {
+            this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+        }
     }
 
-    getReceiptMethods() {
-        this.salesInvoiceService.getReceiptMethods().subscribe({
-            next: (result: any) => {
-                if (!result) {
-                    this.salesInvoiceService.alertPopupService.showWarningDialog("receiptMethods.");
-                    return;
-                }
-                this.receiptMethods = result;
-            },
-            error: (error) => { this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message); }
-        });
-
+    async getReceiptMethods(): Promise<void> {
+        try {
+            const result = await this.salesInvoiceService.getReceiptMethods().toPromise();
+            if (!result) {
+                this.salesInvoiceService.alertPopupService.showWarningDialog("receiptMethods.");
+                return;
+            }
+            this.receiptMethods = result;
+        } catch (error: any) {
+            this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+        }
     }
 
     collectMethodDetails(methodType: string, description: string, methods: any): void {
@@ -445,11 +450,13 @@ export class AppComponent {
         this.createRetailInvoice(invoiceData);
     }
 
-    private createRetailInvoice(invoiceData: any): void {
-        this.salesInvoiceService.retailInvoice_Create(invoiceData).subscribe({
-            next: (result: any) => this.processInvoiceCreationResult(result),
-            error: (error) => this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message)
-        });
+    private async createRetailInvoice(invoiceData: any): Promise<void> {
+        try {
+            const result = await this.salesInvoiceService.retailInvoice_Create(invoiceData).toPromise();
+            this.processInvoiceCreationResult(result);
+        } catch (error: any) {
+            this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+        }
     }
 
     private processInvoiceCreationResult(result: any): void {
@@ -462,21 +469,22 @@ export class AppComponent {
         }
     }
 
-    addItemOrGroup(product: any): void {
+    async addItemOrGroup(product: any): Promise<void> {
         this.loading = true;
-        this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, product.ProductID)
-            .subscribe(stock => {
-                if (stock[0]?.DeviceAvailableQty > 0) {
-                    this.salesInvoiceService.productService.addItemOrGroup(product, this.selectedInvoice, this.addToCart, this.userInfo);
-                    this.newInvoice(this.addToCart);
-                    this.goTab('invoice');
-                    this.loading = false;
-                } else {
-                    this.salesInvoiceService.alertPopupService.showWarningDialog("outOfStock");
-                    this.loading = false;
-                }
-            });
-
+        try {
+            const stock = await this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, product.ProductID).toPromise();
+            if (stock[0]?.DeviceAvailableQty > 0) {
+                this.salesInvoiceService.productService.addItemOrGroup(product, this.selectedInvoice, this.addToCart, this.userInfo);
+                this.newInvoice(this.addToCart);
+                this.goTab('invoice');
+            } else {
+                this.salesInvoiceService.alertPopupService.showWarningDialog("outOfStock");
+            }
+        } catch (error: any) {
+            this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+        } finally {
+            this.loading = false;
+        }
     }
 
     postCash() {
@@ -493,13 +501,15 @@ export class AppComponent {
         this.resetInvoiceState();
     }
 
-    RetailInvoice_Void() {
+    async RetailInvoice_Void() {
         if (this.selectedInvoice && this.selectedInvoice.SalesInvoiceStatusID === 'Created') {
-
-            this.salesInvoiceService.RetailInvoice_Void(this.selectedInvoice.ID).subscribe((result) => {
+            try {
+                const result = await firstValueFrom(this.salesInvoiceService.RetailInvoice_Void(this.selectedInvoice.ID));
                 this.getRetailInvoices();
                 this.resetInvoiceState();
-            });
+            } catch (error: any) {
+                this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+            }
         }
     }
 

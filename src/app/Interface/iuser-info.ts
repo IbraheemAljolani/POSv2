@@ -3,7 +3,7 @@ export interface IUserInfo {
     baseUrl: string,
     menuId: number,
     originalMenuIdForLinkedMenu: number,
-    languageId: number,
+    languageId?: number,
     companyId: number,
     baseCompanyId: number,
     c: string

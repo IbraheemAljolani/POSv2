@@ -9,7 +9,13 @@ export class InitService {
 
     constructor(
         @Inject(DOCUMENT) private document: any,
-    ) { }
+    ) {
+        this.initializeFullScreenElement();
+    }
+
+    private initializeFullScreenElement(): void {
+        this.elem = document.documentElement;
+    }
 
     loadPackageVersion() {
         const packageJson = require('../../../package.json');
@@ -45,16 +51,23 @@ export class InitService {
         return isFullscreen;
     }
 
-    private openFullscreen() {
-        const requestMethods = [
-            "requestFullscreen",
-            "mozRequestFullScreen",
-            "webkitRequestFullscreen",
-            "msRequestFullscreen"
-        ];
-        requestMethods.forEach(method => {
-            if (this.elem[method]) this.elem[method]();
-        });
+    private openFullscreen(): void {
+        const elem: any = this.elem as HTMLElement & {
+            requestFullscreen?: () => Promise<void>;
+            mozRequestFullScreen?: () => Promise<void>;
+            webkitRequestFullscreen?: () => Promise<void>;
+            msRequestFullscreen?: () => Promise<void>;
+        };
+
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.mozRequestFullScreen) { // Mozilla
+            elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) { // Webkit (Safari/Chrome)
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { // IE/Edge
+            elem.msRequestFullscreen();
+        }
     }
 
     private closeFullscreen() {

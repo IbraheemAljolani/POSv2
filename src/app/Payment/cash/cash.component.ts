@@ -15,7 +15,7 @@ export class CashComponent {
     displayValue = this.data.amount.toFixed(3);
     sysLabels: any = {};
 
-    currentLanguage = this.salesInvoiceService.translationService.userInfo.languageId;
+    currentLanguage = this.salesInvoiceService.translationService.userInfo.languageId ?? 1;
 
     ngOnInit(): void {
         this.Sys_Labels();

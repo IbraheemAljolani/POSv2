@@ -57,7 +57,7 @@ export class SimpleLOVComponent {
 
     sysLabels: any = {};
 
-    currentLanguage = this.salesInvoiceService.translationService.userInfo.languageId;
+    currentLanguage = this.salesInvoiceService.translationService.userInfo.languageId ?? 1;
 
     loadingStatus: string = 'Loading...';
     inprocessing: boolean = false;

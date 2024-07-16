@@ -9,7 +9,14 @@ export class TranslationService {
     constructor() { }
 
     userInfo: IUserInfo = (window as any).recordDetails;
-    languageId = this.userInfo?.languageId ?? 1;
+    getUserInfoSafe(): IUserInfo | undefined {
+        const userInfo = sessionStorage.getItem('userInfo');
+        if (!userInfo) {
+            sessionStorage.setItem('userInfo', JSON.stringify(this.userInfo));
+        }
+        return this.userInfo;
+    }
+    languageId = this.getUserInfoSafe()?.languageId ?? 1;
 
     getLanguageSettings(errorMessage: string) {
         const messages: { [key: string]: string[] } = {
