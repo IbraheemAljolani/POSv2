@@ -11,10 +11,10 @@ export class PromoAndMethodService {
     return promosList.forEach((promo: { SelectFlag: boolean; }) => promo.SelectFlag = promoSelectAllFlag);
   }
 
-  addPayment(amount: number, cardNumber: string, receiptMethodTypeID: string, methodDetails: any, selectedPayments: any) {
+  addPayment(amount: number, cardNumber: string, receiptMethodTypeID: string, methodDetails: any, selectedPayments: any, methodID: number) {
     if (!selectedPayments) selectedPayments = [];
 
-    const paymentIndex = selectedPayments.findIndex((payment: { ReceiptMethodTypeID: string; }) => payment.ReceiptMethodTypeID === receiptMethodTypeID);
+    const paymentIndex = selectedPayments.findIndex((payment: { ReceiptMethodID: number; }) => payment.ReceiptMethodID === methodID);
 
     if (paymentIndex >= 0) {
       selectedPayments[paymentIndex].Amount = amount;

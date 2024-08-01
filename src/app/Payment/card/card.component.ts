@@ -10,7 +10,11 @@ import Swal from 'sweetalert2';
 })
 export class CardComponent {
 
-    constructor(public dialogRef: MatDialogRef<any>, @Inject(MAT_DIALOG_DATA) public data: any, private salesInvoiceService: SalesInvoiceService) { }
+    constructor(
+        public dialogRef: MatDialogRef<any>,
+        @Inject(MAT_DIALOG_DATA) public data: any,
+        private salesInvoiceService: SalesInvoiceService
+    ) { }
 
     amountCashnumber: string = this.data.amount.toFixed(3);
     cardNumber: string = '';
@@ -70,7 +74,7 @@ export class CardComponent {
         const amount = parseFloat(this.amountCashnumber);
         if (amount > 0) {
             const finalAmount = amount;
-            this.dialogRef.close({ finalAmount, cardNumber: this.cardNumber });
+            this.dialogRef.close({ finalAmount, cardNumber: this.cardNumber, methodID: this.data.methodID });
         } else {
             this.onCancel();
         }

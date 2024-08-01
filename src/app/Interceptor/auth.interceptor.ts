@@ -18,6 +18,13 @@ export class AuthInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
     this.token = this.salesInvoiceService.translationService.userInfo.c;
+    let userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}');
+    let lastToken = userInfo.c;
+
+    if (this.token != lastToken) {
+      window.location.href = 'https://www.triosuite.com/';
+    }
+
     const authToken = this.token;
 
     const modifiedReq = req.clone({

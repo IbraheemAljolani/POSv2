@@ -10,7 +10,11 @@ import Swal from 'sweetalert2';
 })
 export class CashComponent {
 
-    constructor(public dialogRef: MatDialogRef<any>, @Inject(MAT_DIALOG_DATA) public data: any, private salesInvoiceService: SalesInvoiceService) { }
+    constructor(
+        public dialogRef: MatDialogRef<any>,
+        @Inject(MAT_DIALOG_DATA) public data: any,
+        private salesInvoiceService: SalesInvoiceService
+    ) { }
 
     displayValue = this.data.amount.toFixed(3);
     sysLabels: any = {};
@@ -49,7 +53,7 @@ export class CashComponent {
     onConfirm() {
         const amount = parseFloat(this.displayValue);
         if (!isNaN(amount)) {
-            this.dialogRef.close(amount);
+            this.dialogRef.close({ amount: amount, methodID: this.data.methodID });
         } else {
             Swal.fire({
                 icon: 'error',

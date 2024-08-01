@@ -315,7 +315,6 @@ export class AppComponent {
 
     adjustInputWidth(event: KeyboardEvent, product: any): void {
         this.loading = true;
-        console.log('event', event);
         this.salesInvoiceService.productService.adjustInputWidth(event, product, this.addToCart);
         this.newInvoice(this.addToCart);
         this.loading = false;
@@ -375,13 +374,14 @@ export class AppComponent {
                 isMultiCheck: true,
                 title: methodsType,
                 image: methods.Image,
+                methodID: methods.ID,
                 amount: this.selectedInvoice.NetTotalAfterTax - this.totalAmount,
             },
         });
 
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-                this.addPayment(result, '', ReceiptMethodTypeID, methods)
+        dialogRef.afterClosed().subscribe(({ amount, methodID }) => {
+            if (amount) {
+                this.addPayment(amount, '', ReceiptMethodTypeID, methods, methodID)
                 this.totalAmount = this.salesInvoiceService.promoAndMethodService.updateTotalAmount(this.selectedPayments);
             }
         });
@@ -398,23 +398,24 @@ export class AppComponent {
                 isMultiCheck: true,
                 title: methodsType,
                 image: methods.Image,
+                methodID: methods.ID,
                 amount: this.selectedInvoice.NetTotalAfterTax - this.totalAmount,
             },
         });
 
-        dialogRef.afterClosed().subscribe(({ finalAmount, cardNumber }) => {
+        dialogRef.afterClosed().subscribe(({ finalAmount, cardNumber, methodID }) => {
             if (finalAmount) {
-                this.addPayment(finalAmount, cardNumber, ReceiptMethodTypeID, methods);
+                this.addPayment(finalAmount, cardNumber, ReceiptMethodTypeID, methods, methodID);
                 this.totalAmount = this.salesInvoiceService.promoAndMethodService.updateTotalAmount(this.selectedPayments);
             }
         });
     }
 
-    addPayment(amount: number, cardNumber: string, receiptMethodTypeID: string, methodDetails: any): void {
+    addPayment(amount: number, cardNumber: string, receiptMethodTypeID: string, methodDetails: any, methodID: number): void {
         this.updateTotalAndPaidAmount();
         this.selectedPaymentsData = this.salesInvoiceService
             .promoAndMethodService
-            .addPayment(amount, cardNumber, receiptMethodTypeID, methodDetails, this.selectedPayments);
+            .addPayment(amount, cardNumber, receiptMethodTypeID, methodDetails, this.selectedPayments, methodID);
     }
 
     private updateTotalAndPaidAmount(): void {
