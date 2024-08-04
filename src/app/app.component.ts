@@ -48,6 +48,7 @@ export class AppComponent {
     isFullscreen = false;
     isDisabled = true;
     sysLabels: any = {};
+    stockProducts: any = [];
     productItem: any;
     filters = [
         { label: 'Date', value: 'date', color: 'gray', checked: true },
@@ -150,6 +151,8 @@ export class AppComponent {
         }
     }
 
+
+
     async openDynamicDialog(dialogType: string): Promise<void> {
         let dialogConfig = this.salesInvoiceService.dialogService.getDialogConfig(dialogType, this.userInfo, this.productItem);
 
@@ -171,22 +174,22 @@ export class AppComponent {
         }
     }
 
-    async openMenuDrilldown(productItem: any): Promise<void> {
-        this.loading = true;
-        try {
-            const stock = await this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, productItem.ProductID).toPromise();
-            this.loading = false;
-            if (stock[0]?.DeviceAvailableQty > 0) {
-                this.productItem = productItem;
-                await this.openDynamicDialog('productsStock');
-            } else {
-                this.salesInvoiceService.alertPopupService.showWarningDialog("outOfStock");
-            }
-        } catch (error: any) {
-            this.loading = false;
-            this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
-        }
-    }
+    // async openMenuDrilldown(productItem: any): Promise<void> {
+    //     this.loading = true;
+    //     try {
+    //         const stock = await this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, productItem.ProductID).toPromise();
+    //         this.loading = false;
+    //         if (stock[0]?.DeviceAvailableQty > 0) {
+    //             this.productItem = productItem;
+    //             await this.openDynamicDialog('productsStock');
+    //         } else {
+    //             this.salesInvoiceService.alertPopupService.showWarningDialog("outOfStock");
+    //         }
+    //     } catch (error: any) {
+    //         this.loading = false;
+    //         this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
+    //     }
+    // }
 
     setSelectedTable(table: { ID: string; Description: string }): void {
         sessionStorage.setItem('selectedTable', JSON.stringify(table));
@@ -222,11 +225,29 @@ export class AppComponent {
 
         try {
             const result = await this.salesInvoiceService.getProducts().toPromise();
+            this.getProductStock();
             this.handleProductResult(result, categoryID);
         } catch (error: any) {
             this.salesInvoiceService.alertPopupService.showErrorDialog(error?.error?.Message);
         } finally {
             this.loading = false;
+        }
+    }
+
+    async getProductStock(): Promise<void> {
+        try {
+            this.stockProducts = await this.salesInvoiceService
+                .getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID).toPromise();
+
+            for (const product of this.products) {
+                if (!product.hasOwnProperty('DeviceAvailableQty')) {
+                    product.DeviceAvailableQty = 0;
+                }
+                const stockProduct = this.stockProducts.find((stockProduct: any) => stockProduct.ProductID === product.ProductID);
+                product.DeviceAvailableQty = stockProduct?.DeviceAvailableQty ?? product.DeviceAvailableQty;
+            }
+        } catch (error) {
+            console.error('Error fetching product stock:', error);
         }
     }
 
@@ -473,14 +494,10 @@ export class AppComponent {
     async addItemOrGroup(product: any): Promise<void> {
         this.loading = true;
         try {
-            const stock = await this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, product.ProductID).toPromise();
-            if (stock[0]?.DeviceAvailableQty > 0) {
-                this.salesInvoiceService.productService.addItemOrGroup(product, this.selectedInvoice, this.addToCart, this.userInfo);
-                this.newInvoice(this.addToCart);
-                this.goTab('invoice');
-            } else {
-                this.salesInvoiceService.alertPopupService.showWarningDialog("outOfStock");
-            }
+            // const stock = await this.salesInvoiceService.getProductsStock(this.userInfo.SalesDivision.SalesDivisionPosID, product.ProductID).toPromise();
+            this.salesInvoiceService.productService.addItemOrGroup(product, this.selectedInvoice, this.addToCart, this.userInfo);
+            this.newInvoice(this.addToCart);
+            this.goTab('invoice');
         } catch (error: any) {
             this.salesInvoiceService.alertPopupService.showErrorDialog(error.error.Message);
         } finally {

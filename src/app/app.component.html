@@ -930,12 +930,17 @@
                                                     <div (click)="addItemOrGroup(product)"
                                                         class="prod-desc prod-desc-class"
                                                         title="{{product.DescriptionEn}}" aria-label="Details">
+                                                        <span *ngIf="product.DeviceAvailableQty > 0"
+                                                            style="font-size: 8px; display: block;">QTY:
+                                                            {{product.DeviceAvailableQty}}</span>
+                                                        <span *ngIf="product.DeviceAvailableQty <= 0"
+                                                            style="font-size: 8px; display: block; color: #f00;">Out Of
+                                                            Stock</span>
                                                         {{ currentLanguage == 1 ? product.DescriptionEn :
                                                         product.DescriptionAr }}
                                                     </div>
-                                                    <i class="fa fa-caret-down txt-color-dangerLight"
-                                                        style="padding: 10px;" (click)="openMenuDrilldown(product)"
-                                                        title="Details" aria-hidden="true"></i>
+                                                    <!-- <i class="fa fa-caret-down txt-color-dangerLight"
+                                                        style="padding: 10px;" title="Details" aria-hidden="true"></i> -->
                                                 </div>
 
                                             </div>

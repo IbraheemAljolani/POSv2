@@ -207,17 +207,17 @@ export class SimpleLOVComponent {
         this.lookupRows = posList.map(pos => [pos.ID, pos.POSDescription, pos.PosID]);
     }
 
-    _loadDrillDownData() {
-        this.salesInvoiceService.getProductsStock(this.data.SalesDivisionPOSID, this.data.productItem.ProductID).subscribe({
-            next: (result: any) => this.processProductStock(result),
-            error: (error) => this.handleError(error)
-        });
-    }
+    // _loadDrillDownData() {
+    //     this.salesInvoiceService.getProductsStock(this.data.SalesDivisionPOSID, this.data.productItem.ProductID).subscribe({
+    //         next: (result: any) => this.processProductStock(result),
+    //         error: (error) => this.handleError(error)
+    //     });
+    // }
 
-    private processProductStock(result: any) {
-        this.lookupRowFields = this.getStockRowFields();
-        this.lookupRows = result.map((item: { Code: any; UOMDescription: any; DeviceAvailableQty: any; }) => [item.Code, item.UOMDescription, item.DeviceAvailableQty]);
-    }
+    // private processProductStock(result: any) {
+    //     this.lookupRowFields = this.getStockRowFields();
+    //     this.lookupRows = result.map((item: { Code: any; UOMDescription: any; DeviceAvailableQty: any; }) => [item.Code, item.UOMDescription, item.DeviceAvailableQty]);
+    // }
 
     private getStockRowFields() {
         return [
@@ -247,9 +247,9 @@ export class SimpleLOVComponent {
             case 'POS':
                 this._loadPOS();
                 break;
-            case 'drillDown':
-                this._loadDrillDownData();
-                break;
+            // case 'drillDown':
+            //     this._loadDrillDownData();
+            //     break;
             default:
                 console.error('Invalid data type');
         }

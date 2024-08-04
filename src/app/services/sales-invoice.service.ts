@@ -230,14 +230,13 @@ export class SalesInvoiceService {
         return this.http.post(url, dataLookups);
     }
 
-    getProductsStock(SalesDivisionPOSID: number, ProductID: number): Observable<any> {
+    getProductsStock(SalesDivisionPOSID: number): Observable<any> {
         if (!this.translationService.userInfo) {
             this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
         }
 
         let query = {
             SalesDivisionPOSID: SalesDivisionPOSID,
-            Products: ProductID,
             GetOtherStores: false,
         }
 
