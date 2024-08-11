@@ -331,7 +331,7 @@
                                                             </span>
 
                                                             <span class="pull-right bold m-t-5" title="Total Product">
-                                                                {{product.NetTotalAfterTax}}
+                                                                {{product.NetTotalAfterTax | number:'1.2-2'}}
                                                                 &nbsp;
                                                                 {{product.CurrencyID}}
                                                             </span>
@@ -548,7 +548,7 @@
                                             <div *ngIf="selectedInvoice">
                                                 <div class="row"
                                                     style="display: flex; justify-content: center; padding: 0 40px;">
-                                                    <table class=" col-lg-2  payment-methods-tbl" style="width: 0; ">
+                                                    <table class="col-lg-2 payment-methods-tbl" style="width: 0; ">
                                                         <tr>
                                                             <td *ngFor="let methods of receiptMethods">
                                                                 <label role="button"
@@ -573,25 +573,19 @@
                                                         *ngFor="let item of selectedPayments;let first = first">
                                                         <div class="p-5-10" (click)="item.opened = !item.opened">
                                                             <div class="input-group input-group-rounded"
-                                                                title="{{(item.ReceiptMethodTypeID == 'Card')?'InvoiceID':(item.ReceiptMethodTypeID == 'Loyalty Card' || item.ReceiptMethodTypeID == 'Coupon')?'Card number':'Value'}}">
-                                                                <ng-container
-                                                                    *ngIf="item.ReceiptMethodTypeID == 'Cash'; else defaultPayments">
-                                                                    <span class="input-group-addon"
-                                                                        [ngSwitch]="item.ReceiptMethodTypeID">
-                                                                        <i class="fa fa-money" aria-hidden="true"></i>
-                                                                    </span>
-                                                                    <input type="number" class="form-control" disabled
-                                                                        [ngModel]="item.Amount" />
-                                                                </ng-container>
-                                                                <ng-template #defaultPayments>
-                                                                    <span class="input-group-addon"
-                                                                        [ngSwitch]="item.ReceiptMethodTypeID">
-                                                                        <i class="fa fa-credit-card"
+                                                                title="{{ getTitle(item.ReceiptMethodTypeID) }}">
+                                                                <ng-container [ngSwitch]="item.ReceiptMethodTypeID">
+                                                                    <span class="input-group-addon">
+                                                                        <i *ngSwitchCase="'Cash'" class="fa fa-money"
+                                                                            aria-hidden="true"></i>
+                                                                        <i *ngSwitchCase="'Coupon'" class="fa fa-gift"
+                                                                            aria-hidden="true"></i>
+                                                                        <i *ngSwitchDefault class="fa fa-credit-card"
                                                                             aria-hidden="true"></i>
                                                                     </span>
                                                                     <input type="number" class="form-control" disabled
                                                                         [ngModel]="item.Amount" />
-                                                                </ng-template>
+                                                                </ng-container>
                                                             </div>
 
                                                             <div class="m-t-10 m-b-5 m-l-5">
@@ -919,7 +913,8 @@
                                         *ngFor="let product of (newProducts.length > 0 ? newProducts : products)">
                                         <div class="">
                                             <div class="list-item">
-                                                <span class="prod-price">{{product.SalesPrice}} /
+                                                <span class="prod-price">{{ product.NetTotalAfterTax | number:'1.2-2' }}
+                                                    /
                                                     {{product.UOMDescription}}</span>
                                                 <div (click)="addItemOrGroup(product)" class="prod-image">
                                                     <img [src]="product.Image" style=" object-fit: cover;" alt="product"

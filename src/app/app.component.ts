@@ -7,6 +7,7 @@ import { SimpleLOVComponent } from 'src/app/popup/simple-lov/simple-lov.componen
 import { SalesInvoiceService } from 'src/app/services/sales-invoice.service';
 import { ComponentType } from '@angular/cdk/portal';
 import { firstValueFrom } from 'rxjs';
+import { CouponComponent } from './Payment/coupon/coupon.component';
 
 @Component({
     selector: 'app-root',
@@ -370,7 +371,7 @@ export class AppComponent {
 
     collectMethodDetails(methodType: string, description: string, methods: any): void {
         const isInvoicePrinted = this.selectedInvoice.SalesInvoiceStatusID === 'Printed';
-        const isSupportedMethod = methodType === 'Cash' || methodType === 'Card';
+        const isSupportedMethod = methodType === 'Cash' || methodType === 'Card' || methodType === 'Coupon';
 
         if (isInvoicePrinted) {
             this.salesInvoiceService.alertPopupService.showWarningDialog("alreadyPaid");
@@ -400,9 +401,10 @@ export class AppComponent {
             },
         });
 
-        dialogRef.afterClosed().subscribe(({ amount, methodID }) => {
-            if (amount) {
-                this.addPayment(amount, '', ReceiptMethodTypeID, methods, methodID)
+        dialogRef.afterClosed().subscribe(result => {
+            if (result && result.amount) {
+                const { amount, methodID } = result;
+                this.addPayment(amount, '', ReceiptMethodTypeID, methods, methodID);
                 this.totalAmount = this.salesInvoiceService.promoAndMethodService.updateTotalAmount(this.selectedPayments);
             }
         });
@@ -424,12 +426,55 @@ export class AppComponent {
             },
         });
 
-        dialogRef.afterClosed().subscribe(({ finalAmount, cardNumber, methodID }) => {
-            if (finalAmount) {
-                this.addPayment(finalAmount, cardNumber, ReceiptMethodTypeID, methods, methodID);
-                this.totalAmount = this.salesInvoiceService.promoAndMethodService.updateTotalAmount(this.selectedPayments);
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                const { finalAmount, cardNumber, methodID } = result;
+                if (finalAmount) {
+                    this.addPayment(finalAmount, cardNumber, ReceiptMethodTypeID, methods, methodID);
+                    this.totalAmount = this.salesInvoiceService.promoAndMethodService.updateTotalAmount(this.selectedPayments);
+                }
             }
         });
+    }
+
+    _getCoupon(methodsType: string, ReceiptMethodTypeID: string, methods: any): void {
+
+        const dialogRef = this.dialog.open(CouponComponent, {
+            disableClose: true,
+            width: "300px",
+            direction: this.currentLanguage === 1 ? "ltr" : "rtl",
+            data: {
+                dataType: "Coupon",
+                isMultiCheck: true,
+                title: methodsType,
+                image: methods.Image,
+                methodID: methods.ID,
+                amount: this.selectedInvoice.NetTotalAfterTax - this.totalAmount,
+            },
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                const { finalAmount, cardNumber, methodID } = result;
+                if (finalAmount) {
+                    this.addPayment(finalAmount, cardNumber, ReceiptMethodTypeID, methods, methodID);
+                    this.totalAmount = this.salesInvoiceService.promoAndMethodService.updateTotalAmount(this.selectedPayments);
+                }
+            }
+        });
+    }
+
+    getTitle(receiptMethodTypeID: string): string {
+        switch (receiptMethodTypeID) {
+            case 'Card':
+                return 'Card';
+            case 'Cash':
+                return 'Cash';
+            case 'Coupon':
+                return 'Coupon';
+            default:
+                return 'Value';
+        }
     }
 
     addPayment(amount: number, cardNumber: string, receiptMethodTypeID: string, methodDetails: any, methodID: number): void {

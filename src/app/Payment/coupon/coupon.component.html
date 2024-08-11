@@ -1,0 +1,80 @@
+<div style="padding: 10px;">
+    <div class="modal-header" style="background-color: #fafafa;">
+        <button type="button" class="close" (click)="onCancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">
+            <img [title]="data.title" class="payment-method-logo m-r-5"
+                [src]="'data:image/jpeg;base64,' + data.image ? 'data:image/jpeg;base64,' + data.image : 'assets/customer.svg'"
+                (error)="data.image = 'assets/default.webp'" [alt]="data.title" />
+            {{data.title? sysLabels[data.title]? sysLabels[data.title].Caption: data.title: 'Coupon'}}
+        </h4>
+    </div>
+    <div id="calcuatore">
+        <div class="widget-body-toolbar" style="background-color:#fdfdfd;">
+            <div style="padding:0 10px">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <label>
+                            {{sysLabels["Coupon number"]?
+                            sysLabels["Coupon number"].Caption: "Coupon number"}}
+                            <span class="fa fa-question-circle txt-color-blue" role="tooltip" title="Coupon No"></span>
+                        </label>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <input style="width: 75%;" #CouponNumberRef (focus)="focusedElement = couponNumberElement"
+                                [(ngModel)]="barcode" type="text" (keyup.enter)="amountNumberRef.focus()"
+                                class="form-control" />
+                            <button class="btn btn-success" (click)="checkCoupon()">Check</button>
+                        </div>
+                        <div style="font-size: 12px; color: red;">{{msg}}</div>
+                    </div>
+                    <div class="col-xs-6" style="margin-top: 10px;">
+                        <label>
+                            {{sysLabels["Amount"]? sysLabels["Amount"].Caption: "Amount"}}
+                            <span class="fa fa-question-circle txt-color-blue" role="tooltip"
+                                title="Amount requested"></span>
+                        </label>
+                        <input #amountNumberRef (focus)="focusedElement = amountNumberElement"
+                            [(ngModel)]="amountCashnumber" type="text" pattern="^[0-9]+$" class="form-control" />
+                    </div>
+                    <div class="col-xs-6" style="margin-top: 10px;">
+                        <label>
+                            Coupon Amount
+                            <span class="fa fa-question-circle txt-color-blue" role="tooltip"
+                                title="Amount requested"></span>
+                        </label>
+                        <input disabled [(ngModel)]="couponAmount" type="text" pattern="^[0-9]+$"
+                            class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="keys">
+            <button class="button-culc" (click)="addNumber('7')">7</button>
+            <button class="button-culc" (click)="addNumber('8')">8</button>
+            <button class="button-culc" (click)="addNumber('9')">9</button>
+            <button class="button-culc" (click)="addNumber('4')">4</button>
+            <button class="button-culc" (click)="addNumber('5')">5</button>
+            <button class="button-culc" (click)="addNumber('6')">6</button>
+            <button class="button-culc" (click)="addNumber('1')">1</button>
+            <button class="button-culc" (click)="addNumber('2')">2</button>
+            <button class="button-culc" (click)="addNumber('3')">3</button>
+            <button class="button-culc" (click)="addNumber('0')">0</button>
+            <button class="button-culc" (click)="addNumber('.')">.</button>
+            <button class="button-culc" (click)=clearDisplay()>C</button>
+        </div>
+    </div>
+
+    <div>
+        <div class=" m-t-20 text-center">
+            <button class="btn btn-primary width-80" (click)="onConfirm()"
+                [disabled]="couponAmount == 0 || !couponAmount">
+                {{ sysLabels["Done"]?.Caption || "Done" }}
+            </button>
+            <button class="btn btn-default width-80 m-l-15" (click)="onCancel()">
+                {{sysLabels["Cancel"]? sysLabels["Cancel"].Caption: "Cancel"}}
+            </button>
+        </div>
+    </div>
+</div>

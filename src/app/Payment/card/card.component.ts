@@ -18,7 +18,6 @@ export class CardComponent {
 
     amountCashnumber: string = this.data.amount.toFixed(3);
     cardNumber: string = '';
-    cardObj: any = [];
 
     @ViewChild("cardNumberRef", { static: false }) cardNumberElement: ElementRef | undefined;
     @ViewChild("amountNumberRef", { static: false }) amountNumberElement: ElementRef | undefined;

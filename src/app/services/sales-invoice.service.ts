@@ -252,6 +252,27 @@ export class SalesInvoiceService {
         return this.http.post(url, dataProductsStock);
     }
 
+    getCoupons(barcode: string): Observable<any> {
+        if (!this.translationService.userInfo) {
+            this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');
+        }
+
+        let query = {
+            Barcode: barcode,
+        }
+
+        const dataProductsStock = new HttpParams()
+            .set('CompanyID', this.translationService.userInfo.companyId ? this.translationService.userInfo.companyId.toString() : '')
+            .set('UserID', this.translationService.userInfo.userID ? this.translationService.userInfo.userID.toString() : '')
+            .set('BarCode', JSON.stringify(query))
+            .set('POSID', '')
+            .set('LanguageID', this.translationService.userInfo.languageId ? this.translationService.userInfo.languageId.toString() : '');
+
+        const url = `${this.translationService.userInfo.baseUrl}/api/sec/POS_GetCoupon`;
+
+        return this.http.post(url, dataProductsStock);
+    }
+
     retailInvoice_Create(data: any): Observable<any> {
         if (!this.translationService.userInfo) {
             this.translationService.userInfo = JSON.parse(sessionStorage.getItem('userInfo') ?? '{}');

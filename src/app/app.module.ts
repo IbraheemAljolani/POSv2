@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { ClickOutsideDirective } from './directive/click-outside.directive';
 import { CashComponent } from './Payment/cash/cash.component';
 import { CardComponent } from './Payment/card/card.component';
+import { CouponComponent } from './Payment/coupon/coupon.component';
 
 @NgModule({
     declarations: [
@@ -24,6 +25,7 @@ import { CardComponent } from './Payment/card/card.component';
         ClickOutsideDirective,
         CashComponent,
         CardComponent,
+        CouponComponent
     ],
     imports: [
         BrowserModule,
